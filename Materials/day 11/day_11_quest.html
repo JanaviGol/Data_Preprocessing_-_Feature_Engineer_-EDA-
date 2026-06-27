@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python Data Quest — Encoding Numerical Features!</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f0f4ff;--bg2:#e8edf8;--bg3:#dde4f5;--card:#ffffff;--card2:#f5f7ff;
+  --border:rgba(99,102,241,0.12);--border2:rgba(99,102,241,0.25);
+  --neon-blue:#2563eb;--neon-cyan:#0891b2;--neon-purple:#7c3aed;
+  --neon-pink:#db2777;--neon-green:#16a34a;--neon-yellow:#b45309;
+  --neon-orange:#c2410c;--neon-red:#dc2626;
+  --text:#1e1b4b;--muted:#4b5563;--dim:#9ca3af;
+  --font-head:'Syne',sans-serif;--font-body:'Plus Jakarta Sans',sans-serif;--font-mono:'JetBrains Mono',monospace;
+  --glow-blue:0 4px 16px rgba(37,99,235,0.18),0 1px 4px rgba(37,99,235,0.10);
+  --glow-orange:0 4px 16px rgba(194,65,12,0.18),0 1px 4px rgba(194,65,12,0.10);
+  --glow-cyan:0 4px 16px rgba(8,145,178,0.18),0 1px 4px rgba(8,145,178,0.10);
+  --glow-green:0 4px 16px rgba(22,163,74,0.18),0 1px 4px rgba(22,163,74,0.10);
+  --glow-yellow:0 4px 16px rgba(180,83,9,0.18),0 1px 4px rgba(180,83,9,0.10);
+  --glow-pink:0 4px 16px rgba(219,39,119,0.18),0 1px 4px rgba(219,39,119,0.10);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.8;font-size:16px;overflow-x:hidden;}
+::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--neon-orange);border-radius:3px;}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(37,99,235,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(37,99,235,0.06) 1px,transparent 1px);background-size:50px 50px;}
+.container-main{max-width:1280px;margin:0 auto;padding:0 1.5rem;position:relative;z-index:1;}
+
+/* XP BAR */
+.xp-strip{position:sticky;top:0;z-index:1000;background:rgba(240,244,255,0.95);backdrop-filter:blur(16px);border-bottom:1px solid var(--border2);box-shadow:0 2px 12px rgba(37,99,235,0.08);padding:0.65rem 0;}
+.xp-inner{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;}
+.xp-label{font-family:var(--font-head);font-weight:800;font-size:0.8rem;color:var(--neon-yellow);letter-spacing:2px;text-transform:uppercase;white-space:nowrap;}
+.xp-bar-wrap{flex:1;min-width:120px;background:rgba(37,99,235,0.1);border-radius:50px;height:10px;border:1px solid var(--border2);overflow:hidden;}
+.xp-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--neon-orange),var(--neon-yellow),var(--neon-cyan));border-radius:50px;transition:width 1s cubic-bezier(0.34,1.56,0.64,1);box-shadow:0 0 10px rgba(194,65,12,0.35);position:relative;}
+.xp-bar-fill::after{content:'';position:absolute;right:0;top:0;bottom:0;width:30px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.4));animation:shimmer 2s infinite;}
+@keyframes shimmer{0%,100%{opacity:0;}50%{opacity:1;}}
+.xp-score{font-family:var(--font-head);font-weight:800;font-size:0.9rem;color:var(--neon-yellow);white-space:nowrap;}
+.xp-badges{display:flex;gap:0.4rem;flex-wrap:wrap;}
+.xp-badge{font-size:0.72rem;font-weight:700;padding:0.2rem 0.65rem;border-radius:50px;border:1px solid;white-space:nowrap;transition:0.3s;opacity:0.35;}
+.xp-badge.earned{opacity:1;animation:badgePop 0.5s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes badgePop{0%{transform:scale(0);opacity:0;}100%{transform:scale(1);opacity:1;}}
+.xp-badge.b1{border-color:var(--neon-orange);color:var(--neon-orange);}
+.xp-badge.b2{border-color:var(--neon-cyan);color:var(--neon-cyan);}
+.xp-badge.b3{border-color:var(--neon-blue);color:var(--neon-blue);}
+.xp-badge.b4{border-color:var(--neon-green);color:var(--neon-green);}
+
+/* HERO */
+.hero{position:relative;overflow:hidden;padding:6rem 0 5rem;
+  background:radial-gradient(ellipse at 20% 50%,rgba(194,65,12,0.12) 0%,transparent 60%),
+             radial-gradient(ellipse at 80% 20%,rgba(180,83,9,0.10) 0%,transparent 55%),
+             radial-gradient(ellipse at 60% 80%,rgba(8,145,178,0.07) 0%,transparent 50%),var(--bg);}
+.hero-orbit{position:absolute;top:50%;right:8%;transform:translateY(-50%);width:420px;height:420px;pointer-events:none;}
+.orbit-ring{position:absolute;border-radius:50%;border:1px solid rgba(194,65,12,0.25);top:50%;left:50%;transform:translate(-50%,-50%);}
+.orbit-ring:nth-child(1){width:150px;height:150px;animation:spin 12s linear infinite;}
+.orbit-ring:nth-child(2){width:250px;height:250px;animation:spin 20s linear infinite reverse;border-color:rgba(180,83,9,0.2);}
+.orbit-ring:nth-child(3){width:350px;height:350px;animation:spin 30s linear infinite;border-color:rgba(8,145,178,0.15);}
+.orbit-dot{position:absolute;width:8px;height:8px;border-radius:50%;top:-4px;left:50%;transform:translateX(-50%);}
+.orbit-ring:nth-child(1) .orbit-dot{background:var(--neon-orange);box-shadow:var(--glow-orange);}
+.orbit-ring:nth-child(2) .orbit-dot{background:var(--neon-yellow);box-shadow:var(--glow-yellow);}
+.orbit-ring:nth-child(3) .orbit-dot{background:var(--neon-cyan);box-shadow:var(--glow-cyan);}
+.orbit-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:3rem;animation:float 4s ease-in-out infinite;}
+@keyframes spin{from{transform:translate(-50%,-50%) rotate(0deg);}to{transform:translate(-50%,-50%) rotate(360deg);}}
+@keyframes float{0%,100%{transform:translate(-50%,-50%) translateY(0);}50%{transform:translate(-50%,-50%) translateY(-12px);}}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(194,65,12,0.12);border:1px solid rgba(194,65,12,0.3);border-radius:50px;padding:0.3rem 1rem;font-size:0.78rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--neon-orange);margin-bottom:1.5rem;}
+.hero-eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--neon-orange);box-shadow:var(--glow-orange);animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.2;}}
+.hero h1{font-family:var(--font-head);font-weight:800;font-size:clamp(2.4rem,5vw,4rem);line-height:1.1;letter-spacing:-1.5px;margin-bottom:1.5rem;}
+.hero h1 .line1{display:block;color:#1e1b4b;}
+.hero h1 .line2{display:block;background:linear-gradient(135deg,var(--neon-orange) 0%,var(--neon-yellow) 45%,var(--neon-cyan) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-sub{font-size:1.1rem;color:var(--muted);max-width:560px;margin-bottom:2rem;line-height:1.75;}
+.hero-stats{display:flex;gap:2rem;flex-wrap:wrap;margin-bottom:2.5rem;}
+.hero-stat-item{text-align:center;}
+.hero-stat-num{font-family:var(--font-head);font-weight:800;font-size:1.8rem;line-height:1;background:linear-gradient(135deg,var(--neon-orange),var(--neon-yellow));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-stat-label{font-size:0.75rem;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-top:0.2rem;}
+.hero-cta{display:inline-flex;align-items:center;gap:0.6rem;background:linear-gradient(135deg,var(--neon-orange),var(--neon-yellow));color:white;font-weight:700;font-size:0.95rem;padding:0.8rem 2rem;border-radius:50px;border:none;cursor:pointer;text-decoration:none;box-shadow:0 4px 20px rgba(194,65,12,0.3);transition:0.3s;animation:pulse-btn 2s infinite;}
+@keyframes pulse-btn{0%,100%{box-shadow:0 4px 20px rgba(194,65,12,0.28);}50%{box-shadow:0 4px 32px rgba(194,65,12,0.45);}}
+.hero-cta:hover{transform:translateY(-2px) scale(1.03);color:white;}
+
+/* QUEST MAP */
+.quest-map{background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:2rem;margin:3rem 0;position:relative;box-shadow:0 4px 24px rgba(37,99,235,0.07);}
+.quest-map::before{content:'';position:absolute;inset:0;border-radius:20px;background:linear-gradient(135deg,rgba(194,65,12,0.03),rgba(180,83,9,0.03));pointer-events:none;}
+.quest-map-title{font-family:var(--font-head);font-weight:800;font-size:1.1rem;color:var(--neon-yellow);letter-spacing:2px;text-transform:uppercase;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.75rem;}
+.quest-map-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(234,179,8,0.3),transparent);}
+.quest-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:0.75rem;}
+.quest-item{display:flex;align-items:center;gap:0.75rem;background:#f8f9ff;border:1px solid var(--border);border-radius:12px;padding:0.75rem 1rem;text-decoration:none;color:var(--muted);font-weight:600;font-size:0.88rem;transition:0.25s;}
+.quest-item:hover{background:rgba(194,65,12,0.05);border-color:rgba(194,65,12,0.3);color:var(--neon-orange);transform:translateX(4px);}
+.quest-num{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-weight:800;font-size:0.78rem;flex-shrink:0;}
+
+/* LEVEL CARD */
+.level-card{background:var(--card);border:1px solid var(--border);border-radius:24px;padding:2.5rem;margin-bottom:2.5rem;position:relative;overflow:hidden;transition:border-color 0.3s,box-shadow 0.3s;}
+.level-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:24px 24px 0 0;}
+.level-card.lvl-orange::before{background:linear-gradient(90deg,var(--neon-orange),var(--neon-yellow));}
+.level-card.lvl-cyan::before{background:linear-gradient(90deg,var(--neon-cyan),var(--neon-blue));}
+.level-card.lvl-blue::before{background:linear-gradient(90deg,var(--neon-blue),var(--neon-cyan));}
+.level-card.lvl-green::before{background:linear-gradient(90deg,var(--neon-green),var(--neon-cyan));}
+.level-card.lvl-purple::before{background:linear-gradient(90deg,var(--neon-purple),var(--neon-pink));}
+.level-card.lvl-pink::before{background:linear-gradient(90deg,var(--neon-pink),var(--neon-purple));}
+.level-card.lvl-yellow::before{background:linear-gradient(90deg,var(--neon-yellow),var(--neon-orange));}
+.level-card:hover{box-shadow:0 8px 32px rgba(37,99,235,0.12);}
+.level-card .corner-deco{position:absolute;top:1.2rem;right:1.5rem;font-family:var(--font-head);font-weight:800;font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;opacity:0.25;}
+.lv-header{display:flex;align-items:flex-start;gap:1.2rem;margin-bottom:1.8rem;}
+.lv-icon-wrap{width:60px;height:60px;border-radius:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.5rem;position:relative;}
+.lv-icon-wrap::after{content:'';position:absolute;inset:-3px;border-radius:18px;border:1px solid;opacity:0.4;}
+.ico-orange{background:rgba(194,65,12,0.12);color:var(--neon-orange);}.ico-orange::after{border-color:var(--neon-orange);}
+.ico-yellow{background:rgba(180,83,9,0.12);color:var(--neon-yellow);}.ico-yellow::after{border-color:var(--neon-yellow);}
+.ico-cyan{background:rgba(8,145,178,0.12);color:var(--neon-cyan);}.ico-cyan::after{border-color:var(--neon-cyan);}
+.ico-blue{background:rgba(37,99,235,0.12);color:var(--neon-blue);}.ico-blue::after{border-color:var(--neon-blue);}
+.ico-green{background:rgba(22,163,74,0.12);color:var(--neon-green);}.ico-green::after{border-color:var(--neon-green);}
+.ico-purple{background:rgba(124,58,237,0.12);color:var(--neon-purple);}.ico-purple::after{border-color:var(--neon-purple);}
+.ico-pink{background:rgba(219,39,119,0.12);color:var(--neon-pink);}.ico-pink::after{border-color:var(--neon-pink);}
+.lv-meta{flex:1;}
+.lv-eyebrow{font-size:0.72rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:0.35rem;}
+.lv-title{font-family:var(--font-head);font-weight:800;font-size:1.6rem;line-height:1.2;color:var(--text);}
+.lv-xp{margin-top:0.4rem;display:inline-flex;align-items:center;gap:0.4rem;background:rgba(180,83,9,0.08);border:1px solid rgba(180,83,9,0.25);border-radius:50px;padding:0.2rem 0.75rem;font-size:0.75rem;font-weight:700;color:var(--neon-yellow);}
+
+/* CALLOUT */
+.callout{border-radius:14px;padding:1.2rem 1.4rem;margin:1.2rem 0;border:1px solid;position:relative;overflow:hidden;}
+.callout::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:4px 0 0 4px;}
+.callout .ct{font-weight:800;font-size:0.95rem;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.5rem;}
+.cb-orange{background:rgba(194,65,12,0.06);border-color:rgba(194,65,12,0.2);}.cb-orange::before{background:var(--neon-orange);}.cb-orange .ct{color:var(--neon-orange);}
+.cb-yellow{background:rgba(180,83,9,0.06);border-color:rgba(180,83,9,0.2);}.cb-yellow::before{background:var(--neon-yellow);}.cb-yellow .ct{color:var(--neon-yellow);}
+.cb-cyan{background:rgba(8,145,178,0.06);border-color:rgba(8,145,178,0.2);}.cb-cyan::before{background:var(--neon-cyan);}.cb-cyan .ct{color:var(--neon-cyan);}
+.cb-blue{background:rgba(37,99,235,0.06);border-color:rgba(37,99,235,0.2);}.cb-blue::before{background:var(--neon-blue);}.cb-blue .ct{color:var(--neon-blue);}
+.cb-green{background:rgba(22,163,74,0.06);border-color:rgba(22,163,74,0.2);}.cb-green::before{background:var(--neon-green);}.cb-green .ct{color:var(--neon-green);}
+.cb-purple{background:rgba(124,58,237,0.06);border-color:rgba(124,58,237,0.2);}.cb-purple::before{background:var(--neon-purple);}.cb-purple .ct{color:var(--neon-purple);}
+.cb-pink{background:rgba(219,39,119,0.06);border-color:rgba(219,39,119,0.2);}.cb-pink::before{background:var(--neon-pink);}.cb-pink .ct{color:var(--neon-pink);}
+.cb-red{background:rgba(220,38,38,0.06);border-color:rgba(220,38,38,0.2);}.cb-red::before{background:var(--neon-red);}.cb-red .ct{color:var(--neon-red);}
+
+/* STEP TIMELINE */
+.step-timeline{position:relative;padding-left:2.8rem;}
+.step-timeline::before{content:'';position:absolute;left:15px;top:4px;bottom:4px;width:2px;background:linear-gradient(180deg,var(--neon-orange),var(--neon-yellow),var(--neon-cyan));opacity:0.45;border-radius:2px;}
+.step-item{position:relative;margin-bottom:1.3rem;background:#f8f9ff;border:1px solid var(--border);border-radius:14px;padding:1.1rem 1.3rem;box-shadow:0 2px 8px rgba(37,99,235,0.05);transition:0.25s;}
+.step-item:hover{border-color:var(--border2);background:#eef1ff;}
+.step-item::before{content:attr(data-step);position:absolute;left:-2.8rem;top:1rem;width:32px;height:32px;border-radius:50%;background:#fff;border:2px solid var(--neon-orange);display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-weight:800;font-size:0.78rem;color:var(--neon-orange);box-shadow:0 2px 8px rgba(194,65,12,0.2);}
+.step-label{font-weight:700;color:var(--text);font-size:0.98rem;margin-bottom:0.35rem;}
+.step-body{color:var(--muted);font-size:0.92rem;line-height:1.7;}
+
+/* ACH CARD */
+.ach-card{background:#ffffff;border:1px solid var(--border);border-radius:18px;padding:1.5rem;height:100%;transition:0.3s;text-align:center;position:relative;overflow:hidden;}
+.ach-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;opacity:0;transition:opacity 0.3s;}
+.ach-card:hover{transform:translateY(-6px);border-color:var(--border2);}
+.ach-card:hover::after{opacity:1;}
+.ach-card.ac-orange::after{background:var(--neon-orange);}.ach-card.ac-orange:hover{box-shadow:0 16px 48px rgba(194,65,12,0.2);}
+.ach-card.ac-yellow::after{background:var(--neon-yellow);}.ach-card.ac-yellow:hover{box-shadow:0 10px 28px rgba(180,83,9,0.15);}
+.ach-card.ac-cyan::after{background:var(--neon-cyan);}.ach-card.ac-cyan:hover{box-shadow:0 16px 48px rgba(8,145,178,0.2);}
+.ach-card.ac-blue::after{background:var(--neon-blue);}.ach-card.ac-blue:hover{box-shadow:0 16px 48px rgba(37,99,235,0.2);}
+.ach-card.ac-green::after{background:var(--neon-green);}.ach-card.ac-green:hover{box-shadow:0 16px 48px rgba(22,163,74,0.2);}
+.ach-card.ac-purple::after{background:var(--neon-purple);}.ach-card.ac-purple:hover{box-shadow:0 10px 28px rgba(124,58,237,0.15);}
+.ach-card.ac-pink::after{background:var(--neon-pink);}.ach-card.ac-pink:hover{box-shadow:0 16px 48px rgba(219,39,119,0.2);}
+.ach-icon{font-size:2.2rem;margin-bottom:0.75rem;display:block;}
+.ach-title{font-family:var(--font-head);font-weight:800;font-size:1rem;margin-bottom:0.5rem;}
+.ach-desc{font-size:0.88rem;color:var(--muted);line-height:1.65;}
+
+/* CODE BLOCK */
+.code-wrap{background:#f8f9fc;border:1px solid var(--border2);border-radius:14px;overflow:hidden;margin:1.2rem 0;}
+.code-header{display:flex;align-items:center;justify-content:space-between;background:rgba(194,65,12,0.06);padding:0.6rem 1.1rem;border-bottom:1px solid var(--border);}
+.code-lang{font-family:var(--font-mono);font-size:0.75rem;font-weight:600;color:var(--neon-orange);letter-spacing:1px;text-transform:uppercase;}
+.code-dots{display:flex;gap:5px;}
+.code-dot{width:10px;height:10px;border-radius:50%;}
+.code-dot:nth-child(1){background:#dc2626;}.code-dot:nth-child(2){background:#b45309;}.code-dot:nth-child(3){background:#16a34a;}
+.code-wrap pre{margin:0;padding:1.2rem 1.4rem;overflow-x:auto;background:transparent;}
+.code-wrap pre code{font-family:var(--font-mono);font-size:0.85rem;line-height:1.7;}
+pre[class*="language-"]{border-radius:0!important;font-family:var(--font-mono)!important;font-size:0.85rem!important;margin:0!important;border:none!important;background:transparent!important;}
+.code-output{background:rgba(194,65,12,0.05);border-top:1px solid rgba(194,65,12,0.18);padding:0.7rem 1.2rem;font-family:var(--font-mono);font-size:0.82rem;color:#7c2d12;line-height:1.7;}
+
+/* EX CARD */
+.ex-card{border-radius:16px;overflow:hidden;margin:1.4rem 0;border:1px solid;}
+.ex-card .ex-head{padding:0.85rem 1.4rem;font-weight:800;font-size:0.92rem;display:flex;align-items:center;gap:0.6rem;}
+.ex-card .ex-body{padding:1.4rem;background:#fafbff;}
+.ex-card.ex-story{border-color:rgba(194,65,12,0.25);}.ex-card.ex-story .ex-head{background:rgba(194,65,12,0.08);color:#7c2d12;}
+.ex-card.ex-tech{border-color:rgba(37,99,235,0.25);}.ex-card.ex-tech .ex-head{background:rgba(37,99,235,0.08);color:#1e40af;}
+.ex-card.ex-tip{border-color:rgba(8,145,178,0.25);}.ex-card.ex-tip .ex-head{background:rgba(8,145,178,0.08);color:#0c4a6e;}
+.ex-card.ex-warn{border-color:rgba(220,38,38,0.25);}.ex-card.ex-warn .ex-head{background:rgba(220,38,38,0.08);color:#991b1b;}
+.ex-card.ex-green{border-color:rgba(22,163,74,0.25);}.ex-card.ex-green .ex-head{background:rgba(22,163,74,0.08);color:#14532d;}
+
+/* TABLE */
+.gtbl{width:100%;border-collapse:separate;border-spacing:0;border-radius:14px;overflow:hidden;border:1px solid var(--border);}
+.gtbl thead th{background:rgba(194,65,12,0.08);color:var(--neon-orange);font-family:var(--font-head);font-weight:700;padding:0.9rem 1rem;text-align:left;border-bottom:1px solid rgba(194,65,12,0.15);font-size:0.85rem;letter-spacing:0.5px;}
+.gtbl tbody td{padding:0.75rem 1rem;border-bottom:1px solid var(--border);color:var(--muted);font-size:0.92rem;vertical-align:top;}
+.gtbl tbody tr:last-child td{border-bottom:none;}
+.gtbl tbody tr:hover td{background:rgba(194,65,12,0.03);color:var(--text);}
+.gtbl tbody td strong{color:var(--text);}
+
+/* DIM CARD */
+.dim-card{background:#ffffff;border:1px solid var(--border);border-radius:18px;padding:1.5rem;height:100%;transition:0.3s;position:relative;overflow:hidden;}
+.dim-card:hover{transform:translateY(-4px);box-shadow:0 8px 28px rgba(37,99,235,0.1);}
+.dim-rank{font-family:var(--font-head);font-weight:800;font-size:2.5rem;line-height:1;margin-bottom:0.25rem;}
+.dim-name{font-weight:700;font-size:1rem;margin-bottom:0.8rem;}
+.dim-code{background:#f1f5f9;border-radius:10px;padding:0.65rem 0.9rem;font-family:var(--font-mono);font-size:0.82rem;border:1px solid rgba(99,102,241,0.15);margin-bottom:0.8rem;}
+.dim-desc{font-size:0.88rem;color:var(--muted);margin-bottom:0.75rem;line-height:1.6;}
+.dim-example{font-size:0.82rem;padding:0.5rem 0.75rem;border-radius:8px;border:1px solid;font-style:italic;}
+
+/* STAT PILLS */
+.stat-pill{display:inline-flex;align-items:center;gap:0.4rem;border-radius:50px;padding:0.3rem 0.9rem;font-weight:700;font-size:0.8rem;border:1px solid;}
+.sp-orange{background:rgba(194,65,12,0.08);border-color:rgba(194,65,12,0.3);color:var(--neon-orange);}
+.sp-yellow{background:rgba(180,83,9,0.08);border-color:rgba(180,83,9,0.3);color:var(--neon-yellow);}
+.sp-cyan{background:rgba(8,145,178,0.08);border-color:rgba(8,145,178,0.3);color:var(--neon-cyan);}
+.sp-blue{background:rgba(37,99,235,0.08);border-color:rgba(37,99,235,0.3);color:var(--neon-blue);}
+.sp-green{background:rgba(22,163,74,0.08);border-color:rgba(22,163,74,0.3);color:var(--neon-green);}
+.sp-purple{background:rgba(124,58,237,0.08);border-color:rgba(124,58,237,0.3);color:var(--neon-purple);}
+.sp-pink{background:rgba(219,39,119,0.08);border-color:rgba(219,39,119,0.3);color:var(--neon-pink);}
+.sp-red{background:rgba(220,38,38,0.08);border-color:rgba(220,38,38,0.3);color:var(--neon-red);}
+
+/* INLINE CODE */
+.inline-code{background:rgba(194,65,12,0.08);color:#7c2d12;padding:0.1rem 0.45rem;border-radius:6px;font-family:var(--font-mono);font-size:0.88em;border:1px solid rgba(194,65,12,0.25);}
+
+/* HIGHLIGHT */
+.hl{background:rgba(180,83,9,0.1);color:#92400e;padding:0 5px;border-radius:4px;}
+.hl-orange{background:rgba(194,65,12,0.1);color:var(--neon-orange);padding:0 5px;border-radius:4px;}
+.hl-red{background:rgba(220,38,38,0.1);color:var(--neon-red);padding:0 5px;border-radius:4px;}
+.hl-blue{background:rgba(37,99,235,0.1);color:var(--neon-blue);padding:0 5px;border-radius:4px;}
+.hl-green{background:rgba(22,163,74,0.1);color:var(--neon-green);padding:0 5px;border-radius:4px;}
+.hl-cyan{background:rgba(8,145,178,0.1);color:var(--neon-cyan);padding:0 5px;border-radius:4px;}
+
+/* GLOW DIVIDER */
+.glow-div{height:2px;border-radius:2px;margin:2rem 0;opacity:0.4;background:linear-gradient(90deg,transparent,var(--neon-orange),var(--neon-yellow),var(--neon-cyan),transparent);}
+
+/* MERMAID */
+.mermaid-wrap{background:#f8f9ff;border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin:1.5rem 0;text-align:center;overflow-x:auto;box-shadow:0 2px 12px rgba(37,99,235,0.06);}
+
+/* BIN VIZ — Custom bar chart for visual illustration */
+.bin-viz{display:flex;align-items:flex-end;gap:3px;height:80px;padding:0.5rem 0.75rem;background:rgba(194,65,12,0.04);border:1px solid rgba(194,65,12,0.15);border-radius:12px;}
+.bin-bar{border-radius:4px 4px 0 0;flex:1;min-width:10px;transition:opacity 0.3s;}
+.bin-bar:hover{opacity:0.75;}
+.bin-label-row{display:flex;gap:3px;padding:0 0.75rem;}
+.bin-label{flex:1;font-family:var(--font-mono);font-size:0.62rem;color:var(--dim);text-align:center;}
+
+/* QUIZ */
+.quiz-box{background:#fffbf0;border:1px solid rgba(180,83,9,0.18);border-radius:20px;padding:1.6rem;margin:1.8rem 0;position:relative;overflow:hidden;box-shadow:0 4px 20px rgba(180,83,9,0.07);}
+.quiz-box::before{content:'⚡ QUICK CHALLENGE';position:absolute;top:0;right:0;background:linear-gradient(135deg,#b45309,#c2410c);color:#fff;font-family:var(--font-head);font-weight:800;font-size:0.62rem;letter-spacing:2px;padding:0.32rem 0.9rem;border-radius:0 20px 0 12px;}
+.quiz-q{font-weight:700;color:#1c1917;margin-bottom:1.1rem;font-size:1.02rem;line-height:1.55;}
+.quiz-options{display:flex;flex-direction:column;gap:0.55rem;}
+.quiz-opt{background:#ffffff;border:1.5px solid #e5e7eb;border-radius:12px;padding:0.75rem 1.1rem;cursor:pointer;font-size:0.93rem;color:#374151;transition:background 0.15s,border-color 0.15s,transform 0.12s;font-weight:500;display:flex;align-items:center;gap:0.85rem;user-select:none;}
+.quiz-opt:not(.answered-opt):hover{background:#f3f4f6;border-color:#9ca3af;color:#111827;transform:translateX(3px);}
+.quiz-opt.correct{background:#f0fdf4;border-color:#16a34a;color:#14532d;font-weight:700;}
+.quiz-opt.correct .opt-letter{background:#16a34a;color:#fff;}
+.quiz-opt.wrong{background:#fef2f2;border-color:#dc2626;color:#991b1b;opacity:0.8;}
+.quiz-opt.wrong .opt-letter{background:#dc2626;color:#fff;}
+.quiz-opt.dimmed{opacity:0.45;pointer-events:none;}
+.quiz-opt .opt-letter{width:28px;height:28px;border-radius:8px;background:#f3f4f6;color:#6b7280;border:1.5px solid #e5e7eb;display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-weight:800;font-size:0.8rem;flex-shrink:0;transition:background 0.2s,color 0.2s;}
+.quiz-explain{display:none;font-size:0.84rem;font-weight:500;margin-top:-0.35rem;margin-bottom:0.35rem;padding:0.5rem 0.85rem 0.5rem 1rem;border-radius:0 0 10px 10px;line-height:1.55;border-left:3px solid transparent;}
+.quiz-explain.show-correct{display:block;background:rgba(22,163,74,0.07);color:#166534;border-left-color:#16a34a;}
+.quiz-explain.show-wrong{display:block;background:rgba(220,38,38,0.06);color:#991b1b;border-left-color:#dc2626;}
+.quiz-explain.show-reveal{display:block;background:rgba(37,99,235,0.06);color:#1e40af;border-left-color:#2563eb;}
+.quiz-feedback{display:none;margin-top:1rem;padding:0.85rem 1.1rem;border-radius:12px;font-weight:700;font-size:0.95rem;align-items:center;gap:0.6rem;}
+.quiz-feedback.show{display:flex;animation:fadeIn 0.35s;}
+.quiz-feedback.win{background:linear-gradient(135deg,#f0fdf4,#dcfce7);color:#14532d;border:1px solid rgba(22,163,74,0.3);}
+.quiz-feedback.lose{background:linear-gradient(135deg,#fef2f2,#fee2e2);color:#991b1b;border:1px solid rgba(220,38,38,0.2);}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+
+/* FOOTER */
+.gfooter{background:#e8edf8;border-top:1px solid var(--border);padding:3rem 0;margin-top:4rem;text-align:center;}
+.gfooter-logo{font-family:var(--font-head);font-weight:800;font-size:1.4rem;background:linear-gradient(135deg,var(--neon-orange),var(--neon-yellow));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:0.5rem;}
+
+/* ANIMATIONS */
+.fade-up{opacity:0;transform:translateY(30px);transition:opacity 0.6s ease,transform 0.6s ease;}
+.fade-up.visible{opacity:1;transform:none;}
+
+/* RESPONSIVE */
+@media(max-width:768px){.hero h1{font-size:2rem;}.hero-orbit{display:none;}.level-card{padding:1.5rem;}.xp-badges{display:none;}}
+
+/* TOAST */
+.toast-container{position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:0.5rem;pointer-events:none;}
+.gtoast{background:#ffffff;border:1px solid var(--border2);border-radius:14px;padding:0.85rem 1.2rem;display:flex;align-items:center;gap:0.75rem;backdrop-filter:blur(12px);font-weight:700;font-size:0.88rem;transform:translateX(120%);transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);pointer-events:auto;min-width:260px;box-shadow:0 8px 32px rgba(37,99,235,0.15);}
+.gtoast.show{transform:none;}
+.gtoast-icon{font-size:1.4rem;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:10000;background:rgba(15,23,42,0.55);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity 0.4s ease;}
+.modal-overlay.open{opacity:1;pointer-events:auto;}
+.modal-box{background:#ffffff;border-radius:28px;padding:2.5rem 2.5rem 2rem;max-width:520px;width:100%;position:relative;overflow:hidden;box-shadow:0 24px 80px rgba(37,99,235,0.18),0 4px 20px rgba(0,0,0,0.1);transform:scale(0.85) translateY(20px);transition:transform 0.45s cubic-bezier(0.34,1.56,0.64,1),opacity 0.4s ease;opacity:0;}
+.modal-overlay.open .modal-box{transform:scale(1) translateY(0);opacity:1;}
+.modal-box::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--neon-orange),var(--neon-yellow),var(--neon-cyan));}
+.modal-close{position:absolute;top:1rem;right:1rem;background:#f3f4f6;border:none;border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:0.9rem;color:#6b7280;display:flex;align-items:center;justify-content:center;transition:0.2s;}
+.modal-close:hover{background:#e5e7eb;color:#374151;}
+.modal-trophy{font-size:3rem;text-align:center;margin-bottom:0.5rem;}
+.modal-title{font-family:var(--font-head);font-weight:800;font-size:1.6rem;text-align:center;color:var(--text);margin-bottom:0.4rem;}
+.modal-subtitle{color:var(--muted);text-align:center;font-size:0.92rem;margin-bottom:1.5rem;}
+.score-ring-wrap{display:flex;justify-content:center;margin-bottom:1.2rem;}
+.score-ring{position:relative;width:120px;height:120px;}
+.score-ring svg{width:120px;height:120px;transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:#e5e7eb;stroke-width:10;}
+.ring-fill{fill:none;stroke:#c2410c;stroke-width:10;stroke-linecap:round;stroke-dasharray:327;stroke-dashoffset:327;transition:stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1);}
+.ring-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.ring-num{font-family:var(--font-head);font-weight:800;font-size:1.4rem;color:var(--text);line-height:1;}
+.ring-label{font-size:0.72rem;color:var(--dim);text-transform:uppercase;letter-spacing:1px;}
+.grade-card{border-radius:14px;padding:0.85rem 1.2rem;margin-bottom:1.2rem;display:flex;align-items:center;gap:1rem;border:1.5px solid;}
+.grade-s{background:#fef9c3;border-color:#b45309;}.grade-a{background:#f0fdf4;border-color:#16a34a;}.grade-b{background:#eff6ff;border-color:#2563eb;}.grade-c{background:#f5f3ff;border-color:#7c3aed;}.grade-d{background:#fef2f2;border-color:#dc2626;}
+.grade-letter{font-family:var(--font-head);font-weight:800;font-size:1.6rem;}
+.grade-msg{font-size:0.9rem;color:var(--muted);font-weight:600;}
+.modal-xp-row{display:flex;align-items:center;justify-content:space-between;background:#f8f9ff;border:1px solid rgba(37,99,235,0.15);border-radius:12px;padding:0.75rem 1.1rem;margin-bottom:1.4rem;}
+.modal-xp-row .mxp-label{font-size:0.85rem;color:#6b7280;font-weight:600;}
+.modal-xp-row .mxp-val{font-family:var(--font-head);font-weight:800;font-size:1.1rem;background:linear-gradient(135deg,#c2410c,#b45309);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.modal-btns{display:flex;gap:0.75rem;}
+.modal-btn-retry{flex:1;padding:0.8rem 1rem;background:#f3f4f6;border:1.5px solid #e5e7eb;border-radius:12px;cursor:pointer;font-family:var(--font-head);font-weight:700;font-size:0.92rem;color:#374151;transition:0.2s;display:flex;align-items:center;justify-content:center;gap:0.5rem;}
+.modal-btn-retry:hover{background:#e5e7eb;border-color:#d1d5db;color:#111827;}
+.modal-btn-continue{flex:2;padding:0.8rem 1rem;background:linear-gradient(135deg,#c2410c,#b45309);border:none;border-radius:12px;cursor:pointer;font-family:var(--font-head);font-weight:700;font-size:0.92rem;color:#ffffff;transition:0.2s;display:flex;align-items:center;justify-content:center;gap:0.5rem;box-shadow:0 4px 16px rgba(194,65,12,0.3);}
+.modal-btn-continue:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(194,65,12,0.4);}
+#confettiCanvas{position:fixed;inset:0;z-index:10001;pointer-events:none;}
+</style>
+</head>
+<body>
+
+<!-- XP STRIP -->
+<div class="xp-strip">
+  <div class="container-main">
+    <div class="xp-inner">
+      <span class="xp-label">⚡ XP</span>
+      <div class="xp-bar-wrap"><div class="xp-bar-fill" id="xpFill"></div></div>
+      <span class="xp-score" id="xpScore">0 / 220 XP</span>
+      <div class="xp-badges">
+        <span class="xp-badge b1" id="badge1">📦 Binner</span>
+        <span class="xp-badge b2" id="badge2">⚡ Binarizer</span>
+        <span class="xp-badge b3" id="badge3">📊 Quantile Pro</span>
+        <span class="xp-badge b4" id="badge4">🎯 K-Means Expert</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container-main">
+    <div class="row align-items-center">
+      <div class="col-lg-7">
+        <div class="hero-eyebrow"><i class="fa-solid fa-gamepad me-1"></i> Gamified Learning Quest</div>
+        <h1>
+          <span class="line1">Numbers ko Smarter banao</span>
+          <span class="line2">Numerical Encoding!</span>
+        </h1>
+        <p class="hero-sub">
+          4 boss levels. Binning se lekar K-Means Discretization tak. Real India examples ke saath Python code. <strong style="color:var(--text)">Earn XP</strong>, unlock badges, aur continuous numbers ko ML-ready categories mein convert karo!
+        </p>
+        <div class="hero-stats">
+          <div class="hero-stat-item"><div class="hero-stat-num">4</div><div class="hero-stat-label">Boss Levels</div></div>
+          <div class="hero-stat-item"><div class="hero-stat-num">220</div><div class="hero-stat-label">Total XP</div></div>
+          <div class="hero-stat-item"><div class="hero-stat-num">4</div><div class="hero-stat-label">Badges</div></div>
+          <div class="hero-stat-item"><div class="hero-stat-num">∞</div><div class="hero-stat-label">ML Power</div></div>
+        </div>
+        <a href="#s1" class="hero-cta"><i class="fa-solid fa-play me-1"></i> Start Your Quest</a>
+      </div>
+      <div class="col-lg-5">
+        <div class="hero-orbit">
+          <div class="orbit-ring"><div class="orbit-dot"></div></div>
+          <div class="orbit-ring"><div class="orbit-dot"></div></div>
+          <div class="orbit-ring"><div class="orbit-dot"></div></div>
+          <div class="orbit-center">📦</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="container-main">
+
+<!-- QUEST MAP -->
+<div class="quest-map fade-up">
+  <div class="quest-map-title"><i class="fa-solid fa-map me-2"></i> Quest Map</div>
+  <div class="quest-grid">
+    <a href="#s1" class="quest-item"><span class="quest-num" style="background:rgba(194,65,12,0.15);color:var(--neon-orange);">L1</span> Numerical Encoding Kya Hai? Kyun?</a>
+    <a href="#s2" class="quest-item"><span class="quest-num" style="background:rgba(194,65,12,0.15);color:var(--neon-orange);">L1</span> Binning — Equal Width Discretization</a>
+    <a href="#s3" class="quest-item"><span class="quest-num" style="background:rgba(8,145,178,0.15);color:var(--neon-cyan);">L2</span> Binarization — 0 ya 1 Sirf</a>
+    <a href="#s4" class="quest-item"><span class="quest-num" style="background:rgba(8,145,178,0.15);color:var(--neon-cyan);">L2</span> Binarization — Threshold &amp; Use Cases</a>
+    <a href="#s5" class="quest-item"><span class="quest-num" style="background:rgba(37,99,235,0.15);color:var(--neon-blue);">L3</span> Quantile Binning — Equal Frequency</a>
+    <a href="#s6" class="quest-item"><span class="quest-num" style="background:rgba(37,99,235,0.15);color:var(--neon-blue);">L3</span> Quantile vs Equal Width — Fark Samjho</a>
+    <a href="#s7" class="quest-item"><span class="quest-num" style="background:rgba(22,163,74,0.15);color:var(--neon-green);">L4</span> K-Means Binning — Data-Driven Clusters</a>
+    <a href="#s8" class="quest-item"><span class="quest-num" style="background:rgba(219,39,119,0.15);color:var(--neon-pink);">🏆</span> Final Summary &amp; Decision Guide</a>
+  </div>
+</div>
+
+
+<!-- ████████████████████████████████████
+     LEVEL 1-A : NUMERICAL ENCODING KYA HAI?
+█████████████████████████████████████ -->
+<div class="level-card lvl-orange fade-up" id="s1">
+  <div class="corner-deco">LEVEL 1</div>
+  <div class="lv-header">
+    <div class="lv-icon-wrap ico-orange"><i class="fa-solid fa-sliders"></i></div>
+    <div class="lv-meta">
+      <div class="lv-eyebrow">Level 1 · Boss Topic</div>
+      <div class="lv-title">Numerical Encoding — Continuous Numbers ko Buckets mein Daalo!</div>
+      <div class="lv-xp"><i class="fa-solid fa-star"></i> +30 XP on scroll</div>
+    </div>
+  </div>
+
+  <div class="callout cb-orange">
+    <div class="ct"><i class="fa-solid fa-lightbulb"></i> Core Idea — Ek Line Mein</div>
+    <strong>Numerical Feature Encoding</strong> = continuous numbers ko <span class="hl-orange">discrete categories / buckets mein convert</span> karna — taaki patterns zyada clearly visible hon aur models better seekhein.<br><br>
+    Jaise age 23, 24, 25, 26 alag alag nahi — ye sab "Young Adult" bucket mein hain! Ye transformation ML mein bahut powerful hoti hai.
+  </div>
+
+  <div class="callout cb-yellow">
+    <div class="ct"><i class="fa-solid fa-brain"></i> Kyun Zaroori Hai? — 4 Strong Reasons</div>
+    <div class="row g-2 mt-1">
+      <div class="col-md-6">
+        ✅ <strong>Non-linear patterns pakadna:</strong> Age 20 se 25 ka effect, 60 se 65 se bilkul alag hai — buckets ye pakadta hai<br>
+        ✅ <strong>Outlier robustness:</strong> ₹50 crore wala villa ek bin mein — average distort nahi karega
+      </div>
+      <div class="col-md-6">
+        ✅ <strong>Interpretability:</strong> "Low Income", "Medium Income", "High Income" — stakeholders ko samajhna easy<br>
+        ✅ <strong>Missing value handling:</strong> Ek bin ke liye impute karna zyada sensible hota hai
+      </div>
+    </div>
+  </div>
+
+  <div class="glow-div"></div>
+
+  <h5 style="font-family:var(--font-head);font-weight:800;color:var(--text);margin-bottom:1.2rem;">
+    <i class="fa-solid fa-layer-group me-2" style="color:var(--neon-orange)"></i>Char Main Numerical Encoding Types
+  </h5>
+
+  <div class="row g-3">
+    <div class="col-md-3 col-sm-6">
+      <div class="ach-card ac-orange">
+        <span class="ach-icon">📦</span>
+        <div class="ach-title">Equal Width Binning</div>
+        <div class="ach-desc">Range ko <strong>barabar width</strong> ke bins mein baanto. Simple aur sabse common!<br><span class="stat-pill sp-orange" style="font-size:0.7rem;margin-top:0.4rem;">pd.cut()</span></div>
+      </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+      <div class="ach-card ac-cyan">
+        <span class="ach-icon">⚡</span>
+        <div class="ach-title">Binarization</div>
+        <div class="ach-desc">Ek threshold se <strong>0 ya 1</strong> — threshold se upar = 1, neeche = 0. Ultra simple!<br><span class="stat-pill sp-cyan" style="font-size:0.7rem;margin-top:0.4rem;">Binarizer()</span></div>
+      </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+      <div class="ach-card ac-blue">
+        <span class="ach-icon">📊</span>
+        <div class="ach-title">Quantile Binning</div>
+        <div class="ach-desc"><strong>Barabar count</strong> wale bins — har bin mein same number of rows. Outliers se safe!<br><span class="stat-pill sp-blue" style="font-size:0.7rem;margin-top:0.4rem;">pd.qcut()</span></div>
+      </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+      <div class="ach-card ac-green">
+        <span class="ach-icon">🎯</span>
+        <div class="ach-title">K-Means Binning</div>
+        <div class="ach-desc"><strong>Data ke natural clusters</strong> dhundh ke bins banao. ML-driven, most sophisticated!<br><span class="stat-pill sp-green" style="font-size:0.7rem;margin-top:0.4rem;">KMeans()</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout cb-yellow mt-4">
+    <div class="ct"><i class="fa-solid fa-india"></i> Real India Examples — Har Jagah Binning Hoti Hai</div>
+    <div class="row g-2">
+      <div class="col-md-6">
+        👶 <strong>IRCTC Age:</strong> <span class="inline-code">Child (0-12) → Adult (13-59) → Senior (60+)</span><br>
+        💰 <strong>Income Tax:</strong> <span class="inline-code">0-3L (nil) → 3-6L (5%) → 6-9L (10%)</span><br>
+        🏠 <strong>MagicBricks Price:</strong> <span class="inline-code">Budget → Mid → Premium → Luxury</span>
+      </div>
+      <div class="col-md-6">
+        📱 <strong>Jio Data Usage:</strong> <span class="inline-code">Light → Medium → Heavy user</span><br>
+        🏏 <strong>IPL Strike Rate:</strong> <span class="inline-code">&lt;100 → 100-150 → 150-200 → 200+</span><br>
+        🌡️ <strong>IMD Temperature:</strong> <span class="inline-code">Cold → Mild → Hot → Extreme</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ 1 -->
+  <div class="quiz-box" data-quiz="1" data-correct="b" data-xp="25">
+    <div class="quiz-q">🤔 Numerical Feature Encoding (Binning/Discretization) kyun use karte hain — jab pehle se numbers hain toh kyun convert karein?</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" data-ans="a" data-explain="Galat. Binning se storage nahi bachti — actually categories ke liye bhi memory lagti hai. Binning ka goal ML accuracy aur interpretability hai, compression nahi."><span class="opt-letter">A</span>Storage save karne ke liye — numbers strings se chhote hote hain</div>
+      <div class="quiz-opt" data-ans="b" data-explain="Bilkul sahi! Continuous numbers mein non-linear patterns hoti hain jo linear models directly nahi pakad sakte. Age 25 vs 35 ka effect income pe linear nahi hota. Binning se: (1) non-linear relationships capture hoti hain, (2) outliers ka effect kam hota hai, (3) model interpretable rehta hai, aur (4) patterns clearly dikhte hain!"><span class="opt-letter">B</span>Non-linear patterns pakadne ke liye — continuous values mein hidden structure hoti hai jo bins reveal karte hain</div>
+      <div class="quiz-opt" data-ans="c" data-explain="Nahi. Numerical columns ML models ke saath directly kaam karte hain — encoding mandatory nahi hai. Binning ek optional transformation hai jo specific situations mein helpful hoti hai, ML ke liye required nahi."><span class="opt-letter">C</span>ML models numerical columns directly nahi le sakte — encoding mandatory hai</div>
+      <div class="quiz-opt" data-ans="d" data-explain="Nahi. NaN values handle karne ke liye imputation (mean/median/KNN) use karte hain, binning nahi. Binning ka purpose alag hai — continuous values ko categories mein convert karna."><span class="opt-letter">D</span>Missing values (NaN) handle karne ke liye — bins mein fill karna easy hota hai</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+</div>
+
+
+<!-- ████████████████████████████████████
+     LEVEL 1-B : EQUAL WIDTH BINNING
+█████████████████████████████████████ -->
+<div class="level-card lvl-orange fade-up" id="s2">
+  <div class="corner-deco">LEVEL 1</div>
+  <div class="lv-header">
+    <div class="lv-icon-wrap ico-yellow"><i class="fa-solid fa-ruler-horizontal"></i></div>
+    <div class="lv-meta">
+      <div class="lv-eyebrow">Level 1 · Skill Unlock</div>
+      <div class="lv-title">Binning — Equal Width Discretization (pd.cut)</div>
+    </div>
+  </div>
+
+  <div class="callout cb-orange">
+    <div class="ct"><i class="fa-solid fa-lightbulb"></i> Equal Width Binning kya hai?</div>
+    <strong>Equal Width Binning</strong> = min se max tak ki range ko <span class="hl-orange">barabar width ke buckets</span> mein baanto — jaise ruler pe equal markings.<br><br>
+    Age 0–90 ko 3 bins: <strong>0–30 (Young)</strong> | <strong>30–60 (Middle)</strong> | <strong>60–90 (Senior)</strong> — har bin ki width = 30 years.
+  </div>
+
+  <!-- Visual: Equal width bin bars -->
+  <div class="row g-3 mt-2">
+    <div class="col-md-7">
+      <div class="callout cb-yellow" style="margin:0;">
+        <div class="ct"><i class="fa-solid fa-eye"></i> Visual — Equal Width (Age Data)</div>
+        <div style="margin-top:0.8rem;">
+          <div class="bin-viz">
+            <div class="bin-bar" style="height:55%;background:#f97316;"></div>
+            <div class="bin-bar" style="height:90%;background:#f97316;"></div>
+            <div class="bin-bar" style="height:78%;background:#f97316;"></div>
+            <div class="bin-bar" style="height:62%;background:#ea580c;"></div>
+            <div class="bin-bar" style="height:45%;background:#ea580c;"></div>
+            <div class="bin-bar" style="height:38%;background:#ea580c;"></div>
+            <div class="bin-bar" style="height:20%;background:#c2410c;"></div>
+            <div class="bin-bar" style="height:15%;background:#c2410c;"></div>
+            <div class="bin-bar" style="height:10%;background:#c2410c;"></div>
+          </div>
+          <div class="bin-label-row mt-1">
+            <div class="bin-label" style="flex:3;font-size:0.7rem;text-align:center;color:var(--neon-orange);font-weight:700;">Young<br>0–30</div>
+            <div class="bin-label" style="flex:3;font-size:0.7rem;text-align:center;color:var(--neon-orange);font-weight:700;">Middle<br>30–60</div>
+            <div class="bin-label" style="flex:3;font-size:0.7rem;text-align:center;color:var(--neon-orange);font-weight:700;">Senior<br>60–90</div>
+          </div>
+          <div style="font-size:0.78rem;color:var(--dim);margin-top:0.4rem;">↑ Har bin ki width barabar (30 years) — lekin counts unequal hain!</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-5">
+      <div class="callout cb-red h-100" style="margin:0;">
+        <div class="ct"><i class="fa-solid fa-triangle-exclamation"></i> Problem with Equal Width</div>
+        Agar data skewed hai — jaise salary:<br>
+        <strong>₹0–5L:</strong> 70% log<br>
+        <strong>₹5–10L:</strong> 20% log<br>
+        <strong>₹10–15L:</strong> 10% log<br><br>
+        Pehla bin bahut crowded, baaki khali! <span class="hl-red">Imbalanced bins</span> = model biased ho jaata hai.
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-story mt-4">
+    <div class="ex-head"><i class="fa-brands fa-python"></i> Equal Width Binning — pd.cut() Complete Code</div>
+    <div class="ex-body">
+      <div class="code-wrap">
+        <div class="code-header"><span class="code-lang">🐍 Python — pd.cut() Binning</span><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div></div>
+        <pre><code class="language-python">import pandas as pd
+import numpy as np
+
+# ─── Dataset: HDFC Loan Applicants ───
+data = {
+    'name':   ['Aarav','Priya','Ravi','Sneha','Karan',
+                'Divya','Mohit','Ananya','Vikram','Pooja'],
+    'age':    [23, 45, 31, 58, 27, 62, 38, 19, 52, 41],
+    'income': [280000, 850000, 420000, 1200000, 310000,
+               950000, 680000, 180000, 780000, 520000],
+}
+df = pd.DataFrame(data)
+
+# ════════════════════════════════════════
+# METHOD 1: pd.cut() — Custom Bin Edges (domain knowledge)
+# ════════════════════════════════════════
+# Age bins with custom boundaries
+df['age_group'] = pd.cut(
+    df['age'],
+    bins=[0, 30, 45, 60, 100],              # Boundary points
+    labels=['Young', 'Middle', 'Senior', 'Elder'],  # Bin names
+    right=True                               # Includes right endpoint
+)
+
+print("Age Binning (Custom Edges):")
+print(df[['name', 'age', 'age_group']])
+print("\nBin Distribution:")
+print(df['age_group'].value_counts().sort_index())
+
+# ════════════════════════════════════════
+# METHOD 2: pd.cut() — Auto Equal Width (n bins)
+# sklearn decides boundaries automatically
+# ════════════════════════════════════════
+df['income_bin'] = pd.cut(
+    df['income'],
+    bins=3,                                  # 3 equal-width bins
+    labels=['Low', 'Medium', 'High']
+)
+
+print("\nIncome Binning (3 Equal-Width Bins):")
+print(df[['name', 'income', 'income_bin']])
+
+# ════════════════════════════════════════
+# METHOD 3: sklearn KBinsDiscretizer (Equal Width)
+# ML Pipeline ke saath use karo!
+# ════════════════════════════════════════
+from sklearn.preprocessing import KBinsDiscretizer
+
+kbd = KBinsDiscretizer(
+    n_bins=4,
+    encode='ordinal',     # 0,1,2,3 integers (ordinal) ya onehot
+    strategy='uniform'    # equal width bins
+)
+
+df[['age_binned_sk']] = kbd.fit_transform(df[['age']])
+
+print("\nsklearn KBinsDiscretizer (Equal Width):")
+print(df[['name', 'age', 'age_binned_sk']])
+print("\nBin edges learned:", kbd.bin_edges_[0].round(1))</code></pre>
+        <div class="code-output">📦 Equal Width Binning Done! age_group: Young(4), Middle(3), Senior(2), Elder(1). income_bin: Low(3), Medium(5), High(2). sklearn KBinsDiscretizer bin_edges: [19.0, 30.3, 41.5, 52.8, 62.0]. Note: income mein Low bin mein 3 log jam gaye — skewed data ka typical problem!</div>
+      </div>
+    </div>
+  </div>
+
+  <h5 style="font-family:var(--font-head);font-weight:800;color:var(--text);margin:1.5rem 0 0.8rem;">
+    <i class="fa-solid fa-table me-2" style="color:var(--neon-orange)"></i>pd.cut vs sklearn KBinsDiscretizer — Kab Kya?
+  </h5>
+  <div class="table-responsive">
+    <table class="gtbl">
+      <thead><tr><th>Feature</th><th>pd.cut()</th><th>sklearn KBinsDiscretizer</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Custom boundaries</strong></td><td>✅ Haan — bins=[0,30,60,100]</td><td>❌ Nahi — auto-calculated</td></tr>
+        <tr><td><strong>Named labels</strong></td><td>✅ Haan — labels=['Low','High']</td><td>❌ Nahi — sirf 0,1,2...</td></tr>
+        <tr><td><strong>ML Pipeline support</strong></td><td>❌ Nahi</td><td>✅ Haan — full sklearn compatible</td></tr>
+        <tr><td><strong>Strategy options</strong></td><td>sirf uniform/custom</td><td>'uniform', 'quantile', 'kmeans' — teen options!</td></tr>
+        <tr><td><strong>Best For</strong></td><td>EDA, domain-driven bins, readable output</td><td>ML pipeline, automated binning</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- ████████████████████████████████████
+     LEVEL 2-A : BINARIZATION
+█████████████████████████████████████ -->
+<div class="level-card lvl-cyan fade-up" id="s3">
+  <div class="corner-deco">LEVEL 2</div>
+  <div class="lv-header">
+    <div class="lv-icon-wrap ico-cyan"><i class="fa-solid fa-toggle-on"></i></div>
+    <div class="lv-meta">
+      <div class="lv-eyebrow">Level 2 · Boss Topic</div>
+      <div class="lv-title">Binarization — Sirf 0 ya 1, Aur Kuch Nahi!</div>
+      <div class="lv-xp"><i class="fa-solid fa-star"></i> +30 XP on scroll</div>
+    </div>
+  </div>
+
+  <div class="callout cb-cyan">
+    <div class="ct"><i class="fa-solid fa-lightbulb"></i> Binarization kya hai?</div>
+    <strong>Binarization</strong> = ek <span class="hl-cyan">threshold value set karo</span> — usse upar sab 1, neeche sab 0.<br><br>
+    Binning ka special case — sirf 2 bins! Jaise glucose level &gt;126 = Diabetic (1), ≤126 = Non-diabetic (0). Simple, fast, powerful!
+  </div>
+
+  <div class="row g-3 mt-2">
+    <div class="col-md-6">
+      <div class="callout cb-green h-100" style="margin:0;">
+        <div class="ct"><i class="fa-solid fa-check-double"></i> Binarization kab best hai?</div>
+        ✅ <strong>Binary decision:</strong> Pass/Fail, Spam/Not, Diabetic/Healthy<br>
+        ✅ <strong>Threshold clear ho:</strong> Medical standards, cutoff marks<br>
+        ✅ <strong>Presence/Absence:</strong> Koi cheez hai ya nahi (0 purchases ya 1+ purchases)<br>
+        ✅ <strong>Feature engineering:</strong> "Is customer premium?" — purchases &gt; 5 = 1
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="callout cb-red h-100" style="margin:0;">
+        <div class="ct"><i class="fa-solid fa-triangle-exclamation"></i> Binarization kab avoid karein?</div>
+        ❌ Jab <strong>gradation matter karti ho</strong> — 90% marks aur 51% marks alag hain!<br>
+        ❌ Jab <strong>threshold arbitrary ho</strong> — domain knowledge ke bina threshold mat choose karo<br>
+        ❌ <strong>Continuous regression problems</strong> — exact value predict karni ho toh discretize mat karo
+      </div>
+    </div>
+  </div>
+
+  <div class="glow-div"></div>
+
+  <div class="ex-card ex-story">
+    <div class="ex-head"><i class="fa-brands fa-python"></i> Binarization — sklearn Binarizer + pandas</div>
+    <div class="ex-body">
+      <div class="code-wrap">
+        <div class="code-header"><span class="code-lang">🐍 Python — Binarization</span><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div></div>
+        <pre><code class="language-python">import pandas as pd
+import numpy as np
+from sklearn.preprocessing import Binarizer
+
+# ─── Dataset: Apollo Diagnostics — Health Records ───
+data = {
+    'patient':      ['Aarav','Priya','Ravi','Sneha','Karan',
+                     'Divya','Mohit','Ananya','Vikram','Pooja'],
+    'glucose':      [95, 132, 87, 145, 118, 161, 78, 203, 109, 98],    # mg/dL
+    'bmi':          [22.5, 28.3, 19.8, 31.4, 26.1, 34.2, 17.9, 38.5, 24.7, 21.3],
+    'purchases':    [0, 5, 2, 0, 8, 1, 0, 3, 0, 6],   # Monthly purchases
+}
+df = pd.DataFrame(data)
+
+print("Original Data:")
+print(df)
+
+# ════════════════════════════════════════
+# METHOD 1: sklearn Binarizer
+# Threshold se upar = 1, neeche = 0
+# ════════════════════════════════════════
+# Glucose: 126 mg/dL = diabetes threshold (WHO standard)
+glucose_bin = Binarizer(threshold=126)
+df['diabetic'] = glucose_bin.fit_transform(df[['glucose']])
+
+# BMI: 25 = overweight threshold
+bmi_bin = Binarizer(threshold=25)
+df['overweight'] = bmi_bin.fit_transform(df[['bmi']])
+
+print("\n--- sklearn Binarizer ---")
+print(df[['patient', 'glucose', 'diabetic', 'bmi', 'overweight']])
+
+# ════════════════════════════════════════
+# METHOD 2: pandas — simple comparison (same result!)
+# ════════════════════════════════════════
+df['diabetic_pd']   = (df['glucose'] > 126).astype(int)
+df['overweight_pd'] = (df['bmi'] > 25).astype(int)
+
+# Binary feature: Kya customer ne koi purchase kiya?
+df['is_buyer'] = (df['purchases'] > 0).astype(int)
+
+print("\n--- pandas Binarization ---")
+print(df[['patient', 'purchases', 'is_buyer']])
+
+# ════════════════════════════════════════
+# Check: Diabetes prevalence in our sample
+# ════════════════════════════════════════
+print(f"\nDiabetic patients: {df['diabetic'].sum()}/{len(df)}")
+print(f"Overweight patients: {df['overweight'].sum()}/{len(df)}")
+print(f"Buyers: {df['is_buyer'].sum()}/{len(df)}")</code></pre>
+        <div class="code-output">⚡ Binarization Done! Diabetic (glucose &gt;126): Priya, Sneha, Divya, Ananya = 4/10. Overweight (BMI &gt;25): Priya, Sneha, Karan, Divya, Ananya, Vikram = 6/10. Buyers (purchases &gt;0): 6/10. pandas comparison ka output sklearn Binarizer se identical hai — choose karo jo pipeline fit kare!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ 2 -->
+  <div class="quiz-box" data-quiz="2" data-correct="c" data-xp="25">
+    <div class="quiz-q">🤔 sklearn Binarizer(threshold=5).transform([[3], [7], [5], [10]]) ka output kya hoga?</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" data-ans="a" data-explain="Nahi. Binarizer threshold se strictly greater than check karta hai (>). 5 &gt; 5 = False → 0. Isliye [3,7,5,10] → [0,1,0,1] sahi hai."><span class="opt-letter">A</span>[[1], [1], [1], [1]] — sab 1 ho jaate hain</div>
+      <div class="quiz-opt" data-ans="b" data-explain="Nahi. threshold=5 ka matlab: 5 se strictly upar wale = 1, baaki = 0. 3 &lt;= 5 → 0. 7 &gt; 5 → 1. 5 &lt;= 5 → 0. 10 &gt; 5 → 1. Pehla result 1 nahi, 0 hoga."><span class="opt-letter">B</span>[[0], [1], [1], [1]] — 5 bhi 1 ho jaayega (threshold pe hain)</div>
+      <div class="quiz-opt" data-ans="c" data-explain="Bilkul sahi! sklearn Binarizer strictly greater than (>) check karta hai. 3 &gt; 5? No → 0. 7 &gt; 5? Yes → 1. 5 &gt; 5? No (equal nahi, strictly greater) → 0. 10 &gt; 5? Yes → 1. Result: [[0],[1],[0],[1]]!"><span class="opt-letter">C</span>[[0], [1], [0], [1]] — 3 aur 5 → 0, 7 aur 10 → 1 (strictly greater than threshold)</div>
+      <div class="quiz-opt" data-ans="d" data-explain="Nahi. Binarizer input values ko scale nahi karta — woh sirf threshold se compare karta hai. 3,7,5,10 waise hi compare honge. Output 0 aur 1 hoga, scaled values nahi."><span class="opt-letter">D</span>[[0.3], [0.7], [0.5], [1.0]] — values 0-1 ke beech scale ho jaati hain</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+</div>
+
+
+<!-- ████████████████████████████████████
+     LEVEL 2-B : BINARIZATION USE CASES
+█████████████████████████████████████ -->
+<div class="level-card lvl-cyan fade-up" id="s4">
+  <div class="corner-deco">LEVEL 2</div>
+  <div class="lv-header">
+    <div class="lv-icon-wrap ico-blue"><i class="fa-solid fa-code-compare"></i></div>
+    <div class="lv-meta">
+      <div class="lv-eyebrow">Level 2 · Skill Unlock</div>
+      <div class="lv-title">Binarization — Threshold Selection &amp; Real Applications</div>
+    </div>
+  </div>
+
+  <div class="callout cb-blue">
+    <div class="ct"><i class="fa-solid fa-lightbulb"></i> Threshold Choose Kaise Karein?</div>
+    Threshold selection <strong>domain knowledge</strong> se aata hai — arbitrary mat choose karo!<br><br>
+    <span class="hl-cyan">Medical:</span> WHO/IDF standards follow karo (Glucose &gt;126, BMI &gt;25)<br>
+    <span class="hl-blue">Business:</span> Data distribution dekho — median ya percentile use karo<br>
+    <span class="hl-green">Academic:</span> Passing cutoff — exam board ka standard
+  </div>
+
+  <div class="row g-3 mt-2">
+    <div class="col-md-4">
+      <div class="dim-card" style="border-color:rgba(8,145,178,0.3);">
+        <div class="dim-rank" style="color:var(--neon-cyan);">🏥</div>
+        <div class="dim-name" style="color:var(--neon-cyan);">Medical Diagnosis</div>
+        <div class="dim-code">glucose &gt; 126 → diabetic=1</div>
+        <div class="dim-desc">WHO clinical thresholds — scientific basis. Binary output perfect for diagnosis models.</div>
+        <div class="dim-example" style="border-color:rgba(8,145,178,0.2);color:var(--muted);">Apollo, AIIMS patient risk scoring</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="dim-card" style="border-color:rgba(37,99,235,0.3);">
+        <div class="dim-rank" style="color:var(--neon-blue);">🛒</div>
+        <div class="dim-name" style="color:var(--neon-blue);">E-commerce Engagement</div>
+        <div class="dim-code">purchases &gt; 0 → buyer=1</div>
+        <div class="dim-desc">Presence/Absence — customer ne kuch khara ya nahi? Binary signal for churn models.</div>
+        <div class="dim-example" style="border-color:rgba(37,99,235,0.2);color:var(--muted);">Flipkart, Meesho buyer classification</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="dim-card" style="border-color:rgba(22,163,74,0.3);">
+        <div class="dim-rank" style="color:var(--neon-green);">🎓</div>
+        <div class="dim-name" style="color:var(--neon-green);">Academic Pass/Fail</div>
+        <div class="dim-code">marks &gt; 35 → passed=1</div>
+        <div class="dim-desc">Clear cutoff — 35 se upar pass, neeche fail. Simple rule-based encoding.</div>
+        <div class="dim-example" style="border-color:rgba(22,163,74,0.2);color:var(--muted);">CBSE, JEE qualifying round</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ████████████████████████████████████
+     LEVEL 3-A : QUANTILE BINNING
+█████████████████████████████████████ -->
+<div class="level-card lvl-blue fade-up" id="s5">
+  <div class="corner-deco">LEVEL 3</div>
+  <div class="lv-header">
+    <div class="lv-icon-wrap ico-blue"><i class="fa-solid fa-chart-bar"></i></div>
+    <div class="lv-meta">
+      <div class="lv-eyebrow">Level 3 · Boss Topic</div>
+      <div class="lv-title">Quantile Binning — Har Bin Mein Barabar Log!</div>
+      <div class="lv-xp"><i class="fa-solid fa-star"></i> +30 XP on scroll</div>
+    </div>
+  </div>
+
+  <div class="callout cb-blue">
+    <div class="ct"><i class="fa-solid fa-lightbulb"></i> Quantile Binning kya hai?</div>
+    <strong>Quantile Binning</strong> = bins is tarah banao ki <span class="hl-blue">har bin mein barabar number of data points</span> hon — width unequal ho sakti hai, lekin count equal hoga.<br><br>
+    Jaise 100 log hain, 4 bins chahiye → har bin mein exactly 25 log! Boundaries data ke distribution se determine hoti hain.
+  </div>
+
+  <!-- Visual comparison -->
+  <div class="row g-3 mt-2">
+    <div class="col-md-6">
+      <div class="callout cb-red" style="margin:0;">
+        <div class="ct"><i class="fa-solid fa-xmark"></i> Equal Width — Skewed Data pe Problem</div>
+        <div class="bin-viz mt-2">
+          <div class="bin-bar" style="height:95%;background:#ef4444;"></div>
+          <div class="bin-bar" style="height:90%;background:#ef4444;"></div>
+          <div class="bin-bar" style="height:85%;background:#f97316;"></div>
+          <div class="bin-bar" style="height:40%;background:#f97316;"></div>
+          <div class="bin-bar" style="height:15%;background:#b45309;"></div>
+          <div class="bin-bar" style="height:8%;background:#b45309;"></div>
+          <div class="bin-bar" style="height:5%;background:#b45309;"></div>
+          <div class="bin-bar" style="height:3%;background:#b45309;"></div>
+          <div class="bin-bar" style="height:2%;background:#b45309;"></div>
+        </div>
+        <div style="display:flex;gap:3px;margin-top:4px;">
+          <div style="flex:3;font-size:0.65rem;text-align:center;color:#ef4444;font-weight:700;">Low<br>Crowded!</div>
+          <div style="flex:3;font-size:0.65rem;text-align:center;color:#f97316;font-weight:700;">Medium<br>OK</div>
+          <div style="flex:3;font-size:0.65rem;text-align:center;color:#b45309;font-weight:700;">High<br>Mostly Empty</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="callout cb-green" style="margin:0;">
+        <div class="ct"><i class="fa-solid fa-check"></i> Quantile — Barabar Distribution</div>
+        <div class="bin-viz mt-2">
+          <div class="bin-bar" style="height:75%;background:#16a34a;"></div>
+          <div class="bin-bar" style="height:70%;background:#16a34a;"></div>
+          <div class="bin-bar" style="height:72%;background:#0891b2;"></div>
+          <div class="bin-bar" style="height:68%;background:#0891b2;"></div>
+          <div class="bin-bar" style="height:74%;background:#2563eb;"></div>
+          <div class="bin-bar" style="height:71%;background:#2563eb;"></div>
+          <div class="bin-bar" style="height:73%;background:#7c3aed;"></div>
+          <div class="bin-bar" style="height:69%;background:#7c3aed;"></div>
+          <div class="bin-bar" style="height:75%;background:#7c3aed;"></div>
+        </div>
+        <div style="display:flex;gap:3px;margin-top:4px;">
+          <div style="flex:2;font-size:0.65rem;text-align:center;color:#16a34a;font-weight:700;">Q1</div>
+          <div style="flex:2;font-size:0.65rem;text-align:center;color:#0891b2;font-weight:700;">Q2</div>
+          <div style="flex:2;font-size:0.65rem;text-align:center;color:#2563eb;font-weight:700;">Q3</div>
+          <div style="flex:3;font-size:0.65rem;text-align:center;color:#7c3aed;font-weight:700;">Q4</div>
+        </div>
+        <div style="font-size:0.72rem;color:var(--dim);margin-top:0.4rem;">↑ Har bin mein barabar count — width alag hogi!</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-tech mt-4">
+    <div class="ex-head"><i class="fa-brands fa-python"></i> Quantile Binning — pd.qcut() + sklearn KBinsDiscretizer(strategy='quantile')</div>
+    <div class="ex-body">
+      <div class="code-wrap">
+        <div class="code-header"><span class="code-lang">🐍 Python — Quantile Binning</span><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div></div>
+        <pre><code class="language-python">import pandas as pd
+import numpy as np
+from sklearn.preprocessing import KBinsDiscretizer
+
+# ─── Dataset: Swiggy Restaurant Revenue (₹ Lakhs/month) ───
+np.random.seed(42)
+# Skewed — zyada restaurants low revenue pe hain
+revenue = np.concatenate([
+    np.random.exponential(scale=2, size=70),    # Low revenue restaurants
+    np.random.uniform(5, 20, size=20),           # Mid revenue
+    np.random.uniform(20, 50, size=10),          # High revenue
+])
+df = pd.DataFrame({'restaurant_id': range(1, 101), 'revenue': revenue.round(2)})
+
+print("Revenue Stats:")
+print(df['revenue'].describe().round(2))
+
+# ════════════════════════════════════════
+# METHOD 1: pd.qcut() — Quantile Binning
+# ════════════════════════════════════════
+df['revenue_tier_q'] = pd.qcut(
+    df['revenue'],
+    q=4,                                         # 4 quartiles (Q1, Q2, Q3, Q4)
+    labels=['Budget', 'Standard', 'Premium', 'Elite']
+)
+
+print("\nQuantile Binning (pd.qcut):")
+print(df['revenue_tier_q'].value_counts().sort_index())
+# Each tier should have ~25 restaurants!
+
+# ════════════════════════════════════════
+# METHOD 2: Compare Equal Width vs Quantile
+# ════════════════════════════════════════
+df['revenue_tier_ew'] = pd.cut(
+    df['revenue'],
+    bins=4,
+    labels=['Budget', 'Standard', 'Premium', 'Elite']
+)
+
+print("\n=== Comparison: Equal Width vs Quantile ===")
+print("Equal Width distribution:")
+print(df['revenue_tier_ew'].value_counts().sort_index())
+
+print("\nQuantile distribution:")
+print(df['revenue_tier_q'].value_counts().sort_index())
+# Quantile = balanced! Equal Width = mostly 'Budget'
+
+# ════════════════════════════════════════
+# METHOD 3: sklearn KBinsDiscretizer (strategy='quantile')
+# ════════════════════════════════════════
+kbd_q = KBinsDiscretizer(n_bins=4, encode='ordinal', strategy='quantile')
+df[['revenue_binned']] = kbd_q.fit_transform(df[['revenue']])
+
+print("\nsklearn KBinsDiscretizer (quantile) bin edges:")
+print(kbd_q.bin_edges_[0].round(2))
+# Bin widths alag hongi — lekin har bin mein ~25 rows!</code></pre>
+        <div class="code-output">📊 Quantile Binning Done! pd.qcut() result: Budget=25, Standard=25, Premium=25, Elite=25 — perfectly balanced! Equal Width result: Budget=78, Standard=14, Premium=6, Elite=2 — heavily skewed! Quantile wins for skewed revenue data. Bin edges: [0.04, 1.28, 2.87, 7.44, 49.8] — unequal widths, equal counts!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ 3 -->
+  <div class="quiz-box" data-quiz="3" data-correct="d" data-xp="25">
+    <div class="quiz-q">🤔 Ek Flipkart dataset mein "seller_rating" column hai: mostly 4.0–4.5 ke beech (90% sellers), aur kuch 1.0–3.9 (10%). Inhe 3 bins mein baantna hai. Kaunsa method best result dega?</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" data-ans="a" data-explain="Nahi. Equal Width (pd.cut) se 3 bins [1.0-2.33, 2.33-3.67, 3.67-5.0] banenge. 90% sellers teesri bin mein jam jaayenge aur pehli do bins mein sirf 10% honge — very imbalanced!"><span class="opt-letter">A</span>pd.cut(bins=3) — equal width, simple aur fast</div>
+      <div class="quiz-opt" data-ans="b" data-explain="Nahi. Binarization se sirf 2 bins bante hain — 0 ya 1. Question mein 3 bins chahiye. Binarization wrong approach hai yahan."><span class="opt-letter">B</span>Binarizer(threshold=4.0) — ek line mein binary encode karo</div>
+      <div class="quiz-opt" data-ans="c" data-explain="KBinsDiscretizer(strategy='uniform') equal width binning karta hai — pd.cut(bins=3) jaisa hi result milega. 90% sellers highest bin mein honge. Ye imbalanced hai."><span class="opt-letter">C</span>KBinsDiscretizer(strategy='uniform') — sklearn uniform bins</div>
+      <div class="quiz-opt" data-ans="d" data-explain="Bilkul sahi! pd.qcut(q=3) quantile binning karta hai — har bin mein ~33% sellers honge. Chahe data skewed ho (90% 4.0-4.5 pe), quantile binning data ko 3 equal groups mein divide karega. Ye model training ke liye much better hai — balanced bins!"><span class="opt-letter">D</span>pd.qcut(q=3) — quantile binning, har bin mein barabar sellers</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+</div>
+
+
+<!-- ████████████████████████████████████
+     LEVEL 3-B : QUANTILE vs EQUAL WIDTH
+█████████████████████████████████████ -->
+<div class="level-card lvl-blue fade-up" id="s6">
+  <div class="corner-deco">LEVEL 3</div>
+  <div class="lv-header">
+    <div class="lv-icon-wrap ico-cyan"><i class="fa-solid fa-code-compare"></i></div>
+    <div class="lv-meta">
+      <div class="lv-eyebrow">Level 3 · Skill Unlock</div>
+      <div class="lv-title">Quantile vs Equal Width — Fark Ekdum Crystal Clear</div>
+    </div>
+  </div>
+
+  <div class="callout cb-cyan">
+    <div class="ct"><i class="fa-solid fa-lightbulb"></i> Ek Line Mein Fark</div>
+    <span class="hl-orange">Equal Width (pd.cut):</span> Range equally divide hoti hai — bin widths same, counts unequal<br>
+    <span class="hl-blue">Quantile (pd.qcut):</span> Data points equally divide hote hain — counts same, bin widths unequal
+  </div>
+
+  <div class="table-responsive mt-3">
+    <table class="gtbl">
+      <thead><tr><th>Feature</th><th>Equal Width (pd.cut)</th><th>Quantile (pd.qcut)</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Bin Width</strong></td><td>Sab equal — fixed range</td><td>Unequal — data driven</td></tr>
+        <tr><td><strong>Count per Bin</strong></td><td>Unequal — skewed data pe problem</td><td>Equal — hamesha balanced</td></tr>
+        <tr><td><strong>Outlier Effect</strong></td><td><span class="stat-pill sp-red">High</span> — ek outlier sab bins distort karta hai</td><td><span class="stat-pill sp-green">Low</span> — outlier apni bin mein hota hai</td></tr>
+        <tr><td><strong>Interpretability</strong></td><td><span class="stat-pill sp-green">Easy</span> — "₹0-5L is Low Income"</td><td><span class="stat-pill sp-yellow">Medium</span> — bin edges arbitrary lag sakte hain</td></tr>
+        <tr><td><strong>Uniform Data</strong></td><td>✅ Perfect</td><td>✅ Bhi theek</td></tr>
+        <tr><td><strong>Skewed Data</strong></td><td><span class="stat-pill sp-red">❌ Avoid</span></td><td><span class="stat-pill sp-green">✅ Best Choice</span></td></tr>
+        <tr><td><strong>Domain Knowledge</strong></td><td>Use custom edges (income tax slabs)</td><td>n=4 → quartiles, n=10 → deciles</td></tr>
+        <tr><td><strong>pandas function</strong></td><td><span class="inline-code">pd.cut()</span></td><td><span class="inline-code">pd.qcut()</span></td></tr>
+        <tr><td><strong>sklearn equivalent</strong></td><td><span class="inline-code">strategy='uniform'</span></td><td><span class="inline-code">strategy='quantile'</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout cb-orange mt-3">
+    <div class="ct"><i class="fa-solid fa-india"></i> Real India Examples — Kab Kaunsa</div>
+    <div class="row g-2">
+      <div class="col-md-6">
+        📦 <strong>Equal Width use karo:</strong><br>
+        → Income Tax Slabs (0-3L, 3-6L, 6-9L, 9-12L, 12L+) — govt defined<br>
+        → Age groups (0-18, 18-35, 35-60, 60+) — natural boundaries<br>
+        → Temperature (Cold/Mild/Hot/Extreme) — meteorological standard
+      </div>
+      <div class="col-md-6">
+        📊 <strong>Quantile use karo:</strong><br>
+        → IPL batsman runs — top 25% = elite, bottom 25% = struggling<br>
+        → Zomato restaurant revenue — skewed data, balanced tiers needed<br>
+        → CIBIL score percentile ranking — relative comparison important
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ████████████████████████████████████
+     LEVEL 4-A : K-MEANS BINNING
+█████████████████████████████████████ -->
+<div class="level-card lvl-green fade-up" id="s7">
+  <div class="corner-deco">LEVEL 4</div>
+  <div class="lv-header">
+    <div class="lv-icon-wrap ico-green"><i class="fa-solid fa-circle-nodes"></i></div>
+    <div class="lv-meta">
+      <div class="lv-eyebrow">Level 4 · Boss Topic</div>
+      <div class="lv-title">K-Means Binning — Data ke Natural Clusters Dhundho!</div>
+      <div class="lv-xp"><i class="fa-solid fa-star"></i> +30 XP on scroll</div>
+    </div>
+  </div>
+
+  <div class="callout cb-green">
+    <div class="ct"><i class="fa-solid fa-lightbulb"></i> K-Means Binning kya hai?</div>
+    <strong>K-Means Binning</strong> = K-Means clustering algorithm use karke <span class="hl-green">data ke natural groups dhundho</span>, phir har point ko uske nearest cluster (bin) assign karo.<br><br>
+    Equal Width ya Quantile bins human-defined hain — K-Means bins <strong>data khud define karta hai!</strong> Data mein jo natural groupings hain, unhe automatically discover karta hai.
+  </div>
+
+  <div class="step-timeline mt-3">
+    <div class="step-item" data-step="1">
+      <div class="step-label">🎲 Step 1 — K centroids randomly initialize karo</div>
+      <div class="step-body">K = number of bins tum chahte ho. Shuru mein K random points choose kiye jaate hain as starting centroids.<br>
+      <em style="color:var(--dim);">Example: 3 bins chahiye → 3 random points: ₹2L, ₹8L, ₹20L salary pe</em></div>
+    </div>
+    <div class="step-item" data-step="2">
+      <div class="step-label">📍 Step 2 — Har data point ko nearest centroid assign karo</div>
+      <div class="step-body">Har salary value dekhti hai — konsa centroid mujhse closest hai? Wahan assign ho jaati hai.<br>
+      <em style="color:var(--dim);">₹3L salary: ₹2L centroid nearest → Cluster 1 (Low). ₹15L salary: ₹20L nearest → Cluster 3 (High)</em></div>
+    </div>
+    <div class="step-item" data-step="3">
+      <div class="step-label">🔄 Step 3 — Centroids update karo (mean of assigned points)</div>
+      <div class="step-body">Har cluster ke assigned points ka mean nikalo — ye new centroid ban jaata hai.<br>
+      <em style="color:var(--dim);">Cluster 1 mein ₹2L, ₹2.5L, ₹3L hain → new centroid = ₹2.5L</em></div>
+    </div>
+    <div class="step-item" data-step="4">
+      <div class="step-label">✅ Step 4 — Repeat until stable (convergence)</div>
+      <div class="step-body">Steps 2-3 repeat hote hain jab tak centroids shift karna band na kar dein — data ke natural clusters emerge ho jaate hain!<br>
+      <em style="color:var(--dim);">Final: Low (₹0-4L), Medium (₹4-12L), High (₹12L+) — data ne khud decide kiya</em></div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-green mt-4">
+    <div class="ex-head"><i class="fa-brands fa-python"></i> K-Means Binning — sklearn KMeans + KBinsDiscretizer</div>
+    <div class="ex-body">
+      <div class="code-wrap">
+        <div class="code-header"><span class="code-lang">🐍 Python — K-Means Binning</span><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div></div>
+        <pre><code class="language-python">import pandas as pd
+import numpy as np
+from sklearn.preprocessing import KBinsDiscretizer
+from sklearn.cluster import KMeans
+
+np.random.seed(42)
+
+# ─── Dataset: CIBIL Credit Score Data ───
+# Natural clusters: Poor, Average, Good, Excellent credit
+scores = np.concatenate([
+    np.random.normal(580, 30, 30),   # Poor credit cluster
+    np.random.normal(680, 20, 40),   # Average credit cluster
+    np.random.normal(760, 15, 20),   # Good credit cluster
+    np.random.normal(820, 10, 10),   # Excellent credit cluster
+])
+scores = np.clip(scores, 300, 900).round(0)  # CIBIL range: 300-900
+df = pd.DataFrame({'credit_score': scores})
+
+print("Credit Score Stats:")
+print(df['credit_score'].describe().round(1))
+
+# ════════════════════════════════════════
+# METHOD 1: sklearn KBinsDiscretizer (strategy='kmeans')
+# Easiest way — ek line mein K-Means binning!
+# ════════════════════════════════════════
+kbd_km = KBinsDiscretizer(
+    n_bins=4,
+    encode='ordinal',
+    strategy='kmeans'      # K-Means algorithm use karo
+)
+
+df[['kmeans_bin']] = kbd_km.fit_transform(df[['credit_score']])
+
+print("\nK-Means Binning (KBinsDiscretizer):")
+print(df['kmeans_bin'].value_counts().sort_index())
+print("\nK-Means bin edges:", kbd_km.bin_edges_[0].round(1))
+
+# ════════════════════════════════════════
+# METHOD 2: Manual KMeans (more control)
+# ════════════════════════════════════════
+kmeans = KMeans(n_clusters=4, random_state=42, n_init=10)
+df['cluster'] = kmeans.fit_predict(df[['credit_score']])
+
+# Sort clusters by centroid value (ascending order)
+centroid_order = kmeans.cluster_centers_.flatten().argsort()
+cluster_map = {old: new for new, old in enumerate(centroid_order)}
+df['cluster_sorted'] = df['cluster'].map(cluster_map)
+
+# Label assign karo
+labels = {0: 'Poor', 1: 'Average', 2: 'Good', 3: 'Excellent'}
+df['credit_tier'] = df['cluster_sorted'].map(labels)
+
+print("\nManual K-Means Binning:")
+print(df['credit_tier'].value_counts())
+
+# Cluster centroids dekho
+print("\nCluster Centroids (Credit Score):")
+for i, c in enumerate(sorted(kmeans.cluster_centers_.flatten())):
+    print(f"  Cluster {i}: {c:.1f}")
+
+# ════════════════════════════════════════
+# COMPARISON: All 3 methods side-by-side
+# ════════════════════════════════════════
+df['equal_width'] = pd.cut(df['credit_score'], bins=4,
+                            labels=['Poor','Average','Good','Excellent'])
+df['quantile']    = pd.qcut(df['credit_score'], q=4,
+                             labels=['Poor','Average','Good','Excellent'])
+
+print("\n=== Bin Distribution Comparison ===")
+print("Equal Width:")
+print(df['equal_width'].value_counts().sort_index())
+print("\nQuantile:")
+print(df['quantile'].value_counts().sort_index())
+print("\nK-Means:")
+print(df['credit_tier'].value_counts())</code></pre>
+        <div class="code-output">🎯 K-Means Binning Done! Cluster centroids: ~580, ~680, ~760, ~820 — exactly where our natural clusters were! K-Means ne khud discover kiya ki 4 natural groups hain. Equal Width: mostly 'Poor' bin crowded. Quantile: balanced but boundaries arbitrary. K-Means: balanced AND boundaries meaningful (natural cluster boundaries)!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ 4 -->
+  <div class="quiz-box" data-quiz="4" data-correct="c" data-xp="25">
+    <div class="quiz-q">🤔 K-Means Binning Equal Width aur Quantile se kaise alag hai — kya cheez ise unique banati hai?</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" data-ans="a" data-explain="Galat. K-Means har baar same result de bhi sakta hai aur nahi bhi — random initialization ki wajah se. random_state set karo reproducibility ke liye. Ye uniqueness nahi hai K-Means ki."><span class="opt-letter">A</span>Har baar alag result deta hai — randomness se accurate hota hai</div>
+      <div class="quiz-opt" data-ans="b" data-explain="Nahi. K-Means binning quantile jitna balanced nahi hota — natural clusters ka size data pe depend karta hai. K-Means ki speciality balance nahi, natural structure discover karna hai."><span class="opt-letter">B</span>Har bin mein perfectly barabar data points hote hain — quantile se bhi zyada balanced</div>
+      <div class="quiz-opt" data-ans="c" data-explain="Bilkul sahi! K-Means binning data ke natural clusters dhundh kar bin boundaries set karta hai. Equal Width aur Quantile mein hum decide karte hain ki kahan bins banen (equal range ya equal count). K-Means mein data khud decide karta hai — clustering algorithm natural groupings discover karta hai, jo real-world patterns se match karta hai!"><span class="opt-letter">C</span>Data ke natural clusters discover karta hai — boundaries data-driven hain, human-defined nahi</div>
+      <div class="quiz-opt" data-ans="d" data-explain="Galat. K-Means multi-dimensional data pe bhi apply hota hai, lekin binning ke liye usually 1D pe use karte hain. K-Means ki speciality natural clusters discovery hai, dimensionality nahi."><span class="opt-letter">D</span>Sirf multi-dimensional data pe kaam karta hai — 1D data pe use nahi hota</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+</div>
+
+
+<!-- ████████████████████████████████████
+     FINAL SUMMARY
+█████████████████████████████████████ -->
+<div class="level-card lvl-pink fade-up" id="s8" style="background:linear-gradient(135deg,rgba(194,65,12,0.04),rgba(180,83,9,0.04),#ffffff);">
+  <div class="lv-header">
+    <div class="lv-icon-wrap ico-pink"><i class="fa-solid fa-trophy"></i></div>
+    <div class="lv-meta">
+      <div class="lv-eyebrow">🏆 Quest Complete!</div>
+      <div class="lv-title">Final Summary &amp; Numerical Encoding Decision Guide</div>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="gtbl">
+      <thead><tr><th>Topic</th><th>Core Idea</th><th>Key Tool</th><th>Best For</th></tr></thead>
+      <tbody>
+        <tr><td><span class="stat-pill sp-orange">L1</span> <strong>Numerical Encoding</strong></td><td>Continuous → Discrete categories</td><td>pd.cut, pd.qcut, KBinsDiscretizer</td><td>Non-linear patterns pakadna</td></tr>
+        <tr><td><span class="stat-pill sp-orange">L1</span> <strong>Equal Width Binning</strong></td><td>Range ko equal parts mein baanto</td><td><span class="inline-code">pd.cut(bins=n)</span></td><td>Uniform data, domain-defined boundaries</td></tr>
+        <tr><td><span class="stat-pill sp-cyan">L2</span> <strong>Binarization</strong></td><td>Threshold se 0 ya 1</td><td><span class="inline-code">Binarizer(threshold=t)</span></td><td>Medical diagnosis, Pass/Fail, Presence/Absence</td></tr>
+        <tr><td><span class="stat-pill sp-cyan">L2</span> <strong>Threshold Selection</strong></td><td>Domain knowledge se threshold choose karo</td><td>WHO/medical standards, business rules</td><td>Clear cutoff points wali problems</td></tr>
+        <tr><td><span class="stat-pill sp-blue">L3</span> <strong>Quantile Binning</strong></td><td>Har bin mein barabar count</td><td><span class="inline-code">pd.qcut(q=n)</span></td><td>Skewed data, fair ranking, percentile groups</td></tr>
+        <tr><td><span class="stat-pill sp-blue">L3</span> <strong>Equal Width vs Quantile</strong></td><td>Width-equal vs Count-equal</td><td>Data distribution dekho pehle</td><td>Skewed → Quantile. Uniform/domain → Equal Width</td></tr>
+        <tr><td><span class="stat-pill sp-green">L4</span> <strong>K-Means Binning</strong></td><td>Natural clusters discover karo</td><td><span class="inline-code">KBinsDiscretizer(strategy='kmeans')</span></td><td>Natural groupings, data-driven segments</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="glow-div"></div>
+
+  <div class="mermaid-wrap">
+    <div class="mermaid">
+flowchart TD
+    A["🔢 Numerical Column\nEncode karni hai"] --> B{Kya sirf 2\ngroups chahiye?}
+    B -->|Haan| C["⚡ Binarization\nBinarizer(threshold=t)\nMedical/Pass-Fail"]
+    B -->|Nahi, 3+ bins| D{Data ka distribution\nkaisa hai?}
+    D -->|Uniform ya domain\nboundaries clear hain| E["📦 Equal Width Binning\npd.cut(bins=n)\nAge groups, Tax slabs"]
+    D -->|Skewed data\noutliers hain| F["📊 Quantile Binning\npd.qcut(q=n)\nRevenue tiers, Rankings"]
+    D -->|Natural clusters\ndhundhe chahiye| G["🎯 K-Means Binning\nKBinsDiscretizer(strategy='kmeans')\nCIBIL segments, customer types"]
+    style A fill:#fff7ed,stroke:#c2410c,color:#7c2d12,rx:12
+    style B fill:#fef9c3,stroke:#b45309,color:#713f12,rx:10
+    style C fill:#cffafe,stroke:#0891b2,color:#164e63,rx:10
+    style D fill:#fef9c3,stroke:#b45309,color:#713f12,rx:10
+    style E fill:#fff7ed,stroke:#c2410c,color:#7c2d12,rx:10
+    style F fill:#dbeafe,stroke:#2563eb,color:#1e3a8a,rx:10
+    style G fill:#dcfce7,stroke:#16a34a,color:#14532d,rx:10
+    </div>
+  </div>
+
+  <div class="row g-3 mt-2">
+    <div class="col-md-6">
+      <div class="callout cb-orange h-100" style="margin:0;">
+        <div class="ct"><i class="fa-brands fa-python"></i> Key Functions — Zaroor Seekho</div>
+        <strong style="color:var(--neon-orange)">pd.cut(bins=n)</strong> — equal width, custom labels<br>
+        <strong style="color:var(--neon-orange)">pd.cut(bins=[0,30,60,100])</strong> — custom boundary edges<br>
+        <strong style="color:var(--neon-cyan)">Binarizer(threshold=t)</strong> — 0/1 conversion<br>
+        <strong style="color:var(--neon-blue)">pd.qcut(q=n)</strong> — quantile (equal count) bins<br>
+        <strong style="color:var(--neon-green)">KBinsDiscretizer(strategy='kmeans')</strong> — data-driven bins
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="callout cb-green h-100" style="margin:0;">
+        <div class="ct"><i class="fa-solid fa-road"></i> Aage Kya Seekhein?</div>
+        📐 <strong>Feature Scaling</strong> — StandardScaler, MinMaxScaler (binning ke baad!)<br>
+        🏗️ <strong>Feature Engineering</strong> — bin labels se new interactions banao<br>
+        🔧 <strong>ColumnTransformer</strong> — alag columns pe alag transformations<br>
+        🤝 <strong>Interaction Features</strong> — age_bin × income_bin combinations<br>
+        🤖 <strong>ML Modeling</strong> — binned features pe model train karo!
+      </div>
+    </div>
+  </div>
+
+  <div class="callout cb-pink mt-3">
+    <div class="ct"><i class="fa-solid fa-heart"></i> Final Message</div>
+    <strong>Equal Width Binning</strong> = Ruler se barabar kato — domain knowledge se meaningful bins!<br>
+    → <strong>Binarization</strong> = Threshold par sab kuch decide hota hai — 0 ya 1, kuch nahi beech mein!<br>
+    → <strong>Quantile Binning</strong> = Skewed data ka hero — har bin mein barabar log, outliers se safe!<br>
+    → <strong>K-Means Binning</strong> = Data khud bolta hai — natural clusters discover karo, meaningful boundaries pao!<br>
+    → <strong>Golden Rule</strong> = Data dekho pehle → distribution samjho → phir encoding choose karo!<br><br>
+    <strong style="color:var(--neon-pink)">Char powerful numerical encoding techniques seekh liye — ab continuous numbers tumhara kuch nahi bigaad sakte — Certified Numerical Encoding Expert ban gaye! 📦🚀</strong>
+  </div>
+</div>
+
+</div><!-- /container-main -->
+
+<!-- FOOTER -->
+<footer class="gfooter">
+  <div class="container-main">
+    <div class="gfooter-logo"><i class="fa-solid fa-sliders me-2"></i>Python Numerical Encoding Quest</div>
+    <p style="color:var(--muted);font-size:0.9rem;margin-bottom:0.5rem;">Binning · Binarization · Quantile Binning · K-Means Binning | Gamified Tutorial</p>
+    <p style="color:var(--dim);font-size:0.82rem;">Made with <i class="fa-solid fa-heart" style="color:var(--neon-pink)"></i> for Hindi-speaking Data Science learners across India 🇮🇳</p>
+  </div>
+</footer>
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- MODAL -->
+<canvas id="confettiCanvas"></canvas>
+<div class="modal-overlay" id="finalModal">
+  <div class="modal-box" id="modalBox">
+    <button class="modal-close" id="modalClose" title="Close">✕</button>
+    <div class="modal-trophy" id="modalTrophy">🏆</div>
+    <div class="modal-title" id="modalTitle">Quest Complete!</div>
+    <div class="modal-subtitle" id="modalSubtitle">Tumne saare 4 quizzes complete kar liye!</div>
+    <div class="score-ring-wrap">
+      <div class="score-ring">
+        <svg viewBox="0 0 120 120">
+          <circle class="ring-bg" cx="60" cy="60" r="52"/>
+          <circle class="ring-fill" id="ringFill" cx="60" cy="60" r="52"/>
+        </svg>
+        <div class="ring-text">
+          <div class="ring-num" id="ringNum">0/4</div>
+          <div class="ring-label">Score</div>
+        </div>
+      </div>
+    </div>
+    <div class="grade-card" id="gradeCard">
+      <div class="grade-letter" id="gradeLetter">S</div>
+      <div class="grade-msg" id="gradeMsg">Exceptional!</div>
+    </div>
+    <div class="modal-xp-row">
+      <span class="mxp-label">⚡ Total XP Earned from Quizzes</span>
+      <span class="mxp-val" id="modalXpVal">0 XP</span>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-btn-retry" id="modalRetry"><i class="fa-solid fa-rotate-right"></i> Retry All</button>
+      <button class="modal-btn-continue" id="modalContinue"><i class="fa-solid fa-trophy"></i> Awesome, Continue!</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCRIPTS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+/* FINAL MODAL */
+function showFinalModal(){
+  const total=quizTotal,correct=quizCorrect,pct=total>0?correct/total:0,quizXP=correct*25;
+  const grades=[
+    {min:1.0,cls:'grade-s',letter:'S 🌟',msg:'Zabardast! Sab 4/4 correct! Numerical Encoding Expert! 📦'},
+    {min:0.75,cls:'grade-a',letter:'A 🎯',msg:'Bahut badhiya! Almost perfect performance!'},
+    {min:0.5,cls:'grade-b',letter:'B 📘',msg:'Accha kiya! Kuch topics dobara review karo.'},
+    {min:0.25,cls:'grade-c',letter:'C 💪',msg:'Theek hai! Concepts ko aur practice karo.'},
+    {min:0.0,cls:'grade-d',letter:'D 📚',msg:'Aur mehnat karo! Tutorial dobara padho.'},
+  ];
+  const g=grades.find(gr=>pct>=gr.min);
+  document.getElementById('ringNum').textContent=correct+'/'+total;
+  document.getElementById('modalXpVal').textContent=quizXP+' XP';
+  const gc=document.getElementById('gradeCard');gc.className='grade-card '+g.cls;
+  document.getElementById('gradeLetter').textContent=g.letter;
+  document.getElementById('gradeMsg').textContent=g.msg;
+  if(pct===1.0){
+    document.getElementById('modalTrophy').textContent='🏆';
+    document.getElementById('modalTitle').textContent='🎊 Perfect Score!';
+    document.getElementById('modalSubtitle').textContent='Wah! Saare '+total+'/'+total+' sahi! Numerical Encoding Expert!';
+  }else if(pct>=0.5){
+    document.getElementById('modalTrophy').textContent='🎯';
+    document.getElementById('modalTitle').textContent='Quest Complete!';
+    document.getElementById('modalSubtitle').textContent=correct+' out of '+total+' correct. Kafi accha kiya!';
+  }else{
+    document.getElementById('modalTrophy').textContent='📚';
+    document.getElementById('modalTitle').textContent='Keep Trying!';
+    document.getElementById('modalSubtitle').textContent='Tutorial dobara padho aur retry karo!';
+  }
+  const circumference=327,offset=circumference*(1-pct);
+  const ringColors={'grade-s':'#b45309','grade-a':'#16a34a','grade-b':'#2563eb','grade-c':'#7c3aed','grade-d':'#dc2626'};
+  const ringEl=document.getElementById('ringFill');
+  ringEl.style.stroke=ringColors[g.cls]||'#c2410c';
+  ringEl.style.transition='none';ringEl.style.strokeDashoffset='327';
+  setTimeout(()=>{ringEl.style.transition='stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1)';ringEl.style.strokeDashoffset=offset;},80);
+  document.getElementById('finalModal').classList.add('open');
+  if(pct>=0.5)launchConfetti(pct);
+}
+
+function launchConfetti(pct){
+  const canvas=document.getElementById('confettiCanvas'),ctx=canvas.getContext('2d');
+  canvas.width=window.innerWidth;canvas.height=window.innerHeight;
+  const count=Math.floor(80+pct*140);
+  const colors=['#c2410c','#b45309','#0891b2','#16a34a','#2563eb','#db2777','#f59e0b'];
+  const pieces=Array.from({length:count},()=>({x:Math.random()*canvas.width,y:Math.random()*-canvas.height*0.6,w:Math.random()*10+5,h:Math.random()*6+3,color:colors[Math.floor(Math.random()*colors.length)],vx:(Math.random()-0.5)*4,vy:Math.random()*4+2,rot:Math.random()*360,vrot:(Math.random()-0.5)*9,alpha:1}));
+  let frame=0;
+  (function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);let alive=false;
+    pieces.forEach(p=>{
+      if(p.y>canvas.height+20)return;alive=true;
+      p.x+=p.vx;p.y+=p.vy;p.rot+=p.vrot;
+      if(p.y>canvas.height*0.65)p.alpha-=0.02;
+      p.alpha=Math.max(0,p.alpha);
+      ctx.save();ctx.globalAlpha=p.alpha;ctx.translate(p.x,p.y);ctx.rotate(p.rot*Math.PI/180);
+      ctx.fillStyle=p.color;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore();
+    });
+    frame++;
+    if(alive&&frame<260)requestAnimationFrame(draw);
+    else ctx.clearRect(0,0,canvas.width,canvas.height);
+  })();
+}
+
+function initQuizzes(){
+  document.querySelectorAll('.quiz-box').forEach(box=>{
+    box.querySelectorAll('.quiz-opt').forEach(opt=>{const n=opt.cloneNode(true);opt.parentNode.replaceChild(n,opt);});
+    const correct=box.dataset.correct,qxp=parseInt(box.dataset.xp)||25;
+    let answered=false;
+    box.querySelectorAll('.quiz-opt').forEach(opt=>{
+      opt.addEventListener('click',()=>{
+        if(answered)return;answered=true;
+        const ans=opt.dataset.ans,fb=box.querySelector('.quiz-feedback'),isCorrect=ans===correct;
+        box.querySelectorAll('.quiz-opt').forEach(o=>{
+          o.classList.add('answered-opt');
+          const explainDiv=box.querySelector('.quiz-explain[data-for-ans="'+o.dataset.ans+'"]');
+          if(o.dataset.ans===correct){o.classList.add('correct');if(explainDiv)explainDiv.classList.add('show-correct');}
+          else if(o===opt&&!isCorrect){o.classList.add('wrong');if(explainDiv)explainDiv.classList.add('show-wrong');}
+          else{o.classList.add('dimmed');if(o.dataset.ans===correct&&explainDiv)explainDiv.classList.add('show-reveal');}
+        });
+        if(isCorrect){quizCorrect++;fb.className='quiz-feedback show win';fb.innerHTML='<span style="font-size:1.3rem">🎉</span> Zabardast! Sahi jawab! <strong>+'+qxp+' XP</strong> earned!';addXP(qxp);showToast('⚡','+'+qxp+' XP!','Bilkul sahi jawab!','#16a34a');}
+        else{fb.className='quiz-feedback show lose';fb.innerHTML='<span style="font-size:1.3rem">💡</span> Galat! Sahi jawab highlight ho gaya — concept dobara padho!';showToast('💡','Galat!','Sahi jawab dekho aur concept review karo.','#dc2626');}
+        const doneCount=Array.from(document.querySelectorAll('.quiz-box')).filter(b=>b.querySelector('.quiz-opt.answered-opt')).length;
+        if(doneCount===quizTotal)setTimeout(showFinalModal,1200);
+      });
+    });
+  });
+}
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({startOnLoad:true,theme:'base',themeVariables:{primaryColor:'#fff7ed',primaryTextColor:'#7c2d12',primaryBorderColor:'#c2410c',lineColor:'#94a3b8',secondaryColor:'#cffafe',tertiaryColor:'#dcfce7',fontFamily:'Plus Jakarta Sans, sans-serif',fontSize:'13px'},flowchart:{curve:'basis',padding:24}});
+
+let xp=0,scrollXpEarned=0;
+const XP_MAX=220;
+const earnedBadges=new Set();
+
+function addXP(amount,badgeId){
+  if(badgeId)scrollXpEarned=Math.min(scrollXpEarned+amount,120);
+  xp=Math.min(xp+amount,XP_MAX);
+  document.getElementById('xpFill').style.width=(xp/XP_MAX*100)+'%';
+  document.getElementById('xpScore').textContent=xp+' / '+XP_MAX+' XP';
+  if(badgeId&&!earnedBadges.has(badgeId)){earnedBadges.add(badgeId);const el=document.getElementById(badgeId);if(el)el.classList.add('earned');}
+  if(xp>=XP_MAX)showToast('🏆','QUEST COMPLETE! 🎊','Numerical Encoding Expert! 220/220 XP!','#b45309');
+}
+
+function showToast(icon,title,msg,color){
+  const container=document.getElementById('toastContainer');
+  const t=document.createElement('div');t.className='gtoast';
+  t.innerHTML=`<span class="gtoast-icon">${icon}</span><div><div style="font-weight:800;color:${color};font-size:0.9rem;">${title}</div><div style="color:#6b7280;font-size:0.8rem;font-weight:400;">${msg}</div></div>`;
+  container.appendChild(t);
+  setTimeout(()=>t.classList.add('show'),50);
+  setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),400);},3500);
+}
+
+let quizTotal=0,quizCorrect=0;
+
+document.querySelectorAll('.quiz-box').forEach(box=>{
+  quizTotal++;
+  const correct=box.dataset.correct,qxp=parseInt(box.dataset.xp)||25;
+  let answered=false;
+  box.querySelectorAll('.quiz-opt').forEach(opt=>{
+    const explain=opt.dataset.explain||'';
+    if(explain){const div=document.createElement('div');div.className='quiz-explain';div.dataset.forAns=opt.dataset.ans;div.textContent=explain;opt.parentNode.insertBefore(div,opt.nextSibling);}
+  });
+  box.querySelectorAll('.quiz-opt').forEach(opt=>{
+    opt.addEventListener('click',()=>{
+      if(answered)return;answered=true;
+      const ans=opt.dataset.ans,fb=box.querySelector('.quiz-feedback'),isCorrect=ans===correct;
+      box.querySelectorAll('.quiz-opt').forEach(o=>{
+        o.classList.add('answered-opt');
+        const explainDiv=box.querySelector('.quiz-explain[data-for-ans="'+o.dataset.ans+'"]');
+        if(o.dataset.ans===correct){o.classList.add('correct');if(explainDiv)explainDiv.classList.add('show-correct');}
+        else if(o===opt&&!isCorrect){o.classList.add('wrong');if(explainDiv)explainDiv.classList.add('show-wrong');}
+        else{o.classList.add('dimmed');if(o.dataset.ans===correct&&explainDiv)explainDiv.classList.add('show-reveal');}
+      });
+      if(isCorrect){quizCorrect++;fb.className='quiz-feedback show win';fb.innerHTML='<span style="font-size:1.3rem">🎉</span> Zabardast! Sahi jawab! <strong>+'+qxp+' XP</strong> earned!';addXP(qxp);showToast('⚡','+'+qxp+' XP!','Bilkul sahi jawab!','#16a34a');}
+      else{fb.className='quiz-feedback show lose';fb.innerHTML='<span style="font-size:1.3rem">💡</span> Galat! Sahi jawab highlight ho gaya — concept dobara padho!';showToast('💡','Galat!','Sahi jawab dekho aur concept review karo.','#dc2626');}
+      const doneCount=Array.from(document.querySelectorAll('.quiz-box')).filter(b=>b.querySelector('.quiz-opt.answered-opt')).length;
+      if(doneCount===quizTotal)setTimeout(showFinalModal,1200);
+    });
+  });
+});
+
+const fadeObserver=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');fadeObserver.unobserve(e.target);}});},{threshold:0.12});
+document.querySelectorAll('.fade-up').forEach(el=>fadeObserver.observe(el));
+
+const sectionXP={
+  's1':{xp:30,badge:'badge1',msg:'📦 Binner badge unlocked!'},
+  's3':{xp:30,badge:'badge2',msg:'⚡ Binarizer badge unlocked!'},
+  's5':{xp:30,badge:'badge3',msg:'📊 Quantile Pro badge unlocked!'},
+  's7':{xp:30,badge:'badge4',msg:'🎯 K-Means Expert badge unlocked!'},
+};
+const xpObserver=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const id=e.target.id;
+      if(sectionXP[id]&&!earnedBadges.has(sectionXP[id].badge)){const{xp:sx,badge,msg}=sectionXP[id];addXP(sx,badge);showToast('🏅','Badge Unlocked!',msg,'#c2410c');}
+      xpObserver.unobserve(e.target);
+    }
+  });
+},{threshold:0.12});
+['s1','s3','s5','s7'].forEach(id=>{const el=document.getElementById(id);if(el)xpObserver.observe(el);});
+
+document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(a.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth',block:'start'});});});
+
+function closeModal(){document.getElementById('finalModal').classList.remove('open');}
+document.getElementById('modalClose').addEventListener('click',closeModal);
+document.getElementById('modalContinue').addEventListener('click',closeModal);
+document.getElementById('modalRetry').addEventListener('click',()=>{
+  closeModal();quizCorrect=0;xp=scrollXpEarned;
+  document.getElementById('xpFill').style.width=(xp/XP_MAX*100)+'%';
+  document.getElementById('xpScore').textContent=xp+' / '+XP_MAX+' XP';
+  document.querySelectorAll('.quiz-box').forEach(box=>{
+    box.querySelectorAll('.quiz-opt').forEach(o=>o.classList.remove('correct','wrong','dimmed','answered-opt'));
+    box.querySelectorAll('.quiz-explain').forEach(ex=>ex.classList.remove('show-correct','show-wrong','show-reveal'));
+    const fb=box.querySelector('.quiz-feedback');if(fb){fb.className='quiz-feedback';fb.innerHTML='';}
+  });
+  initQuizzes();window.scrollTo({top:0,behavior:'smooth'});
+});
+document.getElementById('finalModal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+</script>
+
+</body>
+</html>

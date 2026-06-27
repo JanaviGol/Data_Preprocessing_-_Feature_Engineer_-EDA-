@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python Data Quest — Mixed Variables, Date-Time &amp; Complete Case Analysis!</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f0f4ff;--bg2:#e8edf8;--bg3:#dde4f5;--card:#ffffff;--card2:#f5f7ff;
+  --border:rgba(99,102,241,0.12);--border2:rgba(99,102,241,0.25);
+  --neon-blue:#2563eb;--neon-cyan:#0891b2;--neon-purple:#7c3aed;
+  --neon-pink:#db2777;--neon-green:#16a34a;--neon-yellow:#b45309;
+  --neon-orange:#c2410c;--neon-red:#dc2626;
+  --text:#1e1b4b;--muted:#4b5563;--dim:#9ca3af;
+  --font-head:'Syne',sans-serif;--font-body:'Plus Jakarta Sans',sans-serif;--font-mono:'JetBrains Mono',monospace;
+  --glow-blue:0 4px 16px rgba(37,99,235,0.18),0 1px 4px rgba(37,99,235,0.10);
+  --glow-purple:0 4px 16px rgba(124,58,237,0.18),0 1px 4px rgba(124,58,237,0.10);
+  --glow-cyan:0 4px 16px rgba(8,145,178,0.18),0 1px 4px rgba(8,145,178,0.10);
+  --glow-green:0 4px 16px rgba(22,163,74,0.18),0 1px 4px rgba(22,163,74,0.10);
+  --glow-yellow:0 4px 16px rgba(180,83,9,0.18),0 1px 4px rgba(180,83,9,0.10);
+  --glow-pink:0 4px 16px rgba(219,39,119,0.18),0 1px 4px rgba(219,39,119,0.10);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.8;font-size:16px;overflow-x:hidden;}
+::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--neon-green);border-radius:3px;}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(37,99,235,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(37,99,235,0.06) 1px,transparent 1px);background-size:50px 50px;}
+.container-main{max-width:1280px;margin:0 auto;padding:0 1.5rem;position:relative;z-index:1;}
+
+/* XP BAR */
+.xp-strip{position:sticky;top:0;z-index:1000;background:rgba(240,244,255,0.95);backdrop-filter:blur(16px);border-bottom:1px solid var(--border2);box-shadow:0 2px 12px rgba(37,99,235,0.08);padding:0.65rem 0;}
+.xp-inner{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;}
+.xp-label{font-family:var(--font-head);font-weight:800;font-size:0.8rem;color:var(--neon-yellow);letter-spacing:2px;text-transform:uppercase;white-space:nowrap;}
+.xp-bar-wrap{flex:1;min-width:120px;background:rgba(37,99,235,0.1);border-radius:50px;height:10px;border:1px solid var(--border2);overflow:hidden;}
+.xp-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--neon-green),var(--neon-cyan),var(--neon-blue));border-radius:50px;transition:width 1s cubic-bezier(0.34,1.56,0.64,1);box-shadow:0 0 10px rgba(22,163,74,0.35);position:relative;}
+.xp-bar-fill::after{content:'';position:absolute;right:0;top:0;bottom:0;width:30px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.4));animation:shimmer 2s infinite;}
+@keyframes shimmer{0%,100%{opacity:0;}50%{opacity:1;}}
+.xp-score{font-family:var(--font-head);font-weight:800;font-size:0.9rem;color:var(--neon-yellow);white-space:nowrap;}
+.xp-badges{display:flex;gap:0.4rem;flex-wrap:wrap;}
+.xp-badge{font-size:0.72rem;font-weight:700;padding:0.2rem 0.65rem;border-radius:50px;border:1px solid;white-space:nowrap;transition:0.3s;opacity:0.35;}
+.xp-badge.earned{opacity:1;animation:badgePop 0.5s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes badgePop{0%{transform:scale(0);opacity:0;}100%{transform:scale(1);opacity:1;}}
+.xp-badge.b1{border-color:var(--neon-green);color:var(--neon-green);}
+.xp-badge.b2{border-color:var(--neon-cyan);color:var(--neon-cyan);}
+.xp-badge.b3{border-color:var(--neon-blue);color:var(--neon-blue);}
+.xp-badge.b4{border-color:var(--neon-purple);color:var(--neon-purple);}
+.xp-badge.b5{border-color:var(--neon-yellow);color:var(--neon-yellow);}
+
+/* HERO */
+.hero{position:relative;overflow:hidden;padding:6rem 0 5rem;
+  background:radial-gradient(ellipse at 20% 50%,rgba(22,163,74,0.12) 0%,transparent 60%),
+             radial-gradient(ellipse at 80% 20%,rgba(8,145,178,0.10) 0%,transparent 55%),
+             radial-gradient(ellipse at 60% 80%,rgba(37,99,235,0.07) 0%,transparent 50%),var(--bg);}
+.hero-orbit{position:absolute;top:50%;right:8%;transform:translateY(-50%);width:420px;height:420px;pointer-events:none;}
+.orbit-ring{position:absolute;border-radius:50%;border:1px solid rgba(22,163,74,0.25);top:50%;left:50%;transform:translate(-50%,-50%);}
+.orbit-ring:nth-child(1){width:150px;height:150px;animation:spin 12s linear infinite;}
+.orbit-ring:nth-child(2){width:250px;height:250px;animation:spin 20s linear infinite reverse;border-color:rgba(8,145,178,0.2);}
+.orbit-ring:nth-child(3){width:350px;height:350px;animation:spin 30s linear infinite;border-color:rgba(37,99,235,0.15);}
+.orbit-dot{position:absolute;width:8px;height:8px;border-radius:50%;top:-4px;left:50%;transform:translateX(-50%);}
+.orbit-ring:nth-child(1) .orbit-dot{background:var(--neon-green);box-shadow:var(--glow-green);}
+.orbit-ring:nth-child(2) .orbit-dot{background:var(--neon-cyan);box-shadow:var(--glow-cyan);}
+.orbit-ring:nth-child(3) .orbit-dot{background:var(--neon-blue);box-shadow:var(--glow-blue);}
+.orbit-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:3rem;animation:float 4s ease-in-out infinite;}
+@keyframes spin{from{transform:translate(-50%,-50%) rotate(0deg);}to{transform:translate(-50%,-50%) rotate(360deg);}}
+@keyframes float{0%,100%{transform:translate(-50%,-50%) translateY(0);}50%{transform:translate(-50%,-50%) translateY(-12px);}}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(22,163,74,0.12);border:1px solid rgba(22,163,74,0.3);border-radius:50px;padding:0.3rem 1rem;font-size:0.78rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--neon-green);margin-bottom:1.5rem;}
+.hero-eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--neon-green);box-shadow:var(--glow-green);animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.2;}}
+.hero h1{font-family:var(--font-head);font-weight:800;font-size:clamp(2.4rem,5vw,4rem);line-height:1.1;letter-spacing:-1.5px;margin-bottom:1.5rem;}
+.hero h1 .line1{display:block;color:#1e1b4b;}
+.hero h1 .line2{display:block;background:linear-gradient(135deg,var(--neon-green) 0%,var(--neon-cyan) 50%,var(--neon-blue) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-sub{font-size:1.1rem;color:var(--muted);max-width:560px;margin-bottom:2rem;line-height:1.75;}
+.hero-stats{display:flex;gap:2rem;flex-wrap:wrap;margin-bottom:2.5rem;}
+.hero-stat-item{text-align:center;}
+.hero-stat-num{font-family:var(--font-head);font-weight:800;font-size:1.8rem;line-height:1;background:linear-gradient(135deg,var(--neon-green),var(--neon-cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-stat-label{font-size:0.75rem;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-top:0.2rem;}
+.hero-cta{display:inline-flex;align-items:center;gap:0.6rem;background:linear-gradient(135deg,var(--neon-green),var(--neon-blue));color:white;font-weight:700;font-size:0.95rem;padding:0.8rem 2rem;border-radius:50px;border:none;cursor:pointer;text-decoration:none;box-shadow:0 4px 20px rgba(22,163,74,0.3);transition:0.3s;animation:pulse-btn 2s infinite;}
+@keyframes pulse-btn{0%,100%{box-shadow:0 4px 20px rgba(22,163,74,0.28);}50%{box-shadow:0 4px 32px rgba(22,163,74,0.45);}}
+.hero-cta:hover{transform:translateY(-2px) scale(1.03);color:white;}
+
+/* QUEST MAP */
+.quest-map{background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:2rem;margin:3rem 0;position:relative;box-shadow:0 4px 24px rgba(37,99,235,0.07);}
+.quest-map::before{content:'';position:absolute;inset:0;border-radius:20px;background:linear-gradient(135deg,rgba(22,163,74,0.03),rgba(8,145,178,0.03));pointer-events:none;}
+.quest-map-title{font-family:var(--font-head);font-weight:800;font-size:1.1rem;color:var(--neon-yellow);letter-spacing:2px;text-transform:uppercase;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.75rem;}
+.quest-map-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(234,179,8,0.3),transparent);}
+.quest-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:0.75rem;}
+.quest-item{display:flex;align-items:center;gap:0.75rem;background:#f8f9ff;border:1px solid var(--border);border-radius:12px;padding:0.75rem 1rem;text-decoration:none;color:var(--muted);font-weight:600;font-size:0.88rem;transition:0.25s;}
+.quest-item:hover{background:rgba(22,163,74,0.06);border-color:rgba(22,163,74,0.3);color:var(--neon-green);transform:translateX(4px);}
+.quest-num{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-weight:800;font-size:0.78rem;flex-shrink:0;}
+
+/* LEVEL CARD */
+.level-card{background:var(--card);border:1px solid var(--border);border-radius:24px;padding:2.5rem;margin-bottom:2.5rem;position:relative;overflow:hidden;transition:border-color 0.3s,box-shadow 0.3s;}
+.level-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:24px 24px 0 0;}
+.level-card.lvl-green::before{background:linear-gradient(90deg,var(--neon-green),var(--neon-cyan));}
+.level-card.lvl-cyan::before{background:linear-gradient(90deg,var(--neon-cyan),var(--neon-blue));}
+.level-card.lvl-blue::before{background:linear-gradient(90deg,var(--neon-blue),var(--neon-cyan));}
+.level-card.lvl-purple::before{background:linear-gradient(90deg,var(--neon-purple),var(--neon-pink));}
+.level-card.lvl-yellow::before{background:linear-gradient(90deg,var(--neon-yellow),var(--neon-orange));}
+.level-card.lvl-orange::before{background:linear-gradient(90deg,var(--neon-orange),var(--neon-yellow));}
+.level-card.lvl-pink::before{background:linear-gradient(90deg,var(--neon-pink),var(--neon-purple));}
+.level-card.lvl-red::before{background:linear-gradient(90deg,var(--neon-red),var(--neon-orange));}
+.level-card:hover{box-shadow:0 8px 32px rgba(37,99,235,0.12);}
+.level-card .corner-deco{position:absolute;top:1.2rem;right:1.5rem;font-family:var(--font-head);font-weight:800;font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;opacity:0.25;}
+.lv-header{display:flex;align-items:flex-start;gap:1.2rem;margin-bottom:1.8rem;}
+.lv-icon-wrap{width:60px;height:60px;border-radius:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.5rem;position:relative;}
+.lv-icon-wrap::after{content:'';position:absolute;inset:-3px;border-radius:18px;border:1px solid;opacity:0.4;}
+.ico-green{background:rgba(22,163,74,0.12);color:var(--neon-green);}.ico-green::after{border-color:var(--neon-green);}
+.ico-cyan{background:rgba(8,145,178,0.12);color:var(--neon-cyan);}.ico-cyan::after{border-color:var(--neon-cyan);}
+.ico-blue{background:rgba(37,99,235,0.12);color:var(--neon-blue);}.ico-blue::after{border-color:var(--neon-blue);}
+.ico-purple{background:rgba(124,58,237,0.12);color:var(--neon-purple);}.ico-purple::after{border-color:var(--neon-purple);}
+.ico-yellow{background:rgba(180,83,9,0.12);color:var(--neon-yellow);}.ico-yellow::after{border-color:var(--neon-yellow);}
+.ico-orange{background:rgba(194,65,12,0.12);color:var(--neon-orange);}.ico-orange::after{border-color:var(--neon-orange);}
+.ico-pink{background:rgba(219,39,119,0.12);color:var(--neon-pink);}.ico-pink::after{border-color:var(--neon-pink);}
+.ico-red{background:rgba(220,38,38,0.12);color:var(--neon-red);}.ico-red::after{border-color:var(--neon-red);}
+.lv-meta{flex:1;}
+.lv-eyebrow{font-size:0.72rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:0.35rem;}
+.lv-title{font-family:var(--font-head);font-weight:800;font-size:1.6rem;line-height:1.2;color:var(--text);}
+.lv-xp{margin-top:0.4rem;display:inline-flex;align-items:center;gap:0.4rem;background:rgba(180,83,9,0.08);border:1px solid rgba(180,83,9,0.25);border-radius:50px;padding:0.2rem 0.75rem;font-size:0.75rem;font-weight:700;color:var(--neon-yellow);}
+
+/* CALLOUT */
+.callout{border-radius:14px;padding:1.2rem 1.4rem;margin:1.2rem 0;border:1px solid;position:relative;overflow:hidden;}
+.callout::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:4px 0 0 4px;}
+.callout .ct{font-weight:800;font-size:0.95rem;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.5rem;}
+.cb-green{background:rgba(22,163,74,0.06);border-color:rgba(22,163,74,0.2);}.cb-green::before{background:var(--neon-green);}.cb-green .ct{color:var(--neon-green);}
+.cb-cyan{background:rgba(8,145,178,0.06);border-color:rgba(8,145,178,0.2);}.cb-cyan::before{background:var(--neon-cyan);}.cb-cyan .ct{color:var(--neon-cyan);}
+.cb-blue{background:rgba(37,99,235,0.06);border-color:rgba(37,99,235,0.2);}.cb-blue::before{background:var(--neon-blue);}.cb-blue .ct{color:var(--neon-blue);}
+.cb-purple{background:rgba(124,58,237,0.06);border-color:rgba(124,58,237,0.2);}.cb-purple::before{background:var(--neon-purple);}.cb-purple .ct{color:var(--neon-purple);}
+.cb-yellow{background:rgba(180,83,9,0.06);border-color:rgba(180,83,9,0.2);}.cb-yellow::before{background:var(--neon-yellow);}.cb-yellow .ct{color:var(--neon-yellow);}
+.cb-orange{background:rgba(194,65,12,0.06);border-color:rgba(194,65,12,0.2);}.cb-orange::before{background:var(--neon-orange);}.cb-orange .ct{color:var(--neon-orange);}
+.cb-pink{background:rgba(219,39,119,0.06);border-color:rgba(219,39,119,0.2);}.cb-pink::before{background:var(--neon-pink);}.cb-pink .ct{color:var(--neon-pink);}
+.cb-red{background:rgba(220,38,38,0.06);border-color:rgba(220,38,38,0.2);}.cb-red::before{background:var(--neon-red);}.cb-red .ct{color:var(--neon-red);}
+
+/* STEP TIMELINE */
+.step-timeline{position:relative;padding-left:2.8rem;}
+.step-timeline::before{content:'';position:absolute;left:15px;top:4px;bottom:4px;width:2px;background:linear-gradient(180deg,var(--neon-green),var(--neon-cyan),var(--neon-blue));opacity:0.45;border-radius:2px;}
+.step-item{position:relative;margin-bottom:1.3rem;background:#f8f9ff;border:1px solid var(--border);border-radius:14px;padding:1.1rem 1.3rem;box-shadow:0 2px 8px rgba(37,99,235,0.05);transition:0.25s;}
+.step-item:hover{border-color:var(--border2);background:#eef1ff;}
+.step-item::before{content:attr(data-step);position:absolute;left:-2.8rem;top:1rem;width:32px;height:32px;border-radius:50%;background:#fff;border:2px solid var(--neon-green);display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-weight:800;font-size:0.78rem;color:var(--neon-green);box-shadow:0 2px 8px rgba(22,163,74,0.2);}
+.step-label{font-weight:700;color:var(--text);font-size:0.98rem;margin-bottom:0.35rem;}
+.step-body{color:var(--muted);font-size:0.92rem;line-height:1.7;}
+
+/* ACH CARD */
+.ach-card{background:#ffffff;border:1px solid var(--border);border-radius:18px;padding:1.5rem;height:100%;transition:0.3s;text-align:center;position:relative;overflow:hidden;}
+.ach-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;opacity:0;transition:opacity 0.3s;}
+.ach-card:hover{transform:translateY(-6px);border-color:var(--border2);}
+.ach-card:hover::after{opacity:1;}
+.ach-card.ac-green::after{background:var(--neon-green);}.ach-card.ac-green:hover{box-shadow:0 16px 48px rgba(22,163,74,0.2);}
+.ach-card.ac-cyan::after{background:var(--neon-cyan);}.ach-card.ac-cyan:hover{box-shadow:0 16px 48px rgba(8,145,178,0.2);}
+.ach-card.ac-blue::after{background:var(--neon-blue);}.ach-card.ac-blue:hover{box-shadow:0 16px 48px rgba(37,99,235,0.2);}
+.ach-card.ac-purple::after{background:var(--neon-purple);}.ach-card.ac-purple:hover{box-shadow:0 10px 28px rgba(124,58,237,0.15);}
+.ach-card.ac-yellow::after{background:var(--neon-yellow);}.ach-card.ac-yellow:hover{box-shadow:0 10px 28px rgba(180,83,9,0.15);}
+.ach-card.ac-orange::after{background:var(--neon-orange);}.ach-card.ac-orange:hover{box-shadow:0 10px 28px rgba(194,65,12,0.15);}
+.ach-card.ac-pink::after{background:var(--neon-pink);}.ach-card.ac-pink:hover{box-shadow:0 16px 48px rgba(219,39,119,0.2);}
+.ach-card.ac-red::after{background:var(--neon-red);}.ach-card.ac-red:hover{box-shadow:0 16px 48px rgba(220,38,38,0.15);}
+.ach-icon{font-size:2.2rem;margin-bottom:0.75rem;display:block;}
+.ach-title{font-family:var(--font-head);font-weight:800;font-size:1rem;margin-bottom:0.5rem;}
+.ach-desc{font-size:0.88rem;color:var(--muted);line-height:1.65;}
+
+/* CODE BLOCK */
+.code-wrap{background:#f8f9fc;border:1px solid var(--border2);border-radius:14px;overflow:hidden;margin:1.2rem 0;}
+.code-header{display:flex;align-items:center;justify-content:space-between;background:rgba(22,163,74,0.06);padding:0.6rem 1.1rem;border-bottom:1px solid var(--border);}
+.code-lang{font-family:var(--font-mono);font-size:0.75rem;font-weight:600;color:var(--neon-green);letter-spacing:1px;text-transform:uppercase;}
+.code-dots{display:flex;gap:5px;}
+.code-dot{width:10px;height:10px;border-radius:50%;}
+.code-dot:nth-child(1){background:#dc2626;}.code-dot:nth-child(2){background:#b45309;}.code-dot:nth-child(3){background:#16a34a;}
+.code-wrap pre{margin:0;padding:1.2rem 1.4rem;overflow-x:auto;background:transparent;}
+.code-wrap pre code{font-family:var(--font-mono);font-size:0.85rem;line-height:1.7;}
+pre[class*="language-"]{border-radius:0!important;font-family:var(--font-mono)!important;font-size:0.85rem!important;margin:0!important;border:none!important;background:transparent!important;}
+.code-output{background:rgba(22,163,74,0.06);border-top:1px solid rgba(22,163,74,0.2);padding:0.7rem 1.2rem;font-family:var(--font-mono);font-size:0.82rem;color:#14532d;line-height:1.7;}
+
+/* EX CARD */
+.ex-card{border-radius:16px;overflow:hidden;margin:1.4rem 0;border:1px solid;}
+.ex-card .ex-head{padding:0.85rem 1.4rem;font-weight:800;font-size:0.92rem;display:flex;align-items:center;gap:0.6rem;}
+.ex-card .ex-body{padding:1.4rem;background:#fafbff;}
+.ex-card.ex-story{border-color:rgba(22,163,74,0.25);}.ex-card.ex-story .ex-head{background:rgba(22,163,74,0.08);color:#166534;}
+.ex-card.ex-tech{border-color:rgba(124,58,237,0.25);}.ex-card.ex-tech .ex-head{background:rgba(124,58,237,0.08);color:#5b21b6;}
+.ex-card.ex-tip{border-color:rgba(8,145,178,0.25);}.ex-card.ex-tip .ex-head{background:rgba(8,145,178,0.08);color:#0c4a6e;}
+.ex-card.ex-warn{border-color:rgba(220,38,38,0.25);}.ex-card.ex-warn .ex-head{background:rgba(220,38,38,0.08);color:#991b1b;}
+.ex-card.ex-orange{border-color:rgba(194,65,12,0.25);}.ex-card.ex-orange .ex-head{background:rgba(194,65,12,0.08);color:#7c2d12;}
+
+/* TABLE */
+.gtbl{width:100%;border-collapse:separate;border-spacing:0;border-radius:14px;overflow:hidden;border:1px solid var(--border);}
+.gtbl thead th{background:rgba(22,163,74,0.08);color:var(--neon-green);font-family:var(--font-head);font-weight:700;padding:0.9rem 1rem;text-align:left;border-bottom:1px solid rgba(22,163,74,0.15);font-size:0.85rem;letter-spacing:0.5px;}
+.gtbl tbody td{padding:0.75rem 1rem;border-bottom:1px solid var(--border);color:var(--muted);font-size:0.92rem;vertical-align:top;}
+.gtbl tbody tr:last-child td{border-bottom:none;}
+.gtbl tbody tr:hover td{background:rgba(22,163,74,0.03);color:var(--text);}
+.gtbl tbody td strong{color:var(--text);}
+
+/* DIM CARD */
+.dim-card{background:#ffffff;border:1px solid var(--border);border-radius:18px;padding:1.5rem;height:100%;transition:0.3s;position:relative;overflow:hidden;}
+.dim-card:hover{transform:translateY(-4px);box-shadow:0 8px 28px rgba(37,99,235,0.1);}
+.dim-rank{font-family:var(--font-head);font-weight:800;font-size:2.5rem;line-height:1;margin-bottom:0.25rem;}
+.dim-name{font-weight:700;font-size:1rem;margin-bottom:0.8rem;}
+.dim-code{background:#f1f5f9;border-radius:10px;padding:0.65rem 0.9rem;font-family:var(--font-mono);font-size:0.82rem;border:1px solid rgba(99,102,241,0.15);margin-bottom:0.8rem;}
+.dim-desc{font-size:0.88rem;color:var(--muted);margin-bottom:0.75rem;line-height:1.6;}
+.dim-example{font-size:0.82rem;padding:0.5rem 0.75rem;border-radius:8px;border:1px solid;font-style:italic;}
+
+/* STAT PILLS */
+.stat-pill{display:inline-flex;align-items:center;gap:0.4rem;border-radius:50px;padding:0.3rem 0.9rem;font-weight:700;font-size:0.8rem;border:1px solid;}
+.sp-green{background:rgba(22,163,74,0.08);border-color:rgba(22,163,74,0.3);color:var(--neon-green);}
+.sp-cyan{background:rgba(8,145,178,0.08);border-color:rgba(8,145,178,0.3);color:var(--neon-cyan);}
+.sp-blue{background:rgba(37,99,235,0.08);border-color:rgba(37,99,235,0.3);color:var(--neon-blue);}
+.sp-purple{background:rgba(124,58,237,0.08);border-color:rgba(124,58,237,0.3);color:var(--neon-purple);}
+.sp-yellow{background:rgba(180,83,9,0.08);border-color:rgba(180,83,9,0.3);color:var(--neon-yellow);}
+.sp-orange{background:rgba(194,65,12,0.08);border-color:rgba(194,65,12,0.3);color:var(--neon-orange);}
+.sp-pink{background:rgba(219,39,119,0.08);border-color:rgba(219,39,119,0.3);color:var(--neon-pink);}
+.sp-red{background:rgba(220,38,38,0.08);border-color:rgba(220,38,38,0.3);color:var(--neon-red);}
+
+/* INLINE CODE */
+.inline-code{background:rgba(22,163,74,0.08);color:#065f46;padding:0.1rem 0.45rem;border-radius:6px;font-family:var(--font-mono);font-size:0.88em;border:1px solid rgba(22,163,74,0.25);}
+
+/* HIGHLIGHT */
+.hl{background:rgba(180,83,9,0.1);color:#92400e;padding:0 5px;border-radius:4px;}
+.hl-green{background:rgba(22,163,74,0.1);color:var(--neon-green);padding:0 5px;border-radius:4px;}
+.hl-red{background:rgba(220,38,38,0.1);color:var(--neon-red);padding:0 5px;border-radius:4px;}
+.hl-blue{background:rgba(37,99,235,0.1);color:var(--neon-blue);padding:0 5px;border-radius:4px;}
+
+/* GLOW DIVIDER */
+.glow-div{height:2px;border-radius:2px;margin:2rem 0;opacity:0.4;background:linear-gradient(90deg,transparent,var(--neon-green),var(--neon-cyan),var(--neon-blue),transparent);}
+
+/* MERMAID */
+.mermaid-wrap{background:#f8f9ff;border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin:1.5rem 0;text-align:center;overflow-x:auto;box-shadow:0 2px 12px rgba(37,99,235,0.06);}
+
+/* QUIZ */
+.quiz-box{background:#fffbf0;border:1px solid rgba(180,83,9,0.18);border-radius:20px;padding:1.6rem;margin:1.8rem 0;position:relative;overflow:hidden;box-shadow:0 4px 20px rgba(180,83,9,0.07);}
+.quiz-box::before{content:'⚡ QUICK CHALLENGE';position:absolute;top:0;right:0;background:linear-gradient(135deg,#b45309,#c2410c);color:#fff;font-family:var(--font-head);font-weight:800;font-size:0.62rem;letter-spacing:2px;padding:0.32rem 0.9rem;border-radius:0 20px 0 12px;}
+.quiz-q{font-weight:700;color:#1c1917;margin-bottom:1.1rem;font-size:1.02rem;line-height:1.55;}
+.quiz-options{display:flex;flex-direction:column;gap:0.55rem;}
+.quiz-opt{background:#ffffff;border:1.5px solid #e5e7eb;border-radius:12px;padding:0.75rem 1.1rem;cursor:pointer;font-size:0.93rem;color:#374151;transition:background 0.15s,border-color 0.15s,transform 0.12s;font-weight:500;display:flex;align-items:center;gap:0.85rem;user-select:none;}
+.quiz-opt:not(.answered-opt):hover{background:#f3f4f6;border-color:#9ca3af;color:#111827;transform:translateX(3px);}
+.quiz-opt.correct{background:#f0fdf4;border-color:#16a34a;color:#14532d;font-weight:700;}
+.quiz-opt.correct .opt-letter{background:#16a34a;color:#fff;}
+.quiz-opt.wrong{background:#fef2f2;border-color:#dc2626;color:#991b1b;opacity:0.8;}
+.quiz-opt.wrong .opt-letter{background:#dc2626;color:#fff;}
+.quiz-opt.dimmed{opacity:0.45;pointer-events:none;}
+.quiz-opt .opt-letter{width:28px;height:28px;border-radius:8px;background:#f3f4f6;color:#6b7280;border:1.5px solid #e5e7eb;display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-weight:800;font-size:0.8rem;flex-shrink:0;transition:background 0.2s,color 0.2s;}
+.quiz-explain{display:none;font-size:0.84rem;font-weight:500;margin-top:-0.35rem;margin-bottom:0.35rem;padding:0.5rem 0.85rem 0.5rem 1rem;border-radius:0 0 10px 10px;line-height:1.55;border-left:3px solid transparent;}
+.quiz-explain.show-correct{display:block;background:rgba(22,163,74,0.07);color:#166534;border-left-color:#16a34a;}
+.quiz-explain.show-wrong{display:block;background:rgba(220,38,38,0.06);color:#991b1b;border-left-color:#dc2626;}
+.quiz-explain.show-reveal{display:block;background:rgba(37,99,235,0.06);color:#1e40af;border-left-color:#2563eb;}
+.quiz-feedback{display:none;margin-top:1rem;padding:0.85rem 1.1rem;border-radius:12px;font-weight:700;font-size:0.95rem;align-items:center;gap:0.6rem;}
+.quiz-feedback.show{display:flex;animation:fadeIn 0.35s;}
+.quiz-feedback.win{background:linear-gradient(135deg,#f0fdf4,#dcfce7);color:#14532d;border:1px solid rgba(22,163,74,0.3);}
+.quiz-feedback.lose{background:linear-gradient(135deg,#fef2f2,#fee2e2);color:#991b1b;border:1px solid rgba(220,38,38,0.2);}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+
+/* FOOTER */
+.gfooter{background:#e8edf8;border-top:1px solid var(--border);padding:3rem 0;margin-top:4rem;text-align:center;}
+.gfooter-logo{font-family:var(--font-head);font-weight:800;font-size:1.4rem;background:linear-gradient(135deg,var(--neon-green),var(--neon-blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:0.5rem;}
+
+/* ANIMATIONS */
+.fade-up{opacity:0;transform:translateY(30px);transition:opacity 0.6s ease,transform 0.6s ease;}
+.fade-up.visible{opacity:1;transform:none;}
+
+/* RESPONSIVE */
+@media(max-width:768px){.hero h1{font-size:2rem;}.hero-orbit{display:none;}.level-card{padding:1.5rem;}.xp-badges{display:none;}}
+
+/* TOAST */
+.toast-container{position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:0.5rem;pointer-events:none;}
+.gtoast{background:#ffffff;border:1px solid var(--border2);border-radius:14px;padding:0.85rem 1.2rem;display:flex;align-items:center;gap:0.75rem;backdrop-filter:blur(12px);font-weight:700;font-size:0.88rem;transform:translateX(120%);transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);pointer-events:auto;min-width:260px;box-shadow:0 8px 32px rgba(37,99,235,0.15);}
+.gtoast.show{transform:none;}
+.gtoast-icon{font-size:1.4rem;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:10000;background:rgba(15,23,42,0.55);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity 0.4s ease;}
+.modal-overlay.open{opacity:1;pointer-events:auto;}
+.modal-box{background:#ffffff;border-radius:28px;padding:2.5rem 2.5rem 2rem;max-width:520px;width:100%;position:relative;overflow:hidden;box-shadow:0 24px 80px rgba(37,99,235,0.18),0 4px 20px rgba(0,0,0,0.1);transform:scale(0.85) translateY(20px);transition:transform 0.45s cubic-bezier(0.34,1.56,0.64,1),opacity 0.4s ease;opacity:0;}
+.modal-overlay.open .modal-box{transform:scale(1) translateY(0);opacity:1;}
+.modal-box::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--neon-green),var(--neon-cyan),var(--neon-blue));}
+.modal-close{position:absolute;top:1rem;right:1rem;background:#f3f4f6;border:none;border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:0.9rem;color:#6b7280;display:flex;align-items:center;justify-content:center;transition:0.2s;}
+.modal-close:hover{background:#e5e7eb;color:#374151;}
+.modal-trophy{font-size:3rem;text-align:center;margin-bottom:0.5rem;}
+.modal-title{font-family:var(--font-head);font-weight:800;font-size:1.6rem;text-align:center;color:var(--text);margin-bottom:0.4rem;}
+.modal-subtitle{color:var(--muted);text-align:center;font-size:0.92rem;margin-bottom:1.5rem;}
+.score-ring-wrap{display:flex;justify-content:center;margin-bottom:1.2rem;}
+.score-ring{position:relative;width:120px;height:120px;}
+.score-ring svg{width:120px;height:120px;transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:#e5e7eb;stroke-width:10;}
+.ring-fill{fill:none;stroke:#16a34a;stroke-width:10;stroke-linecap:round;stroke-dasharray:327;stroke-dashoffset:327;transition:stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1);}
+.ring-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.ring-num{font-family:var(--font-head);font-weight:800;font-size:1.4rem;color:var(--text);line-height:1;}
+.ring-label{font-size:0.72rem;color:var(--dim);text-transform:uppercase;letter-spacing:1px;}
+.grade-card{border-radius:14px;padding:0.85rem 1.2rem;margin-bottom:1.2rem;display:flex;align-items:center;gap:1rem;border:1.5px solid;}
+.grade-s{background:#fef9c3;border-color:#b45309;}.grade-a{background:#f0fdf4;border-color:#16a34a;}.grade-b{background:#eff6ff;border-color:#2563eb;}.grade-c{background:#f5f3ff;border-color:#7c3aed;}.grade-d{background:#fef2f2;border-color:#dc2626;}
+.grade-letter{font-family:var(--font-head);font-weight:800;font-size:1.6rem;}
+.grade-msg{font-size:0.9rem;color:var(--muted);font-weight:600;}
+.modal-xp-row{display:flex;align-items:center;justify-content:space-between;background:#f8f9ff;border:1px solid rgba(37,99,235,0.15);border-radius:12px;padding:0.75rem 1.1rem;margin-bottom:1.4rem;}
+.modal-xp-row .mxp-label{font-size:0.85rem;color:#6b7280;font-weight:600;}
+.modal-xp-row .mxp-val{font-family:var(--font-head);font-weight:800;font-size:1.1rem;background:linear-gradient(135deg,#16a34a,#2563eb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.modal-btns{display:flex;gap:0.75rem;}
+.modal-btn-retry{flex:1;padding:0.8rem 1rem;background:#f3f4f6;border:1.5px solid #e5e7eb;border-radius:12px;cursor:pointer;font-family:var(--font-head);font-weight:700;font-size:0.92rem;color:#374151;transition:0.2s;display:flex;align-items:center;justify-content:center;gap:0.5rem;}
+.modal-btn-retry:hover{background:#e5e7eb;border-color:#d1d5db;color:#111827;}
+.modal-btn-continue{flex:2;padding:0.8rem 1rem;background:linear-gradient(135deg,#16a34a,#2563eb);border:none;border-radius:12px;cursor:pointer;font-family:var(--font-head);font-weight:700;font-size:0.92rem;color:#ffffff;transition:0.2s;display:flex;align-items:center;justify-content:center;gap:0.5rem;box-shadow:0 4px 16px rgba(22,163,74,0.3);}
+.modal-btn-continue:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(22,163,74,0.4);}
+#confettiCanvas{position:fixed;inset:0;z-index:10001;pointer-events:none;}
+</style>
+</head>
+<body>
+
+<!-- XP STRIP -->
+<div class="xp-strip">
+  <div class="container-main">
+    <div class="xp-inner">
+      <span class="xp-label">⚡ XP</span>
+      <div class="xp-bar-wrap"><div class="xp-bar-fill" id="xpFill"></div></div>
+      <span class="xp-score" id="xpScore">0 / 275 XP</span>
+      <div class="xp-badges">
+        <span class="xp-badge b1" id="badge1">🔀 Mixed Var Pro</span>
+        <span class="xp-badge b2" id="badge2">📅 Date Wrangler</span>
+        <span class="xp-badge b3" id="badge3">⏰ Time Master</span>
+        <span class="xp-badge b4" id="badge4">🧹 CCA Expert</span>
+        <span class="xp-badge b5" id="badge5">🏆 Data Engineer</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container-main">
+    <div class="row align-items-center">
+      <div class="col-lg-7">
+        <div class="hero-eyebrow"><i class="fa-solid fa-gamepad me-1"></i> Gamified Learning Quest</div>
+        <h1>
+          <span class="line1">Master Your Data Types</span>
+          <span class="line2">Mixed · DateTime · CCA</span>
+        </h1>
+        <p class="hero-sub">
+          5 boss levels. Mixed Variables se lekar Date-Time aur Complete Case Analysis tak. Real India examples. Python code jo actually kaam karta hai. <strong style="color:var(--text)">Earn XP</strong>, unlock badges, aur data ko production-ready banao!
+        </p>
+        <div class="hero-stats">
+          <div class="hero-stat-item"><div class="hero-stat-num">5</div><div class="hero-stat-label">Boss Levels</div></div>
+          <div class="hero-stat-item"><div class="hero-stat-num">275</div><div class="hero-stat-label">Total XP</div></div>
+          <div class="hero-stat-item"><div class="hero-stat-num">5</div><div class="hero-stat-label">Badges</div></div>
+          <div class="hero-stat-item"><div class="hero-stat-num">∞</div><div class="hero-stat-label">Clean Data</div></div>
+        </div>
+        <a href="#s1" class="hero-cta"><i class="fa-solid fa-play me-1"></i> Start Your Quest</a>
+      </div>
+      <div class="col-lg-5">
+        <div class="hero-orbit">
+          <div class="orbit-ring"><div class="orbit-dot"></div></div>
+          <div class="orbit-ring"><div class="orbit-dot"></div></div>
+          <div class="orbit-ring"><div class="orbit-dot"></div></div>
+          <div class="orbit-center">🔀</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="container-main">
+
+<!-- QUEST MAP -->
+<div class="quest-map fade-up">
+  <div class="quest-map-title"><i class="fa-solid fa-map me-2"></i> Quest Map</div>
+  <div class="quest-grid">
+    <a href="#s1" class="quest-item"><span class="quest-num" style="background:rgba(22,163,74,0.15);color:var(--neon-green);">L1</span> Mixed Variables — Kya Hoti Hain?</a>
+    <a href="#s2" class="quest-item"><span class="quest-num" style="background:rgba(22,163,74,0.15);color:var(--neon-green);">L1</span> Mixed Variables — Detection &amp; Code</a>
+    <a href="#s3" class="quest-item"><span class="quest-num" style="background:rgba(8,145,178,0.15);color:var(--neon-cyan);">L2</span> Date &amp; Time Variables — Kya Hain?</a>
+    <a href="#s4" class="quest-item"><span class="quest-num" style="background:rgba(8,145,178,0.15);color:var(--neon-cyan);">L2</span> Date &amp; Time — Feature Extraction Code</a>
+    <a href="#s5" class="quest-item"><span class="quest-num" style="background:rgba(37,99,235,0.15);color:var(--neon-blue);">L3</span> Complete Case Analysis — Kya Hai?</a>
+    <a href="#s6" class="quest-item"><span class="quest-num" style="background:rgba(37,99,235,0.15);color:var(--neon-blue);">L3</span> CCA — Python Code &amp; When to Use</a>
+    <a href="#s7" class="quest-item"><span class="quest-num" style="background:rgba(124,58,237,0.15);color:var(--neon-purple);">L4</span> CCA vs Imputation — Comparison</a>
+    <a href="#s8" class="quest-item"><span class="quest-num" style="background:rgba(180,83,9,0.15);color:var(--neon-yellow);">L5</span> Putting It All Together</a>
+    <a href="#s9" class="quest-item"><span class="quest-num" style="background:rgba(219,39,119,0.15);color:var(--neon-pink);">🏆</span> Final Summary &amp; Roadmap</a>
+  </div>
+</div>
+
+
+<!-- ████████████████████████████████████
+     LEVEL 1-A : MIXED VARIABLES — KYA HOTI HAIN?
+█████████████████████████████████████ -->
+<div class="level-card lvl-green fade-up" id="s1">
+  <div class="corner-deco">LEVEL 1</div>
+  <div class="lv-header">
+    <div class="lv-icon-wrap ico-green"><i class="fa-solid fa-shuffle"></i></div>
+    <div class="lv-meta">
+      <div class="lv-eyebrow">Level 1 · Boss Topic</div>
+      <div class="lv-title">Mixed Variables — Ek Column, Do Duniya!</div>
+      <div class="lv-xp"><i class="fa-solid fa-star"></i> +30 XP on scroll</div>
+    </div>
+  </div>
+
+  <div class="callout cb-green">
+    <div class="ct"><i class="fa-solid fa-lightbulb"></i> Core Idea — Ek Line Mein</div>
+    <strong>Mixed Variable</strong> = ek column jisme <span class="hl-green">numbers aur text dono saath hote hain</span> — ya jisme ek hi type ke andar do alag meanings hoti hain.<br><br>
+    Real life mein ye bahut common hai — "100", "200+", "N/A", "Unknown", "300 km" — yeh sab ek hi column mein aa jaate hain aur ML model inhe directly nahi samjh sakta!
+  </div>
+
+  <div class="glow-div"></div>
+
+  <h5 style="font-family:var(--font-head);font-weight:800;color:var(--text);margin-bottom:1.2rem;">
+    <i class="fa-solid fa-shapes me-2" style="color:var(--neon-green)"></i>Mixed Variables ke 3 Common Types
+  </h5>
+
+  <div class="row g-3">
+    <div class="col-md-4">
+      <div class="dim-card" style="border-color:rgba(22,163,74,0.3);">
+        <div class="dim-rank" style="color:var(--neon-green);">①</div>
+        <div class="dim-name" style="color:var(--neon-green);">Number + String Mix</div>
+        <div class="dim-code">['100', '200+', 'N/A', '150', 'Unknown']</div>
+        <div class="dim-desc">Column mein mostly numbers hain, lekin kuch special string values bhi hain — "200+" ka matlab "200 se zyada", "N/A" ka matlab missing.</div>
+        <div class="dim-example" style="border-color:rgba(22,163,74,0.2);color:var(--muted);">
+          Example: Paytm transactions — kuch "Pending", kuch ₹ amount
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="dim-card" style="border-color:rgba(8,145,178,0.3);">
+        <div class="dim-rank" style="color:var(--neon-cyan);">②</div>
+        <div class="dim-name" style="color:var(--neon-cyan);">Number + Unit Mix</div>
+        <div class="dim-code">['5 km', '10 km', '3.5 km', '8 km']</div>
+        <div class="dim-desc">Value ke saath unit bhi string mein hai. Pandas ise string maanega — numeric operations nahi ho sakti seedha.</div>
+        <div class="dim-example" style="border-color:rgba(8,145,178,0.2);color:var(--muted);">
+          Example: Ola/Uber distance column — "4.2 km" as string
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="dim-card" style="border-color:rgba(124,58,237,0.3);">
+        <div class="dim-rank" style="color:var(--neon-purple);">③</div>
+        <div class="dim-name" style="color:var(--neon-purple);">Code + Category Mix</div>
+        <div class="dim-code">['A100', 'B200', 'A150', 'C300', 'B180']</div>
+        <div class="dim-desc">Value mein ek letter (category) aur number dono hain. Inhe alag karna padta hai — letter ek feature, number dusra feature.</div>
+        <div class="dim-example" style="border-color:rgba(124,58,237,0.2);color:var(--muted);">
+          Example: Product code "A100" — A=category, 100=SKU number
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout cb-orange mt-4">
+    <div class="ct"><i class="fa-solid fa-india"></i> Real India Examples — Mixed Variables Pehchano</div>
+    <div class="row g-2">
+      <div class="col-md-6">
+        🚗 <strong>Ola/Uber distance:</strong> <span class="inline-code">"4.2 km", "10 km", "N/A"</span><br>
+        💊 <strong>Pharmacy dosage:</strong> <span class="inline-code">"500mg", "1g", "250 mg"</span><br>
+        🏠 <strong>Property area:</strong> <span class="inline-code">"1200 sqft", "2 BHK", "1.5 acres"</span>
+      </div>
+      <div class="col-md-6">
+        💳 <strong>Paytm transaction:</strong> <span class="inline-code">"500", "Pending", "Refunded"</span><br>
+        📦 <strong>Swiggy weight:</strong> <span class="inline-code">"200g", "0.5 kg", "1 kg"</span><br>
+        📱 <strong>JioFiber speed:</strong> <span class="inline-code">"100 Mbps", "Unlimited", "1 Gbps"</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout cb-red mt-3">
+    <div class="ct"><i class="fa-solid fa-triangle-exclamation"></i> Problem — ML Model Ke Saath</div>
+    <span class="inline-code">df['distance'].mean()</span> — <span class="hl-red">Error!</span> "4.2 km" ek string hai, number nahi.<br>
+    <span class="inline-code">df['amount'].sum()</span> — <span class="hl-red">Wrong!</span> "Pending" aur "500" ek saath sum nahi ho sakta.<br><br>
+    <strong>Solution:</strong> Mixed variables ko clean karo → numbers extract karo → categories alag column mein lo → ML-ready format mein convert karo!
+  </div>
+
+  <!-- QUIZ 1 -->
+  <div class="quiz-box" data-quiz="1" data-correct="c" data-xp="25">
+    <div class="quiz-q">🤔 Ek Swiggy dataset mein "delivery_distance" column hai: ["3.2 km", "5 km", "N/A", "8.1 km", "Cancelled"]. Ye column kaunse type ka mixed variable hai aur iska kya problem hai?</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" data-ans="a" data-explain="Nahi. Categorical variable mein sirf text categories hoti hain (Male/Female, Mumbai/Delhi). Yahan numbers bhi hain (3.2, 5, 8.1) — ye mixed variable hai."><span class="opt-letter">A</span>Pure categorical variable hai — koi problem nahi</div>
+      <div class="quiz-opt" data-ans="b" data-explain="Galat. Numerical column mein sirf numbers hote hain. Yahan 'N/A' aur 'Cancelled' strings hain — ye clearly mixed hai."><span class="opt-letter">B</span>Pure numerical variable hai — seedha use kar sakte hain</div>
+      <div class="quiz-opt" data-ans="c" data-explain="Bilkul sahi! Ye Number+String+Unit mixed variable hai. Teen problems hain: (1) '3.2 km' string hai — '3.2' numeric nahi maana jaayega, (2) 'N/A' = missing value properly handle karna hoga, (3) 'Cancelled' = categorical information hai. Inhe alag karo: unit hatao, numbers extract karo, special values ko NaN ya category mein convert karo!"><span class="opt-letter">C</span>Number+String mix hai — unit aur special values ko alag handle karna padega</div>
+      <div class="quiz-opt" data-ans="d" data-explain="Nahi. Boolean columns mein sirf True/False ya 0/1 hote hain. Yahan distances aur special strings hain — ye boolean nahi hai."><span class="opt-letter">D</span>Boolean variable hai — True/False mein convert karo</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+</div>
+
+
+<!-- ████████████████████████████████████
+     LEVEL 1-B : MIXED VARIABLES — DETECTION & CODE
+█████████████████████████████████████ -->
+<div class="level-card lvl-green fade-up" id="s2">
+  <div class="corner-deco">LEVEL 1</div>
+  <div class="lv-header">
+    <div class="lv-icon-wrap ico-cyan"><i class="fa-solid fa-code"></i></div>
+    <div class="lv-meta">
+      <div class="lv-eyebrow">Level 1 · Skill Unlock</div>
+      <div class="lv-title">Mixed Variables — Detection &amp; Cleaning Code</div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-story">
+    <div class="ex-head"><i class="fa-brands fa-python"></i> Mixed Variables Detect aur Clean Karo — Complete Code</div>
+    <div class="ex-body">
+      <div class="code-wrap">
+        <div class="code-header"><span class="code-lang">🐍 Python — Mixed Variables</span><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div></div>
+        <pre><code class="language-python">import pandas as pd
+import numpy as np
+
+# ─── Inline Dataset: Ola Ride Records ───
+data = {
+    'ride_id':   [101, 102, 103, 104, 105, 106, 107, 108],
+    'distance':  ['3.2 km', '5 km', 'N/A', '8.1 km',        # Number + Unit + Special
+                  'Cancelled', '12.5 km', '2 km', '6.8 km'],
+    'fare':      ['120', '200', 'Pending', '310',             # Number + String
+                  'Refunded', '450', '90', '250'],
+    'product_code': ['A100', 'B200', 'A150', 'C300',         # Code + Category mix
+                     'B180', 'A200', 'C100', 'B250'],
+}
+df = pd.DataFrame(data)
+
+print("Original Data:")
+print(df)
+print("\nData Types:")
+print(df.dtypes)
+
+# ════════════════════════════════════════
+# FIX 1: distance column — unit hatao, number nikalo
+# Approach: str.replace() se ' km' hatao, phir pd.to_numeric se convert karo
+# ════════════════════════════════════════
+# Step 1: ' km' text hatao
+df['distance_clean'] = df['distance'].str.replace(' km', '', case=False)
+# Step 2: Special words (N/A, Cancelled) ko NaN kar do
+special_vals = ['N/A', 'Cancelled', 'Unknown', '']
+df['distance_clean'] = df['distance_clean'].apply(
+    lambda x: np.nan if x in special_vals else x
+)
+# Step 3: pd.to_numeric — jo bhi valid number hai woh float banega, baaki NaN
+df['distance_km'] = pd.to_numeric(df['distance_clean'], errors='coerce')
+
+# ════════════════════════════════════════
+# FIX 2: fare column — numeric convert karo
+# pd.to_numeric se: '120' → 120.0 | 'Pending' → NaN (errors='coerce')
+# ════════════════════════════════════════
+df['fare_num'] = pd.to_numeric(df['fare'], errors='coerce')
+# 'Pending', 'Refunded' automatically NaN ho jaate hain!
+
+# ════════════════════════════════════════
+# FIX 3: product_code — category aur number alag karo
+# 'A100' → category='A', number=100
+# str[0] = pehla character (letter), str[1:] = baaki (number)
+# ════════════════════════════════════════
+df['product_category'] = df['product_code'].str[0]       # 'A100' → 'A'
+df['product_num']      = pd.to_numeric(df['product_code'].str[1:])  # 'A100' → 100
+
+# ════════════════════════════════════════
+# FINAL RESULT
+# ════════════════════════════════════════
+# Temporary column drop karo
+df.drop(columns=['distance_clean'], inplace=True)
+
+print("\nCleaned Dataset:")
+print(df[['ride_id','distance_km','fare_num','product_category','product_num']])
+print("\nNew Data Types:")
+print(df[['distance_km','fare_num','product_num']].dtypes)</code></pre>
+        <div class="code-output">🔀 Mixed Variables Cleaned! distance_km: float64 (N/A → NaN, Cancelled → NaN). fare_num: float64 (Pending/Refunded → NaN automatically via pd.to_numeric). product_category: A/B/C strings (str[0]). product_num: 100/200/150 floats (str[1:]). Ab ye sab ML mein use ho sakta hai!</div>
+      </div>
+    </div>
+  </div>
+
+  <h5 style="font-family:var(--font-head);font-weight:800;color:var(--text);margin:1.5rem 0 0.8rem;">
+    <i class="fa-solid fa-table me-2" style="color:var(--neon-green)"></i>Key Functions — Mixed Variables ke Liye
+  </h5>
+  <div class="table-responsive">
+    <table class="gtbl">
+      <thead><tr><th>Function</th><th>Kya Karta Hai</th><th>Kab Use Karein</th></tr></thead>
+      <tbody>
+        <tr><td><span class="inline-code">str.replace(' km', '')</span></td><td>Specific text (unit) hatao string se</td><td>Unit wali strings: "4.2 km" → "4.2"</td></tr>
+        <tr><td><span class="inline-code">str[0]</span></td><td>String ka pehla character lo</td><td>Product codes: "A100" → "A" (category)</td></tr>
+        <tr><td><span class="inline-code">str[1:]</span></td><td>Pehle character ke baad ka hissa lo</td><td>Product codes: "A100" → "100" (number part)</td></tr>
+        <tr><td><span class="inline-code">pd.to_numeric(errors='coerce')</span></td><td>Convert karo, non-numeric = NaN</td><td>Sabse easy fix — "Pending" → NaN automatically</td></tr>
+        <tr><td><span class="inline-code">apply(lambda x: ...)</span></td><td>Har row pe custom function apply karo</td><td>Special values list check karne ke liye</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- ████████████████████████████████████
+     LEVEL 2-A : DATE & TIME VARIABLES
+█████████████████████████████████████ -->
+<div class="level-card lvl-cyan fade-up" id="s3">
+  <div class="corner-deco">LEVEL 2</div>
+  <div class="lv-header">
+    <div class="lv-icon-wrap ico-cyan"><i class="fa-solid fa-calendar-days"></i></div>
+    <div class="lv-meta">
+      <div class="lv-eyebrow">Level 2 · Boss Topic</div>
+      <div class="lv-title">Date &amp; Time Variables — Waqt Ko Feature Banao!</div>
+      <div class="lv-xp"><i class="fa-solid fa-star"></i> +30 XP on scroll</div>
+    </div>
+  </div>
+
+  <div class="callout cb-cyan">
+    <div class="ct"><i class="fa-solid fa-lightbulb"></i> Core Idea — Ek Line Mein</div>
+    <strong>Date &amp; Time Variables</strong> = dates aur timestamps jo raw form mein string ya object hote hain — inhe <span class="hl-green">meaningful features mein convert</span> karna padta hai jaise year, month, day, hour, weekday, season, etc.<br><br>
+    ML model "2024-12-25" string ko nahi samjhega. Lekin agar tum bata do ki ye <em>December</em> hai, <em>Wednesday</em> hai, <em>Winter</em> hai, <em>Holiday</em> hai — toh model patterns seekhega!
+  </div>
+
+  <div class="glow-div"></div>
+
+  <h5 style="font-family:var(--font-head);font-weight:800;color:var(--text);margin-bottom:1.2rem;">
+    <i class="fa-solid fa-layer-group me-2" style="color:var(--neon-cyan)"></i>Date se Kaun Kaun se Features Nikal Sakte Hain?
+  </h5>
+
+  <div class="row g-3">
+    <div class="col-md-3 col-sm-6">
+      <div class="ach-card ac-cyan">
+        <span class="ach-icon">📅</span>
+        <div class="ach-title">Basic Extractions</div>
+        <div class="ach-desc">
+          <strong>Year</strong> — 2024<br>
+          <strong>Month</strong> — 1 to 12<br>
+          <strong>Day</strong> — 1 to 31<br>
+          <strong>Quarter</strong> — Q1/Q2/Q3/Q4
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+      <div class="ach-card ac-blue">
+        <span class="ach-icon">📆</span>
+        <div class="ach-title">Calendar Features</div>
+        <div class="ach-desc">
+          <strong>Weekday</strong> — Mon=0, Sun=6<br>
+          <strong>Is Weekend</strong> — True/False<br>
+          <strong>Week Number</strong> — 1 to 52<br>
+          <strong>Day of Year</strong> — 1 to 365
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+      <div class="ach-card ac-green">
+        <span class="ach-icon">⏰</span>
+        <div class="ach-title">Time Features</div>
+        <div class="ach-desc">
+          <strong>Hour</strong> — 0 to 23<br>
+          <strong>Minute</strong> — 0 to 59<br>
+          <strong>Is Morning</strong> — 6–12<br>
+          <strong>Time of Day</strong> — morning/evening
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+      <div class="ach-card ac-purple">
+        <span class="ach-icon">📊</span>
+        <div class="ach-title">Derived Features</div>
+        <div class="ach-desc">
+          <strong>Days Since</strong> — reference date se<br>
+          <strong>Is Holiday</strong> — custom list<br>
+          <strong>Season</strong> — Summer/Winter<br>
+          <strong>Days to Event</strong> — countdown
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout cb-green mt-3">
+    <div class="ct"><i class="fa-solid fa-india"></i> Real India Example — Swiggy Order Patterns</div>
+    Swiggy ke order timestamp se kya kya features nikalte hain:<br><br>
+    → <strong>Hour = 13</strong> → Lunch time! Orders zyada honge<br>
+    → <strong>Weekday = Friday/Saturday</strong> → Weekend effect — party orders<br>
+    → <strong>Month = October-November</strong> → Navratri/Diwali — sweets aur snacks surge<br>
+    → <strong>Is_Weekend = True</strong> → Delivery time zyada — riders busy<br>
+    → <strong>Season = Summer (April-June)</strong> → Ice cream aur cold drinks ke orders<br><br>
+    Ek simple timestamp column se 10+ useful features! Ye sab ML model ko patterns seekhne mein help karte hain.
+  </div>
+
+  <!-- QUIZ 2 -->
+  <div class="quiz-box" data-quiz="2" data-correct="b" data-xp="25">
+    <div class="quiz-q">🤔 Pandas mein "2024-01-15" string ko datetime format mein convert karne ke liye kaunsa function use karte hain?</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" data-ans="a" data-explain="Galat. datetime.now() current time deta hai — kisi existing string ko convert nahi karta. Ye Python datetime module ka function hai, pandas ka nahi."><span class="opt-letter">A</span>datetime.now()</div>
+      <div class="quiz-opt" data-ans="b" data-explain="Bilkul sahi! pd.to_datetime() pandas ka official function hai jo strings ko datetime64 format mein convert karta hai. Iske baad .dt accessor se year, month, day, weekday sab nikal sakte ho! Ye har date/time column ke liye pehla step hona chahiye."><span class="opt-letter">B</span>pd.to_datetime()</div>
+      <div class="quiz-opt" data-ans="c" data-explain="Galat. pd.to_numeric() numbers ke liye hai, dates ke liye nahi. 'to_numeric' '2024-01-15' ko number mein convert karne ki koshish karega aur fail ya galat result dega."><span class="opt-letter">C</span>pd.to_numeric()</div>
+      <div class="quiz-opt" data-ans="d" data-explain="Nahi. str.split('-') string ko '-' pe tod dega — ['2024', '01', '15'] list milegi. Ye datetime object nahi banega — .dt.year jaisi property use nahi kar sakoge."><span class="opt-letter">D</span>str.split('-')</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+</div>
+
+
+<!-- ████████████████████████████████████
+     LEVEL 2-B : DATE & TIME — CODE
+█████████████████████████████████████ -->
+<div class="level-card lvl-cyan fade-up" id="s4">
+  <div class="corner-deco">LEVEL 2</div>
+  <div class="lv-header">
+    <div class="lv-icon-wrap ico-blue"><i class="fa-solid fa-code"></i></div>
+    <div class="lv-meta">
+      <div class="lv-eyebrow">Level 2 · Skill Unlock</div>
+      <div class="lv-title">Date &amp; Time — Feature Extraction Python Code</div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-tip">
+    <div class="ex-head"><i class="fa-brands fa-python"></i> Date &amp; Time Features Extract Karo — Complete Code</div>
+    <div class="ex-body">
+      <div class="code-wrap">
+        <div class="code-header"><span class="code-lang">🐍 Python — Date &amp; Time Features</span><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div></div>
+        <pre><code class="language-python">import pandas as pd
+import numpy as np
+
+# ─── Inline Dataset: Swiggy Orders ───
+data = {
+    'order_id':  [1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008],
+    'order_time': ['2024-01-15 13:30:00', '2024-03-22 20:15:00',
+                   '2024-06-10 08:45:00', '2024-10-25 19:00:00',
+                   '2024-12-25 12:00:00', '2024-04-07 22:30:00',
+                   '2024-08-15 07:15:00', '2024-11-01 15:45:00'],
+    'city':      ['Mumbai', 'Delhi', 'Bangalore', 'Hyderabad',
+                  'Chennai', 'Pune', 'Kolkata', 'Ahmedabad'],
+    'amount':    [350, 520, 180, 430, 850, 290, 620, 410],
+}
+df = pd.DataFrame(data)
+
+# ════════════════════════════════════════
+# STEP 1: String → datetime convert karo
+# ════════════════════════════════════════
+df['order_time'] = pd.to_datetime(df['order_time'])
+print("Data type after conversion:", df['order_time'].dtype)
+# datetime64[ns]
+
+# ════════════════════════════════════════
+# STEP 2: Basic date features nikalo
+# ════════════════════════════════════════
+df['year']     = df['order_time'].dt.year        # 2024
+df['month']    = df['order_time'].dt.month       # 1-12
+df['day']      = df['order_time'].dt.day         # 1-31
+df['quarter']  = df['order_time'].dt.quarter     # 1-4
+df['weekday']  = df['order_time'].dt.dayofweek   # 0=Mon, 6=Sun
+df['week_num'] = df['order_time'].dt.isocalendar().week.astype(int)
+
+# ════════════════════════════════════════
+# STEP 3: Time features nikalo
+# ════════════════════════════════════════
+df['hour']   = df['order_time'].dt.hour    # 0-23
+df['minute'] = df['order_time'].dt.minute  # 0-59
+
+# ════════════════════════════════════════
+# STEP 4: Derived / Business features banao
+# ════════════════════════════════════════
+# Weekend flag
+df['is_weekend'] = df['weekday'].isin([5, 6]).astype(int)  # 5=Sat, 6=Sun
+
+# Time of day category
+def time_of_day(hour):
+    if 5 <= hour < 12:   return 'Morning'
+    elif 12 <= hour < 17: return 'Afternoon'
+    elif 17 <= hour < 21: return 'Evening'
+    else:                 return 'Night'
+
+df['time_of_day'] = df['hour'].apply(time_of_day)
+
+# Indian Season (roughly)
+def indian_season(month):
+    if month in [3, 4, 5]:   return 'Summer'
+    elif month in [6, 7, 8, 9]: return 'Monsoon'
+    elif month in [10, 11]:  return 'Autumn'
+    else:                    return 'Winter'  # 12, 1, 2
+
+df['season'] = df['month'].apply(indian_season)
+
+# Days since a reference date
+reference_date = pd.Timestamp('2024-01-01')
+df['days_since_newyear'] = (df['order_time'] - reference_date).dt.days
+
+# ════════════════════════════════════════
+# RESULT
+# ════════════════════════════════════════
+print("\nExtracted Features:")
+print(df[['order_id','month','weekday','hour','is_weekend',
+          'time_of_day','season','days_since_newyear']].to_string())</code></pre>
+        <div class="code-output">📅 Ek timestamp se 10+ features! Christmas order (Dec 25, hour=12) → Winter, Afternoon, is_weekend=1, days_since_newyear=359. Independence Day (Aug 15, hour=7) → Monsoon, Morning. Ab ML model in patterns se seekhega!</div>
+      </div>
+    </div>
+  </div>
+
+  <h5 style="font-family:var(--font-head);font-weight:800;color:var(--text);margin:1.5rem 0 0.8rem;">
+    <i class="fa-solid fa-table me-2" style="color:var(--neon-cyan)"></i>Key .dt Accessor Properties
+  </h5>
+  <div class="table-responsive">
+    <table class="gtbl">
+      <thead><tr><th>Property</th><th>Output</th><th>Example (2024-12-25 13:30)</th></tr></thead>
+      <tbody>
+        <tr><td><span class="inline-code">.dt.year</span></td><td>Year as integer</td><td>2024</td></tr>
+        <tr><td><span class="inline-code">.dt.month</span></td><td>Month 1–12</td><td>12</td></tr>
+        <tr><td><span class="inline-code">.dt.day</span></td><td>Day of month 1–31</td><td>25</td></tr>
+        <tr><td><span class="inline-code">.dt.dayofweek</span></td><td>0=Monday … 6=Sunday</td><td>2 (Wednesday)</td></tr>
+        <tr><td><span class="inline-code">.dt.hour</span></td><td>Hour 0–23</td><td>13</td></tr>
+        <tr><td><span class="inline-code">.dt.quarter</span></td><td>Quarter 1–4</td><td>4</td></tr>
+        <tr><td><span class="inline-code">.dt.is_month_start</span></td><td>True/False</td><td>False</td></tr>
+        <tr><td><span class="inline-code">.dt.days_in_month</span></td><td>Days in that month</td><td>31</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- ████████████████████████████████████
+     LEVEL 3-A : COMPLETE CASE ANALYSIS
+█████████████████████████████████████ -->
+<div class="level-card lvl-blue fade-up" id="s5">
+  <div class="corner-deco">LEVEL 3</div>
+  <div class="lv-header">
+    <div class="lv-icon-wrap ico-blue"><i class="fa-solid fa-filter-circle-xmark"></i></div>
+    <div class="lv-meta">
+      <div class="lv-eyebrow">Level 3 · Boss Topic</div>
+      <div class="lv-title">Complete Case Analysis — Sirf Complete Rows Rakho!</div>
+      <div class="lv-xp"><i class="fa-solid fa-star"></i> +30 XP on scroll</div>
+    </div>
+  </div>
+
+  <div class="callout cb-blue">
+    <div class="ct"><i class="fa-solid fa-lightbulb"></i> Core Idea — Ek Line Mein</div>
+    <strong>Complete Case Analysis (CCA)</strong> = missing values handle karne ka <span class="hl-green">sabse simple method</span> — jis bhi row mein koi bhi NaN ho, <strong>us poori row ko delete karo!</strong><br><br>
+    Sirf "complete cases" (jinmein koi bhi value missing nahi) rakho. Python mein ek line: <span class="inline-code">df.dropna()</span>
+  </div>
+
+  <div class="glow-div"></div>
+
+  <h5 style="font-family:var(--font-head);font-weight:800;color:var(--text);margin-bottom:1.2rem;">
+    <i class="fa-solid fa-diagram-project me-2" style="color:var(--neon-blue)"></i>CCA Visually — Kya Hota Hai?
+  </h5>
+
+  <div class="row g-3">
+    <div class="col-md-5">
+      <div class="callout cb-orange" style="margin:0;">
+        <div class="ct"><i class="fa-solid fa-database"></i> Before CCA</div>
+        <table class="gtbl mt-1" style="font-size:0.82rem;">
+          <thead><tr><th>Name</th><th>Age</th><th>Salary</th><th>City</th></tr></thead>
+          <tbody>
+            <tr><td>Aarav</td><td>25</td><td>40000</td><td>Mumbai</td></tr>
+            <tr style="background:rgba(220,38,38,0.06);"><td>Priya</td><td style="color:var(--neon-red);font-weight:700;">NaN</td><td>55000</td><td>Delhi</td></tr>
+            <tr><td>Ravi</td><td>30</td><td>48000</td><td>Surat</td></tr>
+            <tr style="background:rgba(220,38,38,0.06);"><td>Sneha</td><td>22</td><td style="color:var(--neon-red);font-weight:700;">NaN</td><td style="color:var(--neon-red);font-weight:700;">NaN</td></tr>
+            <tr><td>Kiran</td><td>28</td><td>62000</td><td>Pune</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:0.6rem;font-size:0.82rem;color:var(--muted);">5 rows, 2 incomplete rows</div>
+      </div>
+    </div>
+    <div class="col-md-2 d-flex align-items-center justify-content-center">
+      <div style="text-align:center;font-size:2rem;">➡️<br><small style="font-size:0.7rem;font-family:var(--font-mono);color:var(--neon-blue);">dropna()</small></div>
+    </div>
+    <div class="col-md-5">
+      <div class="callout cb-green" style="margin:0;">
+        <div class="ct"><i class="fa-solid fa-check-circle"></i> After CCA</div>
+        <table class="gtbl mt-1" style="font-size:0.82rem;">
+          <thead><tr><th>Name</th><th>Age</th><th>Salary</th><th>City</th></tr></thead>
+          <tbody>
+            <tr><td>Aarav</td><td>25</td><td>40000</td><td>Mumbai</td></tr>
+            <tr><td>Ravi</td><td>30</td><td>48000</td><td>Surat</td></tr>
+            <tr><td>Kiran</td><td>28</td><td>62000</td><td>Pune</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:0.6rem;font-size:0.82rem;color:var(--muted);">3 rows — sirf complete cases</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout cb-green mt-3">
+    <div class="ct"><i class="fa-solid fa-india"></i> Real India Example — HDFC Loan Applications</div>
+    HDFC ke 10,000 loan applications hain. 800 applications mein kuch fields missing hain (income, CIBIL score, employment type).<br><br>
+    <strong>CCA apply karo:</strong> Sirf woh 9,200 applications use karo jinmein sab kuch filled hai. 800 incomplete applications delete!<br><br>
+    <strong>Kab sahi hai?</strong> Agar 800 applications randomly incomplete hain (MCAR) aur 9,200 remaining still large enough dataset hai — CCA perfect!<br>
+    <strong>Kab galat hai?</strong> Agar sirf low-income applicants hi income field chhod rahe hain (MNAR) — toh CCA biased model banayega!
+  </div>
+
+  <div class="row g-3 mt-2">
+    <div class="col-md-6">
+      <div class="callout cb-green h-100" style="margin:0;">
+        <div class="ct"><i class="fa-solid fa-check-double"></i> CCA ke Fayde</div>
+        ✅ Extremely simple — ek line code: <span class="inline-code">df.dropna()</span><br>
+        ✅ No information "fabricated" — real data sirf<br>
+        ✅ Unbiased estimates jab MCAR ho<br>
+        ✅ ML models ke saath directly compatible<br>
+        ✅ Debugging easy — no imputed values to explain
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="callout cb-red h-100" style="margin:0;">
+        <div class="ct"><i class="fa-solid fa-triangle-exclamation"></i> CCA ki Limitations</div>
+        ❌ Data loss — chhota dataset aur zyada hua!<br>
+        ❌ Agar MNAR hai toh biased model banega<br>
+        ❌ Bahut zyada NaN → almost koi row nahi bachegi<br>
+        ❌ Incomplete rows mein bhi useful info thi<br>
+        ❌ Small datasets mein nuksandaayak
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ 3 -->
+  <div class="quiz-box" data-quiz="3" data-correct="a" data-xp="25">
+    <div class="quiz-q">🤔 Complete Case Analysis kab BEST kaam karta hai?</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" data-ans="a" data-explain="Bilkul sahi! CCA ke liye ideal conditions: (1) MCAR — missingness completely random hai, kisi bias ka sign nahi, (2) Missing % kam hai (5–10%) — data loss manageable, (3) Dataset bada hai — kuch rows jane ke baad bhi kaafi data bachega. In conditions mein CCA fastest, simplest aur unbiased solution hai!"><span class="opt-letter">A</span>Jab missing data MCAR ho, missing % kam ho (&lt;10%), aur dataset bada ho</div>
+      <div class="quiz-opt" data-ans="b" data-explain="Galat. MNAR (Missing Not At Random) mein CCA worst choice hai! Agar sirf ek group ki values missing hain (e.g., high-risk patients test skip karte hain), toh CCA se woh group completely remove ho jaayega — severely biased model banega."><span class="opt-letter">B</span>Jab missing data MNAR ho — sabse acha result deta hai</div>
+      <div class="quiz-opt" data-ans="c" data-explain="Nahi. 50%+ missing pe CCA catastrophic hoga — bahut kam rows bachenge. Agar 50% rows mein kuch na kuch NaN hai, CCA se dataset ka bada hissa chala jaayega. Is case mein imputation methods zyada suitable hain."><span class="opt-letter">C</span>Jab 50%+ rows mein missing values hon</div>
+      <div class="quiz-opt" data-ans="d" data-explain="Nahi, ulta hai. Chhote datasets (100 rows) mein 10 rows delete karna = 10% loss, jo significant hai. Bade datasets mein 1000 rows delete karna negligible hai. CCA chhote datasets mein costly hota hai."><span class="opt-letter">D</span>Chhote datasets mein — data loss minimal hota hai</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+</div>
+
+
+<!-- ████████████████████████████████████
+     LEVEL 3-B : CCA — CODE + WHEN TO USE
+█████████████████████████████████████ -->
+<div class="level-card lvl-blue fade-up" id="s6">
+  <div class="corner-deco">LEVEL 3</div>
+  <div class="lv-header">
+    <div class="lv-icon-wrap ico-purple"><i class="fa-solid fa-code"></i></div>
+    <div class="lv-meta">
+      <div class="lv-eyebrow">Level 3 · Skill Unlock</div>
+      <div class="lv-title">CCA — Python Code (All Variations)</div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-tech">
+    <div class="ex-head"><i class="fa-brands fa-python"></i> Complete Case Analysis — Full Python Code</div>
+    <div class="ex-body">
+      <div class="code-wrap">
+        <div class="code-header"><span class="code-lang">🐍 Python — CCA / dropna()</span><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div></div>
+        <pre><code class="language-python">import pandas as pd
+import numpy as np
+
+# ─── Inline Dataset: Student Exam Records ───
+data = {
+    'student':  ['Aarav','Priya','Ravi','Sneha','Karan',
+                 'Divya','Mohit','Ananya','Vikram','Pooja'],
+    'age':      [22, np.nan, 25, 23, np.nan, 21, 24, np.nan, 26, 20],
+    'marks':    [85, 90, np.nan, 78, 88, np.nan, 72, 95, 80, np.nan],
+    'city':     ['Mumbai','Delhi', np.nan,'Surat','Mumbai',
+                 np.nan,'Delhi','Pune','Bangalore','Chennai'],
+    'attendance':[90, 85, 80, np.nan, 92, 88, np.nan, 95, 78, 85],
+}
+df = pd.DataFrame(data)
+
+print("Original Dataset:")
+print(df)
+print(f"\nShape: {df.shape}")
+print(f"\nMissing values per column:\n{df.isnull().sum()}")
+print(f"\nRows with at least one NaN: {df.isnull().any(axis=1).sum()}")
+
+# ════════════════════════════════════════
+# METHOD 1: All NaN rows hatao (basic CCA)
+# ════════════════════════════════════════
+df_cca = df.dropna()
+print(f"\n--- Basic CCA (dropna all) ---")
+print(f"Rows before: {len(df)} | Rows after: {len(df_cca)}")
+print(df_cca)
+
+# ════════════════════════════════════════
+# METHOD 2: Specific columns pe CCA
+# sirf marks aur age missing ho toh hi drop karo
+# ════════════════════════════════════════
+df_cca2 = df.dropna(subset=['marks', 'age'])
+print(f"\n--- CCA on specific columns (marks + age) ---")
+print(f"Rows before: {len(df)} | Rows after: {len(df_cca2)}")
+
+# ════════════════════════════════════════
+# METHOD 3: Threshold — agar 2+ columns NaN hain toh drop
+# ════════════════════════════════════════
+# thresh=3 means: kam se kam 3 non-NaN values chahiye row mein
+df_cca3 = df.dropna(thresh=3)
+print(f"\n--- CCA with thresh=3 ---")
+print(f"Rows before: {len(df)} | Rows after: {len(df_cca3)}")
+
+# ════════════════════════════════════════
+# BEFORE vs AFTER — Statistics Check
+# ════════════════════════════════════════
+print("\n--- Before vs After: marks column ---")
+print(f"Mean BEFORE: {df['marks'].mean():.2f}")
+print(f"Mean AFTER:  {df_cca['marks'].mean():.2f}")
+print(f"Missing %:   {df.isnull().sum().sum() / df.size * 100:.1f}% original")
+print(f"Missing %:   {df_cca.isnull().sum().sum() / df_cca.size * 100:.1f}% after CCA")</code></pre>
+        <div class="code-output">🧹 CCA Results: Basic dropna() = 10 → 4 rows (60% loss!). Specific columns (marks+age) = 10 → 6 rows. thresh=3 = 10 → 8 rows. Missing % after = 0.0%! Lekin 10 mein se 4 sirf bachne pe — yeh dataset chhota tha, CCA aggressive tha!</div>
+      </div>
+    </div>
+  </div>
+
+  <h5 style="font-family:var(--font-head);font-weight:800;color:var(--text);margin:1.5rem 0 0.8rem;">
+    <i class="fa-solid fa-table me-2" style="color:var(--neon-blue)"></i>dropna() Parameters — Full Reference
+  </h5>
+  <div class="table-responsive">
+    <table class="gtbl">
+      <thead><tr><th>Parameter</th><th>Values</th><th>Matlab</th></tr></thead>
+      <tbody>
+        <tr><td><span class="inline-code">axis</span></td><td>0 (rows) ya 1 (columns)</td><td>Rows drop karo (default=0) ya columns drop karo</td></tr>
+        <tr><td><span class="inline-code">how</span></td><td>'any' ya 'all'</td><td>'any' = koi bhi NaN → drop. 'all' = sab NaN tab hi drop</td></tr>
+        <tr><td><span class="inline-code">subset</span></td><td>Column names list</td><td>Sirf in columns mein NaN dekho, baaki ignore</td></tr>
+        <tr><td><span class="inline-code">thresh</span></td><td>Integer n</td><td>Kam se kam n non-NaN values chahiye row mein rakhne ke liye</td></tr>
+        <tr><td><span class="inline-code">inplace</span></td><td>True/False</td><td>True = original df modify karo, False = new df return karo</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- ████████████████████████████████████
+     LEVEL 4 : CCA vs IMPUTATION
+█████████████████████████████████████ -->
+<div class="level-card lvl-purple fade-up" id="s7">
+  <div class="corner-deco">LEVEL 4</div>
+  <div class="lv-header">
+    <div class="lv-icon-wrap ico-purple"><i class="fa-solid fa-scale-balanced"></i></div>
+    <div class="lv-meta">
+      <div class="lv-eyebrow">Level 4 · Boss Topic</div>
+      <div class="lv-title">CCA vs Imputation — Kab Kaunsa Method?</div>
+      <div class="lv-xp"><i class="fa-solid fa-star"></i> +30 XP on scroll</div>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="gtbl">
+      <thead><tr><th>Feature</th><th>CCA (dropna)</th><th>Imputation (fill)</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Kaise kaam karta hai</strong></td><td>NaN wali rows delete karo</td><td>NaN ko estimated value se fill karo</td></tr>
+        <tr><td><strong>Data loss</strong></td><td><span class="stat-pill sp-red">Haan — rows jaati hain</span></td><td><span class="stat-pill sp-green">Nahi — rows bachi rahti hain</span></td></tr>
+        <tr><td><strong>Best missingness type</strong></td><td><span class="stat-pill sp-cyan">MCAR only</span></td><td><span class="stat-pill sp-green">MCAR, MAR, aur MNAR</span></td></tr>
+        <tr><td><strong>Missing % limit</strong></td><td><span class="stat-pill sp-yellow">&lt; 5–10% ideal</span></td><td><span class="stat-pill sp-green">5–40% tak manageable</span></td></tr>
+        <tr><td><strong>Code complexity</strong></td><td><span class="stat-pill sp-green">1 line — df.dropna()</span></td><td><span class="stat-pill sp-yellow">Thoda zyada — strategy choose karni padti</span></td></tr>
+        <tr><td><strong>Bias risk</strong></td><td><span class="stat-pill sp-red">High agar MNAR</span></td><td><span class="stat-pill sp-yellow">Depends on method chosen</span></td></tr>
+        <tr><td><strong>Medical / fraud data</strong></td><td><span class="stat-pill sp-red">❌ Avoid</span></td><td><span class="stat-pill sp-green">✅ Preferred</span></td></tr>
+        <tr><td><strong>Quick EDA / prototype</strong></td><td><span class="stat-pill sp-green">✅ Perfect</span></td><td><span class="stat-pill sp-yellow">Overkill sometimes</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout cb-yellow mt-4">
+    <div class="ct"><i class="fa-solid fa-brain"></i> Decision Framework — 3 Questions Puchho</div>
+    <div class="step-timeline mt-2">
+      <div class="step-item" data-step="1">
+        <div class="step-label">Missingness MCAR hai kya?</div>
+        <div class="step-body">
+          Agar haan → CCA safe hai. Agar MNAR (rich log income nahi batate) → <strong>CCA mat karo, imputation karo!</strong><br>
+          <em style="color:var(--dim);">Check: missing values ka koi pattern hai? Kisi specific group ke liye zyada missing hai?</em>
+        </div>
+      </div>
+      <div class="step-item" data-step="2">
+        <div class="step-label">Missing % kitna hai?</div>
+        <div class="step-body">
+          <strong>&lt; 5%</strong>: CCA safe — loss negligible hai.<br>
+          <strong>5–15%</strong>: CCA caution ke saath — dataset size pe depend karta hai.<br>
+          <strong>&gt; 15%</strong>: Imputation better — CCA se bahut data jayega.
+        </div>
+      </div>
+      <div class="step-item" data-step="3">
+        <div class="step-label">Dataset kitna bada hai?</div>
+        <div class="step-body">
+          <strong>1 lakh+ rows</strong>: 5% delete karna = 5000 rows — still plenty data.<br>
+          <strong>200 rows</strong>: 5% delete karna = 10 rows — significant loss!<br>
+          <em style="color:var(--dim);">Chhote datasets mein hamesha imputation prefer karo.</em>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ 4 -->
+  <div class="quiz-box" data-quiz="4" data-correct="d" data-xp="25">
+    <div class="quiz-q">🤔 Ek Zomato dataset mein 50,000 orders hain. 2,500 orders mein "delivery_time" missing hai. Investigation se pata chala ki sirf rainy days pe delivery time nahi record hota (sensor fault). Kaunsa approach best hai?</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" data-ans="a" data-explain="Galat. 2500 rows = 5% loss — manageable hai, lekin problem yeh hai ki ye MCAR nahi hai! Rain days pe zyada missing hai — ye MAR ya MNAR hai. CCA se rain day patterns completely remove ho jaayenge — model rain mein delivery time predict nahi kar paayega."><span class="opt-letter">A</span>CCA — df.dropna() se 2500 rows hata do, 47500 kafi hain</div>
+      <div class="quiz-opt" data-ans="b" data-explain="Nahi. Missing Indicator is situation mein zyada helpful nahi — hum delivery time predict karna chahte hain, pattern signal nahi. Missing Indicator MNAR cases ke liye hai jahan missingness itself meaningful hai."><span class="opt-letter">B</span>Missing Indicator add karo aur chod do</div>
+      <div class="quiz-opt" data-ans="c" data-explain="Nahi. 0 se fill karna wrong imputation hai — delivery time 0 matlab order instantly deliver hua? Ye clearly unrealistic hai aur model ko confuse karega."><span class="opt-letter">C</span>Delivery time ko 0 se fill karo</div>
+      <div class="quiz-opt" data-ans="d" data-explain="Bilkul sahi! Ye MAR case hai — missingness rain ke saath related hai. Imputation best choice hai kyunki: (1) CCA se rain day patterns remove ho jaayenge — model rain mein kaam nahi karega, (2) Mean ya median imputation se rain day delays underestimate honge. Best approach: Rain day ke data se mean nikalo aur usi se fill karo (conditional imputation) ya KNN Imputer use karo jo weather feature dekhe."><span class="opt-letter">D</span>Imputation — kyunki missingness MAR hai (rain-related pattern), CCA biased model banega</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+</div>
+
+
+<!-- ████████████████████████████████████
+     LEVEL 5 : PUTTING IT ALL TOGETHER
+█████████████████████████████████████ -->
+<div class="level-card lvl-yellow fade-up" id="s8">
+  <div class="corner-deco">LEVEL 5</div>
+  <div class="lv-header">
+    <div class="lv-icon-wrap ico-yellow"><i class="fa-solid fa-layer-group"></i></div>
+    <div class="lv-meta">
+      <div class="lv-eyebrow">Level 5 · Boss Topic</div>
+      <div class="lv-title">Sabko Ek Saath — Realistic Dataset Cleaning Pipeline</div>
+      <div class="lv-xp"><i class="fa-solid fa-star"></i> +30 XP on scroll</div>
+    </div>
+  </div>
+
+  <div class="callout cb-yellow">
+    <div class="ct"><i class="fa-solid fa-lightbulb"></i> Real World Mein Aisa Aata Hai</div>
+    Ek real dataset mein <strong>sab problems ek saath</strong> milti hain — mixed variables, date columns, aur missing values bhi! Ek complete cleaning pipeline banate hain jisme sab kuch handle ho.
+  </div>
+
+  <div class="ex-card ex-story">
+    <div class="ex-head"><i class="fa-brands fa-python"></i> Complete Data Cleaning Pipeline — Mixed + DateTime + CCA</div>
+    <div class="ex-body">
+      <div class="code-wrap">
+        <div class="code-header"><span class="code-lang">🐍 Python — Full Pipeline</span><div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div></div>
+        <pre><code class="language-python">import pandas as pd
+import numpy as np
+
+# ─── Inline Dataset: Ola Rides with all problem types ───
+data = {
+    'ride_id':   [101, 102, 103, 104, 105, 106, 107, 108, 109, 110],
+    'booking_time': ['2024-03-15 08:30:00','2024-06-22 14:15:00',
+                     '2024-10-05 20:00:00','2024-01-18 07:45:00',
+                     None,                 '2024-08-11 18:30:00',
+                     '2024-12-25 11:00:00','2024-04-30 16:20:00',
+                     '2024-09-01 09:10:00','2024-07-14 21:45:00'],
+    'distance':  ['5.2 km','8 km','N/A','12.5 km','3.8 km',
+                  'Cancelled','6.1 km','9.3 km',None,'4.7 km'],
+    'fare':      ['180','250','Pending','420','140',
+                  'Refunded','210','310',None,'165'],
+    'rating':    [4.5, None, 4.2, 4.8, 4.0, None, 4.7, 4.3, 4.6, None],
+    'city':      ['Mumbai','Delhi',None,'Pune','Bangalore',
+                  'Mumbai','Chennai',None,'Hyderabad','Kolkata'],
+}
+df = pd.DataFrame(data)
+
+print("=== STEP 1: Original Dataset ===")
+print(df)
+print(f"\nShape: {df.shape}")
+print(f"Missing values:\n{df.isnull().sum()}")
+
+# ════════════════════════════════
+# STEP 2: Date-Time Handle karo
+# ════════════════════════════════
+df['booking_time'] = pd.to_datetime(df['booking_time'], errors='coerce')
+df['hour']         = df['booking_time'].dt.hour
+df['month']        = df['booking_time'].dt.month
+df['is_weekend']   = df['booking_time'].dt.dayofweek.isin([5,6]).astype('Int64')
+
+print("\n=== STEP 2: DateTime Features Added ===")
+print(df[['ride_id','hour','month','is_weekend']].head())
+
+# ════════════════════════════════
+# STEP 3: Mixed Variables Clean karo
+# Simple approach: str.replace + pd.to_numeric
+# ════════════════════════════════
+
+# distance: ' km' text hatao, special values NaN, phir numeric convert
+special_vals = ['N/A', 'Cancelled', 'Refunded', 'Pending', 'Unknown', '']
+
+df['distance_clean'] = df['distance'].str.replace(' km', '', case=False)
+df['distance_clean'] = df['distance_clean'].apply(
+    lambda x: np.nan if x in special_vals else x
+)
+df['distance_km'] = pd.to_numeric(df['distance_clean'], errors='coerce')
+
+# fare: sirf pd.to_numeric — 'Pending', 'Refunded' automatically NaN ho jaate
+df['fare_num'] = pd.to_numeric(df['fare'], errors='coerce')
+
+# Cleanup temporary column
+df.drop(columns=['distance_clean'], inplace=True)
+
+print("\n=== STEP 3: Mixed Variables Cleaned ===")
+print(df[['ride_id','distance_km','fare_num']])
+
+# ════════════════════════════════
+# STEP 4: CCA — Complete Case Analysis
+# sirf core columns pe apply karo
+# ════════════════════════════════
+core_cols = ['distance_km', 'fare_num', 'rating', 'city', 'hour']
+df_clean = df.dropna(subset=core_cols)
+
+print(f"\n=== STEP 4: CCA Applied ===")
+print(f"Rows before CCA: {len(df)}")
+print(f"Rows after  CCA: {len(df_clean)}")
+print(f"\nFinal Clean Dataset:")
+print(df_clean[['ride_id','distance_km','fare_num',
+                'rating','city','hour','month','is_weekend']])</code></pre>
+        <div class="code-output">✅ Full Pipeline Done! DateTime features extracted (hour, month, is_weekend). Mixed variables cleaned — str.replace(' km','') + pd.to_numeric(errors='coerce') — no regex needed! (distance_km, fare_num — numbers only). CCA applied on core columns: 10 → 5 clean rows. Ab ye data ML model ke liye ready hai — no mixed types, no NaN in important columns!</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ████████████████████████████████████
+     FINAL SUMMARY
+█████████████████████████████████████ -->
+<div class="level-card lvl-pink fade-up" id="s9" style="background:linear-gradient(135deg,rgba(22,163,74,0.04),rgba(8,145,178,0.04),#ffffff);">
+  <div class="lv-header">
+    <div class="lv-icon-wrap ico-pink"><i class="fa-solid fa-trophy"></i></div>
+    <div class="lv-meta">
+      <div class="lv-eyebrow">🏆 Quest Complete!</div>
+      <div class="lv-title">Final Summary &amp; Your Data Engineering Roadmap</div>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="gtbl">
+      <thead><tr><th>Topic</th><th>Core Idea</th><th>Key Tool</th><th>Remember This</th></tr></thead>
+      <tbody>
+        <tr><td><span class="stat-pill sp-green">L1</span> <strong>Mixed Variables</strong></td><td>Number+String column ko alag karo</td><td><span class="inline-code">str.replace(), str[0], str[1:]</span></td><td>Pehle detect karo, phir type by type fix karo</td></tr>
+        <tr><td><span class="stat-pill sp-green">L1</span> <strong>Mixed Cleaning</strong></td><td>pd.to_numeric(errors='coerce') shortcut!</td><td><span class="inline-code">apply(), pd.to_numeric()</span></td><td>Special values → NaN, numbers → float</td></tr>
+        <tr><td><span class="stat-pill sp-cyan">L2</span> <strong>DateTime Variables</strong></td><td>String timestamp → meaningful features</td><td><span class="inline-code">pd.to_datetime(), .dt</span></td><td>Ek timestamp se 10+ features possible!</td></tr>
+        <tr><td><span class="stat-pill sp-cyan">L2</span> <strong>Date Feature Extraction</strong></td><td>Year, month, hour, weekday, season</td><td><span class="inline-code">.dt.year, .dt.hour, apply()</span></td><td>Domain knowledge se useful features banao</td></tr>
+        <tr><td><span class="stat-pill sp-blue">L3</span> <strong>Complete Case Analysis</strong></td><td>NaN wali rows delete karo</td><td><span class="inline-code">df.dropna()</span></td><td>Simple lekin MCAR + low missing % zaroori</td></tr>
+        <tr><td><span class="stat-pill sp-blue">L3</span> <strong>CCA Variations</strong></td><td>subset, thresh, how parameters</td><td><span class="inline-code">dropna(subset=, thresh=)</span></td><td>Specific columns pe CCA — smarter approach</td></tr>
+        <tr><td><span class="stat-pill sp-purple">L4</span> <strong>CCA vs Imputation</strong></td><td>MCAR + large data → CCA, else → Impute</td><td>Domain knowledge first!</td><td>Puchho: MCAR? Missing %? Dataset size?</td></tr>
+        <tr><td><span class="stat-pill sp-yellow">L5</span> <strong>Full Pipeline</strong></td><td>Mixed + DateTime + CCA ek saath</td><td>Sequence matters!</td><td>Date → Mixed → CCA — isi order mein</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="glow-div"></div>
+
+  <div class="mermaid-wrap">
+    <div class="mermaid">
+flowchart TD
+    A["📦 Raw Dataset Mila"] --> B[Mixed Variables?]
+    B -->|Haan| C["🔀 String se Number Extract\nstr.replace, str[0], pd.to_numeric"]
+    B -->|Nahi| D[Date/Time Columns?]
+    C --> D
+    D -->|Haan| E["📅 pd.to_datetime\n.dt.year, .dt.hour, season, weekday"]
+    D -->|Nahi| F[Missing Values?]
+    E --> F
+    F -->|Nahi| G["✅ ML Ready!"]
+    F -->|Haan| H{MCAR + Low % + Large Dataset?}
+    H -->|Haan| I["🧹 CCA — df.dropna()"]
+    H -->|Nahi| J["💉 Imputation\nMean / Median / KNN / MICE"]
+    I --> G
+    J --> G
+    style A fill:#dcfce7,stroke:#16a34a,color:#14532d,rx:12
+    style B fill:#fef9c3,stroke:#b45309,color:#713f12,rx:10
+    style C fill:#d1fae5,stroke:#16a34a,color:#14532d,rx:10
+    style D fill:#fef9c3,stroke:#b45309,color:#713f12,rx:10
+    style E fill:#cffafe,stroke:#0891b2,color:#164e63,rx:10
+    style F fill:#fef9c3,stroke:#b45309,color:#713f12,rx:10
+    style G fill:#dcfce7,stroke:#16a34a,color:#14532d,rx:12
+    style H fill:#f5f3ff,stroke:#7c3aed,color:#4c1d95,rx:10
+    style I fill:#dbeafe,stroke:#2563eb,color:#1e3a8a,rx:10
+    style J fill:#ede9fe,stroke:#7c3aed,color:#4c1d95,rx:10
+    </div>
+  </div>
+
+  <div class="row g-3 mt-2">
+    <div class="col-md-6">
+      <div class="callout cb-blue h-100" style="margin:0;">
+        <div class="ct"><i class="fa-brands fa-python"></i> Key Functions — Zaroor Seekho</div>
+        <strong style="color:var(--neon-green)">str.replace(' km', '')</strong> — unit text hatao<br>
+        <strong style="color:var(--neon-green)">pd.to_numeric(errors='coerce')</strong> — quick numeric convert<br>
+        <strong style="color:var(--neon-cyan)">pd.to_datetime()</strong> — string → datetime<br>
+        <strong style="color:var(--neon-cyan)">.dt.year / .dt.hour / .dt.dayofweek</strong> — features<br>
+        <strong style="color:var(--neon-blue)">df.dropna(subset=, thresh=)</strong> — CCA variations
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="callout cb-green h-100" style="margin:0;">
+        <div class="ct"><i class="fa-solid fa-road"></i> Aage Kya Seekhein? (Next Quest!)</div>
+        🔤 <strong>Encoding</strong> — categorical variables ko numbers mein badlo<br>
+        📊 <strong>Feature Scaling</strong> — StandardScaler, MinMaxScaler<br>
+        🏗️ <strong>Feature Engineering</strong> — new columns banao existing se<br>
+        🔍 <strong>EDA</strong> — matplotlib, seaborn se data visualize karo<br>
+        🤖 <strong>First ML Model</strong> — cleaned data pe train karo!
+      </div>
+    </div>
+  </div>
+
+  <div class="callout cb-pink mt-3">
+    <div class="ct"><i class="fa-solid fa-heart"></i> Final Message</div>
+    <strong>Mixed Variables</strong> = String aur number alag karo — str.replace, str[0]/str[1:] aur pd.to_numeric tumhare best tools hain!<br>
+    → <strong>DateTime</strong> = Ek timestamp se 10 features — pd.to_datetime + .dt accessor = magic!<br>
+    → <strong>CCA</strong> = Sabse simple missing data solution — MCAR, low %, large dataset pe use karo!<br>
+    → <strong>Golden Rule</strong> = Pehle Mixed variables fix karo, phir DateTime features nikalo, phir missing values handle karo!<br><br>
+    <strong style="color:var(--neon-pink)">Teen powerful techniques seekh liye — ab tum kisi bhi messy real-world dataset ko handle kar sakte ho — Certified Data Engineer ban gaye! 🛠️🚀</strong>
+  </div>
+</div>
+
+</div><!-- /container-main -->
+
+<!-- FOOTER -->
+<footer class="gfooter">
+  <div class="container-main">
+    <div class="gfooter-logo"><i class="fa-solid fa-wrench me-2"></i>Python Data Engineering Quest</div>
+    <p style="color:var(--muted);font-size:0.9rem;margin-bottom:0.5rem;">Mixed Variables · Date &amp; Time Features · Complete Case Analysis | Gamified Tutorial</p>
+    <p style="color:var(--dim);font-size:0.82rem;">Made with <i class="fa-solid fa-heart" style="color:var(--neon-pink)"></i> for Hindi-speaking Data Science learners across India 🇮🇳</p>
+  </div>
+</footer>
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- MODAL -->
+<canvas id="confettiCanvas"></canvas>
+<div class="modal-overlay" id="finalModal">
+  <div class="modal-box" id="modalBox">
+    <button class="modal-close" id="modalClose" title="Close">✕</button>
+    <div class="modal-trophy" id="modalTrophy">🏆</div>
+    <div class="modal-title" id="modalTitle">Quest Complete!</div>
+    <div class="modal-subtitle" id="modalSubtitle">Tumne saare 5 quizzes complete kar liye!</div>
+    <div class="score-ring-wrap">
+      <div class="score-ring">
+        <svg viewBox="0 0 120 120">
+          <circle class="ring-bg" cx="60" cy="60" r="52"/>
+          <circle class="ring-fill" id="ringFill" cx="60" cy="60" r="52"/>
+        </svg>
+        <div class="ring-text">
+          <div class="ring-num" id="ringNum">0/5</div>
+          <div class="ring-label">Score</div>
+        </div>
+      </div>
+    </div>
+    <div class="grade-card" id="gradeCard">
+      <div class="grade-letter" id="gradeLetter">S</div>
+      <div class="grade-msg" id="gradeMsg">Exceptional!</div>
+    </div>
+    <div class="modal-xp-row">
+      <span class="mxp-label">⚡ Total XP Earned from Quizzes</span>
+      <span class="mxp-val" id="modalXpVal">0 XP</span>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-btn-retry"    id="modalRetry"><i class="fa-solid fa-rotate-right"></i> Retry All</button>
+      <button class="modal-btn-continue" id="modalContinue"><i class="fa-solid fa-trophy"></i> Awesome, Continue!</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCRIPTS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+/* FINAL MODAL */
+function showFinalModal(){
+  const total=quizTotal,correct=quizCorrect,pct=total>0?correct/total:0,quizXP=correct*25;
+  const grades=[
+    {min:1.0,cls:'grade-s',letter:'S 🌟',msg:'Zabardast! Sab 5/5 correct! Certified Data Engineer! 🛠️'},
+    {min:0.8,cls:'grade-a',letter:'A 🎯',msg:'Bahut badhiya! Almost perfect performance!'},
+    {min:0.6,cls:'grade-b',letter:'B 📘',msg:'Accha kiya! Kuch topics dobara review karo.'},
+    {min:0.4,cls:'grade-c',letter:'C 💪',msg:'Theek hai! Concepts ko aur practice karo.'},
+    {min:0.0,cls:'grade-d',letter:'D 📚',msg:'Aur mehnat karo! Tutorial dobara padho.'},
+  ];
+  const g=grades.find(gr=>pct>=gr.min);
+  document.getElementById('ringNum').textContent=correct+'/'+total;
+  document.getElementById('modalXpVal').textContent=quizXP+' XP';
+  const gc=document.getElementById('gradeCard');gc.className='grade-card '+g.cls;
+  document.getElementById('gradeLetter').textContent=g.letter;
+  document.getElementById('gradeMsg').textContent=g.msg;
+  if(pct===1.0){
+    document.getElementById('modalTrophy').textContent='🏆';
+    document.getElementById('modalTitle').textContent='🎊 Perfect Score!';
+    document.getElementById('modalSubtitle').textContent='Wah! Saare '+total+'/'+total+' sahi! Data Engineer!';
+  }else if(pct>=0.6){
+    document.getElementById('modalTrophy').textContent='🎯';
+    document.getElementById('modalTitle').textContent='Quest Complete!';
+    document.getElementById('modalSubtitle').textContent=correct+' out of '+total+' correct. Kafi accha kiya!';
+  }else{
+    document.getElementById('modalTrophy').textContent='📚';
+    document.getElementById('modalTitle').textContent='Keep Trying!';
+    document.getElementById('modalSubtitle').textContent='Tutorial dobara padho aur retry karo!';
+  }
+  const circumference=327,offset=circumference*(1-pct);
+  const ringColors={'grade-s':'#b45309','grade-a':'#16a34a','grade-b':'#2563eb','grade-c':'#7c3aed','grade-d':'#dc2626'};
+  const ringEl=document.getElementById('ringFill');
+  ringEl.style.stroke=ringColors[g.cls]||'#16a34a';
+  ringEl.style.transition='none';ringEl.style.strokeDashoffset='327';
+  setTimeout(()=>{ringEl.style.transition='stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1)';ringEl.style.strokeDashoffset=offset;},80);
+  document.getElementById('finalModal').classList.add('open');
+  if(pct>=0.6)launchConfetti(pct);
+}
+
+function launchConfetti(pct){
+  const canvas=document.getElementById('confettiCanvas'),ctx=canvas.getContext('2d');
+  canvas.width=window.innerWidth;canvas.height=window.innerHeight;
+  const count=Math.floor(80+pct*140);
+  const colors=['#16a34a','#0891b2','#2563eb','#7c3aed','#b45309','#db2777','#f59e0b'];
+  const pieces=Array.from({length:count},()=>({x:Math.random()*canvas.width,y:Math.random()*-canvas.height*0.6,w:Math.random()*10+5,h:Math.random()*6+3,color:colors[Math.floor(Math.random()*colors.length)],vx:(Math.random()-0.5)*4,vy:Math.random()*4+2,rot:Math.random()*360,vrot:(Math.random()-0.5)*9,alpha:1}));
+  let frame=0;
+  (function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);let alive=false;
+    pieces.forEach(p=>{
+      if(p.y>canvas.height+20)return;alive=true;
+      p.x+=p.vx;p.y+=p.vy;p.rot+=p.vrot;
+      if(p.y>canvas.height*0.65)p.alpha-=0.02;
+      p.alpha=Math.max(0,p.alpha);
+      ctx.save();ctx.globalAlpha=p.alpha;ctx.translate(p.x,p.y);ctx.rotate(p.rot*Math.PI/180);
+      ctx.fillStyle=p.color;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore();
+    });
+    frame++;
+    if(alive&&frame<260)requestAnimationFrame(draw);
+    else ctx.clearRect(0,0,canvas.width,canvas.height);
+  })();
+}
+
+function initQuizzes(){
+  document.querySelectorAll('.quiz-box').forEach(box=>{
+    box.querySelectorAll('.quiz-opt').forEach(opt=>{const n=opt.cloneNode(true);opt.parentNode.replaceChild(n,opt);});
+    const correct=box.dataset.correct,qxp=parseInt(box.dataset.xp)||25;
+    let answered=false;
+    box.querySelectorAll('.quiz-opt').forEach(opt=>{
+      opt.addEventListener('click',()=>{
+        if(answered)return;answered=true;
+        const isCorrect=opt.dataset.ans===correct,fb=box.querySelector('.quiz-feedback');
+        box.querySelectorAll('.quiz-opt').forEach(o=>{
+          o.classList.add('answered-opt');
+          const exDiv=box.querySelector('.quiz-explain[data-for-ans="'+o.dataset.ans+'"]');
+          if(o.dataset.ans===correct){o.classList.add('correct');if(exDiv)exDiv.classList.add('show-correct');}
+          else if(o===opt&&!isCorrect){o.classList.add('wrong');if(exDiv)exDiv.classList.add('show-wrong');}
+          else{o.classList.add('dimmed');}
+        });
+        if(isCorrect){quizCorrect++;fb.className='quiz-feedback show win';fb.innerHTML='<span style="font-size:1.3rem">🎉</span>&nbsp;Zabardast! Sahi jawab! <strong>+'+qxp+' XP</strong> earned!';addXP(qxp);showToast('⚡','+'+qxp+' XP!','Bilkul sahi jawab!','#16a34a');}
+        else{fb.className='quiz-feedback show lose';fb.innerHTML='<span style="font-size:1.3rem">💡</span>&nbsp;Galat! Sahi jawab highlight ho gaya — concept dobara padho!';showToast('💡','Galat!','Sahi jawab dekho aur concept review karo.','#dc2626');}
+        const doneCount=Array.from(document.querySelectorAll('.quiz-box')).filter(b=>b.querySelector('.quiz-opt.answered-opt')).length;
+        if(doneCount===quizTotal)setTimeout(showFinalModal,1200);
+      });
+    });
+  });
+}
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({startOnLoad:true,theme:'base',themeVariables:{primaryColor:'#dcfce7',primaryTextColor:'#14532d',primaryBorderColor:'#16a34a',lineColor:'#94a3b8',secondaryColor:'#cffafe',tertiaryColor:'#ede9fe',fontFamily:'Plus Jakarta Sans, sans-serif',fontSize:'13px'},flowchart:{curve:'basis',padding:24}});
+
+let xp=0,scrollXpEarned=0;
+const XP_MAX=275;  // 5×30 scroll + 5×25 quiz = 275
+const earnedBadges=new Set();
+
+function addXP(amount,badgeId){
+  if(badgeId)scrollXpEarned=Math.min(scrollXpEarned+amount,150);
+  xp=Math.min(xp+amount,XP_MAX);
+  document.getElementById('xpFill').style.width=(xp/XP_MAX*100)+'%';
+  document.getElementById('xpScore').textContent=xp+' / '+XP_MAX+' XP';
+  if(badgeId&&!earnedBadges.has(badgeId)){earnedBadges.add(badgeId);const el=document.getElementById(badgeId);if(el)el.classList.add('earned');}
+  if(xp>=XP_MAX)showToast('🏆','QUEST COMPLETE! 🎊','Certified Data Engineer! 275/275 XP!','#b45309');
+}
+
+function showToast(icon,title,msg,color){
+  const container=document.getElementById('toastContainer');
+  const t=document.createElement('div');t.className='gtoast';
+  t.innerHTML=`<span class="gtoast-icon">${icon}</span><div><div style="font-weight:800;color:${color};font-size:0.9rem;">${title}</div><div style="color:#6b7280;font-size:0.8rem;font-weight:400;">${msg}</div></div>`;
+  container.appendChild(t);
+  setTimeout(()=>t.classList.add('show'),50);
+  setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),400);},3500);
+}
+
+let quizTotal=0,quizCorrect=0;
+
+document.querySelectorAll('.quiz-box').forEach(box=>{
+  quizTotal++;
+  const correct=box.dataset.correct,qxp=parseInt(box.dataset.xp)||25;
+  let answered=false;
+  box.querySelectorAll('.quiz-opt').forEach(opt=>{
+    const explain=opt.dataset.explain||'';
+    if(explain){const div=document.createElement('div');div.className='quiz-explain';div.dataset.forAns=opt.dataset.ans;div.textContent=explain;opt.parentNode.insertBefore(div,opt.nextSibling);}
+  });
+  box.querySelectorAll('.quiz-opt').forEach(opt=>{
+    opt.addEventListener('click',()=>{
+      if(answered)return;answered=true;
+      const ans=opt.dataset.ans,fb=box.querySelector('.quiz-feedback'),isCorrect=ans===correct;
+      box.querySelectorAll('.quiz-opt').forEach(o=>{
+        o.classList.add('answered-opt');
+        const explainDiv=box.querySelector('.quiz-explain[data-for-ans="'+o.dataset.ans+'"]');
+        if(o.dataset.ans===correct){o.classList.add('correct');if(explainDiv)explainDiv.classList.add('show-correct');}
+        else if(o===opt&&!isCorrect){o.classList.add('wrong');if(explainDiv)explainDiv.classList.add('show-wrong');}
+        else{o.classList.add('dimmed');if(o.dataset.ans===correct&&explainDiv)explainDiv.classList.add('show-reveal');}
+      });
+      if(isCorrect){quizCorrect++;fb.className='quiz-feedback show win';fb.innerHTML='<span style="font-size:1.3rem">🎉</span> Zabardast! Sahi jawab! <strong>+'+qxp+' XP</strong> earned!';addXP(qxp);showToast('⚡','+'+qxp+' XP!','Bilkul sahi jawab!','#16a34a');}
+      else{fb.className='quiz-feedback show lose';fb.innerHTML='<span style="font-size:1.3rem">💡</span> Galat! Sahi jawab highlight ho gaya — concept dobara padho!';showToast('💡','Galat!','Sahi jawab dekho aur concept review karo.','#dc2626');}
+      const doneCount=Array.from(document.querySelectorAll('.quiz-box')).filter(b=>b.querySelector('.quiz-opt.answered-opt')).length;
+      if(doneCount===quizTotal)setTimeout(showFinalModal,1200);
+    });
+  });
+});
+
+const fadeObserver=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');fadeObserver.unobserve(e.target);}});},{threshold:0.12});
+document.querySelectorAll('.fade-up').forEach(el=>fadeObserver.observe(el));
+
+const sectionXP={
+  's1':{xp:30,badge:'badge1',msg:'🔀 Mixed Var Pro badge unlocked!'},
+  's3':{xp:30,badge:'badge2',msg:'📅 Date Wrangler badge unlocked!'},
+  's5':{xp:30,badge:'badge3',msg:'⏰ Time Master badge unlocked!'},
+  's7':{xp:30,badge:'badge4',msg:'🧹 CCA Expert badge unlocked!'},
+  's8':{xp:30,badge:'badge5',msg:'🏆 Data Engineer badge unlocked!'},
+};
+const xpObserver=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const id=e.target.id;
+      if(sectionXP[id]&&!earnedBadges.has(sectionXP[id].badge)){const{xp:sx,badge,msg}=sectionXP[id];addXP(sx,badge);showToast('🏅','Badge Unlocked!',msg,'#7c3aed');}
+      xpObserver.unobserve(e.target);
+    }
+  });
+},{threshold:0.12});
+['s1','s3','s5','s7','s8'].forEach(id=>{const el=document.getElementById(id);if(el)xpObserver.observe(el);});
+
+document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(a.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth',block:'start'});});});
+
+function closeModal(){document.getElementById('finalModal').classList.remove('open');}
+document.getElementById('modalClose').addEventListener('click',closeModal);
+document.getElementById('modalContinue').addEventListener('click',closeModal);
+document.getElementById('modalRetry').addEventListener('click',()=>{
+  closeModal();quizCorrect=0;xp=scrollXpEarned;
+  document.getElementById('xpFill').style.width=(xp/XP_MAX*100)+'%';
+  document.getElementById('xpScore').textContent=xp+' / '+XP_MAX+' XP';
+  document.querySelectorAll('.quiz-box').forEach(box=>{
+    box.querySelectorAll('.quiz-opt').forEach(o=>o.classList.remove('correct','wrong','dimmed','answered-opt'));
+    box.querySelectorAll('.quiz-explain').forEach(ex=>ex.classList.remove('show-correct','show-wrong','show-reveal'));
+    const fb=box.querySelector('.quiz-feedback');if(fb){fb.className='quiz-feedback';fb.innerHTML='';}
+  });
+  initQuizzes();window.scrollTo({top:0,behavior:'smooth'});
+});
+document.getElementById('finalModal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+</script>
+
+</body>
+</html>

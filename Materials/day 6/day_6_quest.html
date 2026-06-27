@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MICE Algorithm Quest — Beginners ke liye!</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg:        #f0f4ff;
+  --card:      #ffffff;
+  --card2:     #f5f7ff;
+  --border:    rgba(99,102,241,0.12);
+  --border2:   rgba(99,102,241,0.25);
+  --neon-blue:   #2563eb;
+  --neon-cyan:   #0891b2;
+  --neon-purple: #7c3aed;
+  --neon-pink:   #db2777;
+  --neon-green:  #16a34a;
+  --neon-yellow: #b45309;
+  --neon-orange: #c2410c;
+  --neon-red:    #dc2626;
+  --text:  #1e1b4b;
+  --muted: #4b5563;
+  --dim:   #9ca3af;
+  --font-head: 'Syne', sans-serif;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --glow-blue:   0 4px 16px rgba(37,99,235,0.18), 0 1px 4px rgba(37,99,235,0.10);
+  --glow-purple: 0 4px 16px rgba(124,58,237,0.18), 0 1px 4px rgba(124,58,237,0.10);
+  --glow-cyan:   0 4px 16px rgba(8,145,178,0.18),  0 1px 4px rgba(8,145,178,0.10);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--font-body); background: var(--bg); color: var(--text); line-height: 1.8; font-size: 16px; overflow-x: hidden; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 3px; }
+
+body::before {
+  content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image: linear-gradient(rgba(37,99,235,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(37,99,235,0.06) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+.container-main { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; position: relative; z-index: 1; }
+
+/* ═══ XP BAR ═══ */
+.xp-strip { position: sticky; top: 0; z-index: 1000; background: rgba(240,244,255,0.95); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border2); box-shadow: 0 2px 12px rgba(37,99,235,0.08); padding: 0.65rem 0; }
+.xp-inner { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.xp-label { font-family: var(--font-head); font-weight: 800; font-size: 0.8rem; color: var(--neon-yellow); letter-spacing: 2px; text-transform: uppercase; white-space: nowrap; }
+.xp-bar-wrap { flex: 1; min-width: 120px; background: rgba(37,99,235,0.1); border-radius: 50px; height: 10px; border: 1px solid var(--border2); overflow: hidden; }
+.xp-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--neon-blue), var(--neon-cyan), var(--neon-purple)); border-radius: 50px; transition: width 1s cubic-bezier(0.34,1.56,0.64,1); box-shadow: 0 0 10px rgba(37,99,235,0.35); position: relative; }
+.xp-bar-fill::after { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 30px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4)); animation: shimmer 2s infinite; }
+@keyframes shimmer { 0%,100%{opacity:0;} 50%{opacity:1;} }
+.xp-score { font-family: var(--font-head); font-weight: 800; font-size: 0.9rem; color: var(--neon-yellow); white-space: nowrap; }
+.xp-badges { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.xp-badge { font-size: 0.72rem; font-weight: 700; padding: 0.2rem 0.65rem; border-radius: 50px; border: 1px solid; white-space: nowrap; transition: 0.3s; opacity: 0.35; }
+.xp-badge.earned { opacity: 1; animation: badgePop 0.5s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes badgePop { 0%{transform:scale(0);opacity:0;} 100%{transform:scale(1);opacity:1;} }
+.xp-badge.b1 { border-color: var(--neon-blue);   color: var(--neon-blue);   }
+.xp-badge.b2 { border-color: var(--neon-cyan);   color: var(--neon-cyan);   }
+.xp-badge.b3 { border-color: var(--neon-purple); color: var(--neon-purple); }
+.xp-badge.b4 { border-color: var(--neon-green);  color: var(--neon-green);  }
+
+/* ═══ HERO ═══ */
+.hero { position: relative; overflow: hidden; padding: 6rem 0 5rem; background: radial-gradient(ellipse at 20% 50%, rgba(37,99,235,0.12) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(124,58,237,0.10) 0%, transparent 55%), radial-gradient(ellipse at 60% 80%, rgba(8,145,178,0.07) 0%, transparent 50%), var(--bg); }
+.hero-orbit { position: absolute; top: 50%; right: 8%; transform: translateY(-50%); width: 420px; height: 420px; pointer-events: none; }
+.orbit-ring { position: absolute; border-radius: 50%; border: 1px solid rgba(37,99,235,0.25); top: 50%; left: 50%; transform: translate(-50%, -50%); }
+.orbit-ring:nth-child(1) { width: 150px; height: 150px; animation: spin 12s linear infinite; }
+.orbit-ring:nth-child(2) { width: 250px; height: 250px; animation: spin 20s linear infinite reverse; border-color: rgba(168,85,247,0.2); }
+.orbit-ring:nth-child(3) { width: 350px; height: 350px; animation: spin 30s linear infinite; border-color: rgba(6,182,212,0.15); }
+.orbit-dot { position: absolute; width: 8px; height: 8px; border-radius: 50%; top: -4px; left: 50%; transform: translateX(-50%); }
+.orbit-ring:nth-child(1) .orbit-dot { background: var(--neon-blue);   box-shadow: var(--glow-blue); }
+.orbit-ring:nth-child(2) .orbit-dot { background: var(--neon-purple); box-shadow: var(--glow-purple); }
+.orbit-ring:nth-child(3) .orbit-dot { background: var(--neon-cyan);   box-shadow: var(--glow-cyan); }
+.orbit-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 3rem; animation: float 4s ease-in-out infinite; }
+@keyframes spin  { from{transform:translate(-50%,-50%) rotate(0deg);}  to{transform:translate(-50%,-50%) rotate(360deg);} }
+@keyframes float { 0%,100%{transform:translate(-50%,-50%) translateY(0);} 50%{transform:translate(-50%,-50%) translateY(-12px);} }
+.hero-eyebrow { display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.3); border-radius: 50px; padding: 0.3rem 1rem; font-size: 0.78rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--neon-blue); margin-bottom: 1.5rem; }
+.hero-eyebrow::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--neon-blue); box-shadow: var(--glow-blue); animation: blink 1.5s infinite; }
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.2;} }
+.hero h1 { font-family: var(--font-head); font-weight: 800; font-size: clamp(2.4rem, 5vw, 4rem); line-height: 1.1; letter-spacing: -1.5px; margin-bottom: 1.5rem; }
+.hero h1 .line1 { display: block; color: #1e1b4b; }
+.hero h1 .line2 { display: block; background: linear-gradient(135deg, var(--neon-blue) 0%, var(--neon-cyan) 40%, var(--neon-purple) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero-sub { font-size: 1.1rem; color: var(--muted); max-width: 560px; margin-bottom: 2rem; line-height: 1.75; }
+.hero-stats { display: flex; gap: 2rem; flex-wrap: wrap; margin-bottom: 2.5rem; }
+.hero-stat-item { text-align: center; }
+.hero-stat-num { font-family: var(--font-head); font-weight: 800; font-size: 1.8rem; line-height: 1; background: linear-gradient(135deg, var(--neon-yellow), var(--neon-orange)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero-stat-label { font-size: 0.75rem; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 0.2rem; }
+.hero-cta { display: inline-flex; align-items: center; gap: 0.6rem; background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple)); color: white; font-weight: 700; font-size: 0.95rem; padding: 0.8rem 2rem; border-radius: 50px; border: none; cursor: pointer; text-decoration: none; box-shadow: 0 4px 20px rgba(37,99,235,0.3); transition: 0.3s; animation: pulse-btn 2s infinite; }
+@keyframes pulse-btn { 0%,100%{box-shadow:0 4px 20px rgba(37,99,235,0.28);} 50%{box-shadow:0 4px 32px rgba(37,99,235,0.45);} }
+.hero-cta:hover { transform: translateY(-2px) scale(1.03); color: white; }
+
+/* ═══ QUEST MAP ═══ */
+.quest-map { background: var(--card); border: 1px solid var(--border2); border-radius: 20px; padding: 2rem; margin: 3rem 0; position: relative; box-shadow: 0 4px 24px rgba(37,99,235,0.07); }
+.quest-map::before { content: ''; position: absolute; inset: 0; border-radius: 20px; background: linear-gradient(135deg, rgba(37,99,235,0.03), rgba(124,58,237,0.03)); pointer-events: none; }
+.quest-map-title { font-family: var(--font-head); font-weight: 800; font-size: 1.1rem; color: var(--neon-yellow); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; }
+.quest-map-title::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(234,179,8,0.3), transparent); }
+.quest-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 0.75rem; }
+.quest-item { display: flex; align-items: center; gap: 0.75rem; background: #f8f9ff; border: 1px solid var(--border); border-radius: 12px; padding: 0.75rem 1rem; text-decoration: none; color: var(--muted); font-weight: 600; font-size: 0.88rem; transition: 0.25s; }
+.quest-item:hover { background: rgba(37,99,235,0.07); border-color: rgba(37,99,235,0.3); color: var(--neon-blue); transform: translateX(4px); }
+.quest-num { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-weight: 800; font-size: 0.78rem; flex-shrink: 0; }
+
+/* ═══ LEVEL CARD ═══ */
+.level-card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 2.5rem; margin-bottom: 2.5rem; position: relative; overflow: hidden; transition: border-color 0.3s, box-shadow 0.3s; }
+.level-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: 24px 24px 0 0; }
+.level-card.lvl-blue::before   { background: linear-gradient(90deg, var(--neon-blue),   var(--neon-cyan));   }
+.level-card.lvl-cyan::before   { background: linear-gradient(90deg, var(--neon-cyan),   var(--neon-green));  }
+.level-card.lvl-purple::before { background: linear-gradient(90deg, var(--neon-purple), var(--neon-pink));   }
+.level-card.lvl-green::before  { background: linear-gradient(90deg, var(--neon-green),  var(--neon-cyan));   }
+.level-card.lvl-yellow::before { background: linear-gradient(90deg, var(--neon-yellow), var(--neon-orange)); }
+.level-card.lvl-pink::before   { background: linear-gradient(90deg, var(--neon-pink),   var(--neon-purple)); }
+.level-card:hover { box-shadow: 0 8px 32px rgba(37,99,235,0.12); }
+.level-card .corner-deco { position: absolute; top: 1.2rem; right: 1.5rem; font-family: var(--font-head); font-weight: 800; font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase; opacity: 0.25; }
+.lv-header { display: flex; align-items: flex-start; gap: 1.2rem; margin-bottom: 1.8rem; }
+.lv-icon-wrap { width: 60px; height: 60px; border-radius: 16px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; position: relative; }
+.lv-icon-wrap::after { content: ''; position: absolute; inset: -3px; border-radius: 18px; border: 1px solid; opacity: 0.4; }
+.ico-blue   { background: rgba(37,99,235,0.12);  color: var(--neon-blue);   } .ico-blue::after   { border-color: var(--neon-blue);   }
+.ico-purple { background: rgba(124,58,237,0.12); color: var(--neon-purple); } .ico-purple::after { border-color: var(--neon-purple); }
+.ico-cyan   { background: rgba(8,145,178,0.12);  color: var(--neon-cyan);   } .ico-cyan::after   { border-color: var(--neon-cyan);   }
+.ico-green  { background: rgba(22,163,74,0.12);  color: var(--neon-green);  } .ico-green::after  { border-color: var(--neon-green);  }
+.ico-yellow { background: rgba(180,83,9,0.12);   color: var(--neon-yellow); } .ico-yellow::after { border-color: var(--neon-yellow); }
+.ico-pink   { background: rgba(219,39,119,0.12); color: var(--neon-pink);   } .ico-pink::after   { border-color: var(--neon-pink);   }
+.lv-meta { flex: 1; }
+.lv-eyebrow { font-size: 0.72rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); margin-bottom: 0.35rem; }
+.lv-title { font-family: var(--font-head); font-weight: 800; font-size: 1.6rem; line-height: 1.2; color: var(--text); }
+.lv-xp { margin-top: 0.4rem; display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(180,83,9,0.08); border: 1px solid rgba(180,83,9,0.25); border-radius: 50px; padding: 0.2rem 0.75rem; font-size: 0.75rem; font-weight: 700; color: var(--neon-yellow); }
+
+/* ═══ CALLOUT ═══ */
+.callout { border-radius: 14px; padding: 1.2rem 1.4rem; margin: 1.2rem 0; border: 1px solid; position: relative; overflow: hidden; }
+.callout::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; border-radius: 4px 0 0 4px; }
+.callout .ct { font-weight: 800; font-size: 0.95rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+.cb-blue   { background: rgba(37,99,235,0.06);  border-color: rgba(37,99,235,0.2);  } .cb-blue::before   { background: var(--neon-blue);   } .cb-blue   .ct { color: var(--neon-blue);   }
+.cb-purple { background: rgba(124,58,237,0.06); border-color: rgba(124,58,237,0.2); } .cb-purple::before { background: var(--neon-purple); } .cb-purple .ct { color: var(--neon-purple); }
+.cb-cyan   { background: rgba(8,145,178,0.06);  border-color: rgba(8,145,178,0.2);  } .cb-cyan::before   { background: var(--neon-cyan);   } .cb-cyan   .ct { color: var(--neon-cyan);   }
+.cb-green  { background: rgba(22,163,74,0.06);  border-color: rgba(22,163,74,0.2);  } .cb-green::before  { background: var(--neon-green);  } .cb-green  .ct { color: var(--neon-green);  }
+.cb-yellow { background: rgba(180,83,9,0.06);   border-color: rgba(180,83,9,0.2);   } .cb-yellow::before { background: var(--neon-yellow); } .cb-yellow .ct { color: var(--neon-yellow); }
+.cb-pink   { background: rgba(219,39,119,0.06); border-color: rgba(219,39,119,0.2); } .cb-pink::before   { background: var(--neon-pink);   } .cb-pink   .ct { color: var(--neon-pink);   }
+.cb-orange { background: rgba(194,65,12,0.06);  border-color: rgba(194,65,12,0.2);  } .cb-orange::before { background: var(--neon-orange); } .cb-orange .ct { color: var(--neon-orange); }
+
+/* ═══ STEP TIMELINE ═══ */
+.step-timeline { position: relative; padding-left: 2.8rem; }
+.step-timeline::before { content: ''; position: absolute; left: 15px; top: 4px; bottom: 4px; width: 2px; background: linear-gradient(180deg, var(--neon-blue), var(--neon-purple), var(--neon-cyan)); opacity: 0.45; border-radius: 2px; }
+.step-item { position: relative; margin-bottom: 1.3rem; background: #f8f9ff; border: 1px solid var(--border); border-radius: 14px; padding: 1rem 1.2rem; transition: 0.25s; box-shadow: 0 2px 8px rgba(37,99,235,0.05); }
+.step-item:hover { border-color: var(--border2); background: #eef1ff; }
+.step-item::before { content: attr(data-step); position: absolute; left: -2.8rem; top: 1rem; width: 32px; height: 32px; border-radius: 50%; background: #ffffff; border: 2px solid var(--neon-blue); display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-weight: 800; font-size: 0.78rem; color: var(--neon-blue); box-shadow: 0 2px 8px rgba(37,99,235,0.2); }
+.step-label { font-weight: 700; color: var(--text); font-size: 0.98rem; margin-bottom: 0.35rem; }
+.step-body  { color: var(--muted); font-size: 0.92rem; line-height: 1.7; }
+
+/* ═══ ACH CARD ═══ */
+.ach-card { background: #ffffff; border: 1px solid var(--border); border-radius: 18px; padding: 1.5rem; height: 100%; transition: 0.3s; text-align: center; position: relative; overflow: hidden; }
+.ach-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; opacity: 0; transition: opacity 0.3s; }
+.ach-card:hover { transform: translateY(-6px); border-color: var(--border2); }
+.ach-card:hover::after { opacity: 1; }
+.ach-card.ac-blue::after   { background: var(--neon-blue);   } .ach-card.ac-blue:hover   { box-shadow: 0 16px 48px rgba(59,130,246,0.2); }
+.ach-card.ac-purple::after { background: var(--neon-purple); } .ach-card.ac-purple:hover { box-shadow: 0 10px 28px rgba(124,58,237,0.15); }
+.ach-card.ac-cyan::after   { background: var(--neon-cyan);   } .ach-card.ac-cyan:hover   { box-shadow: 0 16px 48px rgba(6,182,212,0.2); }
+.ach-card.ac-green::after  { background: var(--neon-green);  } .ach-card.ac-green:hover  { box-shadow: 0 16px 48px rgba(34,197,94,0.2); }
+.ach-card.ac-yellow::after { background: var(--neon-yellow); } .ach-card.ac-yellow:hover { box-shadow: 0 10px 28px rgba(180,83,9,0.15); }
+.ach-card.ac-pink::after   { background: var(--neon-pink);   } .ach-card.ac-pink:hover   { box-shadow: 0 16px 48px rgba(236,72,153,0.2); }
+.ach-icon  { font-size: 2.2rem; margin-bottom: 0.75rem; display: block; }
+.ach-title { font-family: var(--font-head); font-weight: 800; font-size: 1rem; margin-bottom: 0.5rem; }
+.ach-desc  { font-size: 0.88rem; color: var(--muted); line-height: 1.65; }
+
+/* ═══ CODE BLOCK ═══ */
+.code-wrap { background: #f8f9fc; border: 1px solid var(--border2); border-radius: 14px; overflow: hidden; margin: 1.2rem 0; }
+.code-header { display: flex; align-items: center; justify-content: space-between; background: rgba(37,99,235,0.06); padding: 0.6rem 1.1rem; border-bottom: 1px solid var(--border); }
+.code-lang { font-family: var(--font-mono); font-size: 0.75rem; font-weight: 600; color: var(--neon-blue); letter-spacing: 1px; text-transform: uppercase; }
+.code-dots { display: flex; gap: 5px; }
+.code-dot  { width: 10px; height: 10px; border-radius: 50%; }
+.code-dot:nth-child(1){ background:#dc2626; } .code-dot:nth-child(2){ background:#b45309; } .code-dot:nth-child(3){ background:#16a34a; }
+.code-wrap pre { margin: 0; padding: 1.2rem 1.4rem; overflow-x: auto; background: transparent; }
+.code-wrap pre code { font-family: var(--font-mono); font-size: 0.85rem; line-height: 1.7; }
+pre[class*="language-"] { border-radius: 0 !important; font-family: var(--font-mono) !important; font-size: 0.85rem !important; margin: 0 !important; border: none !important; background: transparent !important; }
+.code-output { background: rgba(22,163,74,0.06); border-top: 1px solid rgba(22,163,74,0.2); padding: 0.7rem 1.2rem; font-family: var(--font-mono); font-size: 0.82rem; color: #14532d; line-height: 1.7; }
+
+/* ═══ TABLE ═══ */
+.gtbl { width: 100%; border-collapse: separate; border-spacing: 0; border-radius: 14px; overflow: hidden; border: 1px solid var(--border); }
+.gtbl thead th { background: rgba(37,99,235,0.08); color: var(--neon-blue); font-family: var(--font-head); font-weight: 700; padding: 0.9rem 1rem; text-align: left; border-bottom: 1px solid rgba(37,99,235,0.15); font-size: 0.85rem; letter-spacing: 0.5px; }
+.gtbl tbody td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); color: var(--muted); font-size: 0.92rem; vertical-align: top; }
+.gtbl tbody tr:last-child td { border-bottom: none; }
+.gtbl tbody tr:hover td { background: rgba(37,99,235,0.04); color: var(--text); }
+.gtbl tbody td strong { color: var(--text); }
+
+/* ═══ DIM CARD ═══ */
+.dim-card { background: #ffffff; border: 1px solid var(--border); border-radius: 18px; padding: 1.5rem; height: 100%; transition: 0.3s; position: relative; overflow: hidden; }
+.dim-card:hover { transform: translateY(-4px); box-shadow: 0 8px 28px rgba(37,99,235,0.1); }
+.dim-rank { font-family: var(--font-head); font-weight: 800; font-size: 2.5rem; line-height: 1; margin-bottom: 0.25rem; }
+.dim-name { font-weight: 700; font-size: 1rem; margin-bottom: 0.8rem; }
+.dim-code { background: #f1f5f9; border-radius: 10px; padding: 0.65rem 0.9rem; font-family: var(--font-mono); font-size: 0.82rem; border: 1px solid rgba(99,102,241,0.15); margin-bottom: 0.8rem; }
+.dim-desc { font-size: 0.88rem; color: var(--muted); margin-bottom: 0.75rem; line-height: 1.6; }
+.dim-example { font-size: 0.82rem; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid; }
+
+/* ═══ STAT PILLS ═══ */
+.stat-pill { display: inline-flex; align-items: center; gap: 0.4rem; border-radius: 50px; padding: 0.3rem 0.9rem; font-weight: 700; font-size: 0.8rem; border: 1px solid; }
+.sp-blue   { background: rgba(37,99,235,0.08);  border-color: rgba(37,99,235,0.3);  color: var(--neon-blue);   }
+.sp-green  { background: rgba(22,163,74,0.08);  border-color: rgba(22,163,74,0.3);  color: var(--neon-green);  }
+.sp-yellow { background: rgba(180,83,9,0.08);   border-color: rgba(180,83,9,0.3);   color: var(--neon-yellow); }
+.sp-purple { background: rgba(124,58,237,0.08); border-color: rgba(124,58,237,0.3); color: var(--neon-purple); }
+.sp-cyan   { background: rgba(8,145,178,0.08);  border-color: rgba(8,145,178,0.3);  color: var(--neon-cyan);   }
+.sp-pink   { background: rgba(219,39,119,0.08); border-color: rgba(219,39,119,0.3); color: var(--neon-pink);   }
+.sp-orange { background: rgba(194,65,12,0.08);  border-color: rgba(194,65,12,0.3);  color: var(--neon-orange); }
+
+/* ═══ ITERATION TABLE ═══ */
+.iter-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; font-family: var(--font-mono); }
+.iter-table th { background: rgba(37,99,235,0.1); color: var(--neon-blue); font-weight: 700; padding: 0.6rem 0.8rem; text-align: center; border: 1px solid var(--border2); font-family: var(--font-head); font-size: 0.8rem; }
+.iter-table td { padding: 0.55rem 0.8rem; border: 1px solid var(--border); text-align: center; color: var(--muted); }
+.iter-table tr:nth-child(even) td { background: rgba(37,99,235,0.03); }
+.iter-table td.nan-cell { background: rgba(220,38,38,0.08); color: #dc2626; font-weight: 700; font-style: italic; }
+.iter-table td.filled-cell { background: rgba(22,163,74,0.08); color: #16a34a; font-weight: 700; }
+.iter-table td.final-cell  { background: rgba(37,99,235,0.1);  color: var(--neon-blue); font-weight: 800; }
+.iter-wrap { background: var(--card); border: 1px solid var(--border2); border-radius: 14px; padding: 1.2rem; margin: 1rem 0; overflow-x: auto; }
+.iter-wrap h6 { font-family: var(--font-head); font-weight: 800; font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase; color: var(--dim); margin-bottom: 0.75rem; }
+
+/* ═══ INLINE CODE ═══ */
+.inline-code { background: rgba(8,145,178,0.08); color: #0e7490; padding: 0.1rem 0.45rem; border-radius: 6px; font-family: var(--font-mono); font-size: 0.88em; border: 1px solid rgba(37,99,235,0.25); }
+
+/* ═══ HIGHLIGHT ═══ */
+.hl      { background: rgba(180,83,9,0.1);  color: #92400e;          padding: 0 5px; border-radius: 4px; }
+.hl-blue { background: rgba(37,99,235,0.1); color: var(--neon-blue); padding: 0 5px; border-radius: 4px; }
+.hl-red  { background: rgba(220,38,38,0.1); color: var(--neon-red);  padding: 0 5px; border-radius: 4px; }
+.hl-green{ background: rgba(22,163,74,0.1); color: var(--neon-green);padding: 0 5px; border-radius: 4px; }
+
+/* ═══ GLOW DIVIDER ═══ */
+.glow-div { height: 2px; border-radius: 2px; margin: 2rem 0; opacity: 0.4; background: linear-gradient(90deg, transparent, var(--neon-blue), var(--neon-purple), var(--neon-cyan), transparent); }
+
+/* ═══ MERMAID ═══ */
+.mermaid-wrap { background: #f8f9ff; border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; margin: 1.5rem 0; text-align: center; overflow-x: auto; box-shadow: 0 2px 12px rgba(37,99,235,0.06); }
+
+/* ═══ QUIZ ═══ */
+.quiz-box { background: #fffbf0; border: 1px solid rgba(180,83,9,0.18); border-radius: 20px; padding: 1.6rem; margin: 1.8rem 0; position: relative; overflow: hidden; box-shadow: 0 4px 20px rgba(180,83,9,0.07); }
+.quiz-box::before { content: '⚡ QUICK CHALLENGE'; position: absolute; top: 0; right: 0; background: linear-gradient(135deg, #b45309, #c2410c); color: #fff; font-family: var(--font-head); font-weight: 800; font-size: 0.62rem; letter-spacing: 2px; padding: 0.32rem 0.9rem; border-radius: 0 20px 0 12px; }
+.quiz-q { font-weight: 700; color: #1c1917; margin-bottom: 1.1rem; font-size: 1.02rem; line-height: 1.55; }
+.quiz-options { display: flex; flex-direction: column; gap: 0.55rem; }
+.quiz-opt { background: #ffffff; border: 1.5px solid #e5e7eb; border-radius: 12px; padding: 0.75rem 1.1rem; cursor: pointer; font-size: 0.93rem; color: #374151; transition: background 0.15s, border-color 0.15s, transform 0.12s; font-weight: 500; display: flex; align-items: center; gap: 0.85rem; user-select: none; }
+.quiz-opt:not(.answered-opt):hover { background: #f3f4f6; border-color: #9ca3af; color: #111827; transform: translateX(3px); }
+.quiz-opt.correct { background: #f0fdf4; border-color: #16a34a; color: #14532d; font-weight: 700; }
+.quiz-opt.correct .opt-letter { background: #16a34a; color: #fff; }
+.quiz-opt.wrong   { background: #fef2f2; border-color: #dc2626; color: #991b1b; opacity: 0.8; }
+.quiz-opt.wrong   .opt-letter { background: #dc2626; color: #fff; }
+.quiz-opt.dimmed  { opacity: 0.45; pointer-events: none; }
+.quiz-opt .opt-letter { width: 28px; height: 28px; border-radius: 8px; background: #f3f4f6; color: #6b7280; border: 1.5px solid #e5e7eb; display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-weight: 800; font-size: 0.8rem; flex-shrink: 0; transition: background 0.2s, color 0.2s; }
+.quiz-explain { display: none; font-size: 0.84rem; font-weight: 500; margin-top: -0.35rem; margin-bottom: 0.35rem; padding: 0.5rem 0.85rem 0.5rem 1rem; border-radius: 0 0 10px 10px; line-height: 1.55; border-left: 3px solid transparent; }
+.quiz-explain.show-correct { display: block; background: rgba(22,163,74,0.07);  color: #166534; border-left-color: #16a34a; }
+.quiz-explain.show-wrong   { display: block; background: rgba(220,38,38,0.06);  color: #991b1b; border-left-color: #dc2626; }
+.quiz-explain.show-reveal  { display: block; background: rgba(37,99,235,0.06);  color: #1e40af; border-left-color: #2563eb; }
+.quiz-feedback { display: none; margin-top: 1rem; padding: 0.85rem 1.1rem; border-radius: 12px; font-weight: 700; font-size: 0.95rem; align-items: center; gap: 0.6rem; }
+.quiz-feedback.show { display: flex; animation: fadeIn 0.35s; }
+.quiz-feedback.win  { background: linear-gradient(135deg,#f0fdf4,#dcfce7); color: #14532d; border: 1px solid rgba(22,163,74,0.3); }
+.quiz-feedback.lose { background: linear-gradient(135deg,#fef2f2,#fee2e2); color: #991b1b; border: 1px solid rgba(220,38,38,0.2); }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;} }
+
+/* ═══ FOOTER ═══ */
+.gfooter { background: #e8edf8; border-top: 1px solid var(--border); padding: 3rem 0; margin-top: 4rem; text-align: center; }
+.gfooter-logo { font-family: var(--font-head); font-weight: 800; font-size: 1.4rem; background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0.5rem; }
+
+/* ═══ ANIMATIONS ═══ */
+.fade-up { opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.fade-up.visible { opacity: 1; transform: none; }
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width: 768px) { .hero h1 { font-size: 2rem; } .hero-orbit { display: none; } .level-card { padding: 1.5rem; } .xp-badges { display: none; } }
+
+/* ═══ TOAST ═══ */
+.toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem; pointer-events: none; }
+.gtoast { background: #ffffff; border: 1px solid var(--border2); border-radius: 14px; padding: 0.85rem 1.2rem; display: flex; align-items: center; gap: 0.75rem; backdrop-filter: blur(12px); font-weight: 700; font-size: 0.88rem; transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1); pointer-events: auto; min-width: 260px; box-shadow: 0 8px 32px rgba(37,99,235,0.15); }
+.gtoast.show { transform: none; }
+.gtoast-icon { font-size: 1.4rem; }
+
+/* ═══ MODAL ═══ */
+.modal-overlay { position: fixed; inset: 0; z-index: 10000; background: rgba(15,23,42,0.55); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
+.modal-overlay.open { opacity: 1; pointer-events: auto; }
+.modal-box { background: #ffffff; border-radius: 28px; padding: 2.5rem 2.5rem 2rem; max-width: 520px; width: 100%; position: relative; overflow: hidden; box-shadow: 0 24px 80px rgba(37,99,235,0.18), 0 4px 20px rgba(0,0,0,0.1); transform: scale(0.85) translateY(20px); transition: transform 0.45s cubic-bezier(0.34,1.56,0.64,1), opacity 0.4s ease; opacity: 0; }
+.modal-overlay.open .modal-box { transform: scale(1) translateY(0); opacity: 1; }
+.modal-box::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple), var(--neon-pink)); }
+.modal-close { position: absolute; top: 1rem; right: 1rem; background: #f3f4f6; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-size: 0.9rem; color: #6b7280; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+.modal-close:hover { background: #e5e7eb; color: #374151; }
+.modal-trophy { font-size: 3rem; text-align: center; margin-bottom: 0.5rem; }
+.modal-title  { font-family: var(--font-head); font-weight: 800; font-size: 1.6rem; text-align: center; color: var(--text); margin-bottom: 0.4rem; }
+.modal-subtitle { color: var(--muted); text-align: center; font-size: 0.92rem; margin-bottom: 1.5rem; }
+.score-ring-wrap { display: flex; justify-content: center; margin-bottom: 1.2rem; }
+.score-ring { position: relative; width: 120px; height: 120px; }
+.score-ring svg { width: 120px; height: 120px; transform: rotate(-90deg); }
+.ring-bg   { fill: none; stroke: #e5e7eb; stroke-width: 10; }
+.ring-fill { fill: none; stroke: #2563eb; stroke-width: 10; stroke-linecap: round; stroke-dasharray: 327; stroke-dashoffset: 327; transition: stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1); }
+.ring-text { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.ring-num  { font-family: var(--font-head); font-weight: 800; font-size: 1.4rem; color: var(--text); line-height: 1; }
+.ring-label{ font-size: 0.72rem; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; }
+.grade-card { border-radius: 14px; padding: 0.85rem 1.2rem; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 1rem; border: 1.5px solid; }
+.grade-s { background: #fef9c3; border-color: #b45309; } .grade-a { background: #f0fdf4; border-color: #16a34a; } .grade-b { background: #eff6ff; border-color: #2563eb; } .grade-c { background: #f5f3ff; border-color: #7c3aed; } .grade-d { background: #fef2f2; border-color: #dc2626; }
+.grade-letter { font-family: var(--font-head); font-weight: 800; font-size: 1.6rem; }
+.grade-msg    { font-size: 0.9rem; color: var(--muted); font-weight: 600; }
+.modal-xp-row { display: flex; align-items: center; justify-content: space-between; background: #f8f9ff; border: 1px solid rgba(37,99,235,0.15); border-radius: 12px; padding: 0.75rem 1.1rem; margin-bottom: 1.4rem; }
+.modal-xp-row .mxp-label { font-size: 0.85rem; color: #6b7280; font-weight: 600; }
+.modal-xp-row .mxp-val   { font-family: var(--font-head); font-weight: 800; font-size: 1.1rem; background: linear-gradient(135deg, #2563eb, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.modal-btns { display: flex; gap: 0.75rem; }
+.modal-btn-retry { flex: 1; padding: 0.8rem 1rem; background: #f3f4f6; border: 1.5px solid #e5e7eb; border-radius: 12px; cursor: pointer; font-family: var(--font-head); font-weight: 700; font-size: 0.92rem; color: #374151; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+.modal-btn-retry:hover { background: #e5e7eb; color: #111827; }
+.modal-btn-continue { flex: 2; padding: 0.8rem 1rem; background: linear-gradient(135deg, #2563eb, #7c3aed); border: none; border-radius: 12px; cursor: pointer; font-family: var(--font-head); font-weight: 700; font-size: 0.92rem; color: #ffffff; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; box-shadow: 0 4px 16px rgba(37,99,235,0.3); }
+.modal-btn-continue:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(37,99,235,0.4); }
+#confettiCanvas { position: fixed; inset: 0; z-index: 10001; pointer-events: none; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ XP STRIP ═══════════════════ -->
+<div class="xp-strip">
+  <div class="container-main">
+    <div class="xp-inner">
+      <span class="xp-label">⚡ XP</span>
+      <div class="xp-bar-wrap"><div class="xp-bar-fill" id="xpFill"></div></div>
+      <span class="xp-score" id="xpScore">0 / 220 XP</span>
+      <div class="xp-badges">
+        <span class="xp-badge b1" id="badge1">🐭 MICE Initiate</span>
+        <span class="xp-badge b2" id="badge2">🔄 Loop Learner</span>
+        <span class="xp-badge b3" id="badge3">💡 Logic Solver</span>
+        <span class="xp-badge b4" id="badge4">🏆 Imputation Pro</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ HERO ═══════════════════ -->
+<section class="hero">
+  <div class="container-main">
+    <div class="row align-items-center">
+      <div class="col-lg-7">
+        <div class="hero-eyebrow"><i class="fa-solid fa-gamepad me-1"></i> Gamified Learning Quest</div>
+        <h1>
+          <span class="line1">MICE Algorithm —</span>
+          <span class="line2">Beginners ke liye!</span>
+        </h1>
+        <p class="hero-sub">
+          4 boss levels. Andar ki logic seedhi pandas se samjho. Phir ek simple sklearn code. Real India examples. <strong style="color:var(--text)">Earn XP</strong>, unlock badges, aur MICE ka concept crystal-clear kar lo!
+        </p>
+        <div class="hero-stats">
+          <div class="hero-stat-item"><div class="hero-stat-num">4</div><div class="hero-stat-label">Boss Levels</div></div>
+          <div class="hero-stat-item"><div class="hero-stat-num">220</div><div class="hero-stat-label">Total XP</div></div>
+          <div class="hero-stat-item"><div class="hero-stat-num">4</div><div class="hero-stat-label">Badges</div></div>
+          <div class="hero-stat-item"><div class="hero-stat-num">2</div><div class="hero-stat-label">Code Blocks</div></div>
+        </div>
+        <a href="#s1" class="hero-cta"><i class="fa-solid fa-play me-1"></i> Start Your Quest</a>
+      </div>
+      <div class="col-lg-5">
+        <div class="hero-orbit">
+          <div class="orbit-ring"><div class="orbit-dot"></div></div>
+          <div class="orbit-ring"><div class="orbit-dot"></div></div>
+          <div class="orbit-ring"><div class="orbit-dot"></div></div>
+          <div class="orbit-center">🐭</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="container-main">
+
+<!-- ═══════════════════ QUEST MAP ═══════════════════ -->
+<div class="quest-map fade-up">
+  <div class="quest-map-title"><i class="fa-solid fa-map me-2"></i> Quest Map</div>
+  <div class="quest-grid">
+    <a href="#s1"  class="quest-item"><span class="quest-num" style="background:rgba(37,99,235,0.15);color:var(--neon-blue);">L1</span> MICE kya hai?</a>
+    <a href="#s2"  class="quest-item"><span class="quest-num" style="background:rgba(37,99,235,0.15);color:var(--neon-blue);">L1</span> Problem samjho — Zomato Example</a>
+    <a href="#s3"  class="quest-item"><span class="quest-num" style="background:rgba(8,145,178,0.15);color:var(--neon-cyan);">L2</span> MICE ki Logic — Step by Step</a>
+    <a href="#s4"  class="quest-item"><span class="quest-num" style="background:rgba(8,145,178,0.15);color:var(--neon-cyan);">L2</span> Manual Iteration — pandas se dekhte hain</a>
+    <a href="#s5"  class="quest-item"><span class="quest-num" style="background:rgba(124,58,237,0.15);color:var(--neon-purple);">L3</span> Iterations mein kya hota hai?</a>
+    <a href="#s6"  class="quest-item"><span class="quest-num" style="background:rgba(22,163,74,0.15);color:var(--neon-green);">L4</span> sklearn mein MICE — IterativeImputer</a>
+    <a href="#s7"  class="quest-item"><span class="quest-num" style="background:rgba(219,39,119,0.15);color:var(--neon-pink);">🏆</span> Final Summary</a>
+  </div>
+</div>
+
+
+<!-- ██████████████████████████████████████████████████
+     LEVEL 1-A : MICE KYA HAI?
+█████████████████████████████████████████████████████ -->
+<div class="level-card lvl-blue fade-up" id="s1">
+  <div class="corner-deco">LEVEL 1</div>
+  <div class="lv-header">
+    <div class="lv-icon-wrap ico-blue"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+    <div class="lv-meta">
+      <div class="lv-eyebrow">Level 1 · Boss Topic</div>
+      <div class="lv-title">MICE — Naam bada, concept simple!</div>
+      <div class="lv-xp"><i class="fa-solid fa-star"></i> +30 XP on scroll</div>
+    </div>
+  </div>
+
+  <div class="callout cb-blue">
+    <div class="ct"><i class="fa-solid fa-lightbulb"></i> MICE ka Full Form</div>
+    <strong>M</strong>ultivariate <strong>I</strong>mputation by <strong>C</strong>hained <strong>E</strong>quations<br><br>
+    Ye naam sun ke darr mat jao! Iska matlab bahut simple hai — <span class="hl">missing values ko fill karo, doosri columns ki help lekar</span>. Ek column ki value predict karo baaki columns se.
+  </div>
+
+  <div class="callout cb-yellow">
+    <div class="ct"><i class="fa-solid fa-question"></i> Pehle — Simpler Imputation kyun nahi kaafi?</div>
+    Humne pehle seekha: missing values ko <strong>mean ya median</strong> se fill karo. Ye kaam karta hai, lekin ek problem hai...<br><br>
+    <strong>Mean imputation ek global average deta hai — chahe row ka context kuch bhi ho!</strong><br><br>
+    Socho: Ek <em>5-star restaurant</em> ka average bill ₹1500 hai aur ek <em>2-star dhaba</em> ka ₹120. Agar dono ka bill missing ho toh mean imputation dono ko ₹450 de dega — galat!<br><br>
+    MICE samjhta hai: <span class="hl-blue">context matter karta hai</span> — aur doosri columns se context milta hai!
+  </div>
+
+  <div class="glow-div"></div>
+
+  <h5 style="font-family:var(--font-head);font-weight:800;color:var(--text);margin-bottom:1.2rem;"><i class="fa-solid fa-circle-nodes me-2" style="color:var(--neon-blue)"></i>Ek Line Mein MICE ka Idea</h5>
+
+  <div class="row g-3">
+    <div class="col-md-4">
+      <div class="ach-card ac-blue">
+        <span class="ach-icon">🎯</span>
+        <div class="ach-title">Column A missing hai?</div>
+        <div class="ach-desc">Column B, C, D ko dekho. Unka use karo Column A ki value <strong>predict</strong> karne ke liye — jaise ek detective clues se jawab dhundta hai!</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="ach-card ac-purple">
+        <span class="ach-icon">🔗</span>
+        <div class="ach-title">Chained = Ek ke baad ek</div>
+        <div class="ach-desc">Pehle A predict karo B, C se. Phir B predict karo A, C se. Phir C predict karo A, B se. Ye chain chalti rehti hai — isliye <strong>"Chained"</strong>!</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="ach-card ac-cyan">
+        <span class="ach-icon">🔄</span>
+        <div class="ach-title">Multiple Rounds = Better Guesses</div>
+        <div class="ach-desc">Pehla round = rough guess. Doosra round = better. Teesra = aur better. Har round mein values improve hoti hain — <strong>convergence</strong> tak!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ 1 -->
+  <div class="quiz-box" data-quiz="1" data-correct="b" data-xp="25">
+    <div class="quiz-q">🤔 MICE aur simple mean imputation mein sabse bada farak kya hai?</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" data-ans="a" data-explain="Nahi! MICE aksar slow hota hai kyunki woh multiple iterations chalata hai aur har column ke liye prediction karta hai. Simplicity mein bhi mean imputation zyada simple hai."><span class="opt-letter">A</span>MICE zyada fast aur simple hai</div>
+      <div class="quiz-opt" data-ans="b" data-explain="Bilkul sahi! Mean imputation ek global average deta hai — context ignore karta hai. MICE doosri columns ko dekh ke predict karta hai — jaise 5-star restaurant ki bill predict karne ke liye uski rating aur location bhi use karta hai. Context-aware imputation!"><span class="opt-letter">B</span>MICE doosri columns ka context use karta hai; mean imputation sirf overall average deta hai</div>
+      <div class="quiz-opt" data-ans="c" data-explain="Nahi. Dono methods NaN values fill karte hain. MICE ka farak ye nahi hai ki woh NaN handle karta hai ya nahi — farak ye hai KI TARAH se fill karta hai."><span class="opt-letter">C</span>MICE sirf numerical columns mein kaam karta hai, mean imputation NaN bhi handle karta hai</div>
+      <div class="quiz-opt" data-ans="d" data-explain="Nahi. Mean imputation aur MICE dono hi NaN fill karte hain. MICE outliers ke baare mein specifically better nahi hota — uska farak multivariate prediction approach hai."><span class="opt-letter">D</span>MICE outliers ko automatically remove karta hai</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+</div>
+
+
+<!-- ── LEVEL 1-B: PROBLEM SAMJHO ── -->
+<div class="level-card lvl-blue fade-up" id="s2">
+  <div class="corner-deco">LEVEL 1</div>
+  <div class="lv-header">
+    <div class="lv-icon-wrap ico-cyan"><i class="fa-solid fa-utensils"></i></div>
+    <div class="lv-meta">
+      <div class="lv-eyebrow">Level 1 · Skill Unlock</div>
+      <div class="lv-title">Problem Samjho — Zomato Dataset Example</div>
+    </div>
+  </div>
+
+  <div class="callout cb-cyan">
+    <div class="ct"><i class="fa-solid fa-table"></i> Hamara Dataset — Zomato Restaurants</div>
+    Maano hamare paas 6 restaurants ka data hai. Teen columns hain: <strong>Avg_Bill (₹)</strong>, <strong>Rating (1–5)</strong>, aur <strong>Delivery_Time (minutes)</strong>. Kuch values missing hain — NaN!
+  </div>
+
+  <!-- RAW DATA TABLE -->
+  <div class="iter-wrap">
+    <h6>📋 Raw Dataset — Missing Values (NaN) ke saath</h6>
+    <table class="iter-table">
+      <thead>
+        <tr>
+          <th>Restaurant</th>
+          <th>Avg_Bill (₹)</th>
+          <th>Rating</th>
+          <th>Delivery_Time (min)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>BiryaniHouse</td><td>350</td><td>4.2</td><td>30</td></tr>
+        <tr><td>PizzaPalace</td><td class="nan-cell">NaN ❓</td><td>4.5</td><td>25</td></tr>
+        <tr><td>DosaCorner</td><td>180</td><td class="nan-cell">NaN ❓</td><td>40</td></tr>
+        <tr><td>BurgerZone</td><td class="nan-cell">NaN ❓</td><td>3.8</td><td class="nan-cell">NaN ❓</td></tr>
+        <tr><td>ChaatWala</td><td>120</td><td>4.0</td><td>20</td></tr>
+        <tr><td>TandoorKing</td><td>480</td><td class="nan-cell">NaN ❓</td><td>35</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout cb-orange">
+    <div class="ct"><i class="fa-solid fa-triangle-exclamation"></i> Problem with Mean Imputation yahan</div>
+    Agar sirf <strong>mean</strong> se fill karein:<br>
+    → <strong>Avg_Bill</strong> mean = (350+180+120+480)/4 = <strong>₹282.5</strong> — PizzaPalace aur BurgerZone dono ko ₹282 mil jaayega<br>
+    → But PizzaPalace ka Rating 4.5 hai (premium!) → uski bill zyada honi chahiye<br>
+    → BurgerZone ka Rating 3.8 hai → uski bill kam honi chahiye<br><br>
+    <span class="hl-red">Mean ne dono ko same value di — yahi galat hai!</span><br>
+    MICE dono ko Rating aur Delivery_Time dekhkar <strong>alag alag</strong> values dega.
+  </div>
+
+  <div class="callout cb-green mt-2">
+    <div class="ct"><i class="fa-solid fa-check-double"></i> MICE ka Intuition — Relationship Use Karo</div>
+    Socho logically:<br><br>
+    → <strong>Rating jyada</strong> hoti hai toh usually <strong>Avg_Bill bhi zyada</strong> hota hai (premium restaurants)<br>
+    → <strong>Delivery_Time kam</strong> ho toh usually restaurant <strong>efficient aur popular</strong> hai — bill alag ho sakta hai<br><br>
+    MICE in relationships ko seekhta hai aur phir missing values predict karta hai. <span class="hl-blue">Columns ek dusre ke context se fill hote hain!</span>
+  </div>
+</div>
+
+
+<!-- ██████████████████████████████████████████████████
+     LEVEL 2-A : MICE KI LOGIC — STEP BY STEP
+█████████████████████████████████████████████████████ -->
+<div class="level-card lvl-cyan fade-up" id="s3">
+  <div class="corner-deco">LEVEL 2</div>
+  <div class="lv-header">
+    <div class="lv-icon-wrap ico-cyan"><i class="fa-solid fa-gears"></i></div>
+    <div class="lv-meta">
+      <div class="lv-eyebrow">Level 2 · Boss Topic</div>
+      <div class="lv-title">MICE ki Logic — Andar Kya Hota Hai?</div>
+      <div class="lv-xp"><i class="fa-solid fa-star"></i> +30 XP on scroll</div>
+    </div>
+  </div>
+
+  <div class="callout cb-cyan">
+    <div class="ct"><i class="fa-solid fa-lightbulb"></i> Detective Analogy — MICE ko Samjho</div>
+    Socho tum ek detective ho. Tumhare paas ek missing information hai — ek suspect ka <strong>age</strong>. Tumhare paas clues hain: uski <strong>job title</strong>, <strong>salary</strong>, aur <strong>years of experience</strong>.<br><br>
+    Tum in clues se age <strong>estimate</strong> karoge — ek overall average se nahi, balki <em>is specific person ke context</em> se.<br><br>
+    MICE bhi yahi karta hai — har missing value ke liye doosri columns ko clues ki tarah use karta hai!
+  </div>
+
+  <div class="glow-div"></div>
+
+  <h5 style="font-family:var(--font-head);font-weight:800;color:var(--text);margin-bottom:1.5rem;"><i class="fa-solid fa-list-ol me-2" style="color:var(--neon-cyan)"></i>MICE ke 3 Simple Steps</h5>
+
+  <div class="step-timeline">
+    <div class="step-item" data-step="1">
+      <div class="step-label">🌱 Step 1 — Initial Fill (Rough Placeholder)</div>
+      <div class="step-body">
+        Sabse pehle, sab NaN ko ek simple value se fill karo — jaise <strong>mean ya median</strong>. Ye final values nahi hain — sirf <em>ek starting point</em> taaki aage prediction ho sake.<br><br>
+        Jaise ek exam mein sab questions ka answer pahle "B" likh do — phir wapas jaake sahi karo!<br>
+        <span style="color:var(--neon-cyan); font-weight:700;">Avg_Bill NaN → ₹282.5 (mean placeholder)</span>
+      </div>
+    </div>
+    <div class="step-item" data-step="2">
+      <div class="step-label">🎯 Step 2 — Column by Column Predict Karo</div>
+      <div class="step-body">
+        Ab <strong>ek column ko target banao</strong> jisme NaN tha. Baaki saari columns ko features ki tarah use karo. Ek simple prediction model chalao.<br><br>
+        → <strong>Avg_Bill predict karo</strong> using Rating + Delivery_Time (as features)<br>
+        → Ye model dekhta hai: jahan Rating high hai aur Delivery_Time kam hai, wahan Bill zyada hoti hai<br>
+        → Ab NaN wali rows ke liye predict karo → <span style="color:var(--neon-green); font-weight:700;">PizzaPalace → ₹410, BurgerZone → ₹240</span><br><br>
+        Phir same cheez doosri column ke liye karo (Rating, phir Delivery_Time).
+      </div>
+    </div>
+    <div class="step-item" data-step="3">
+      <div class="step-label">🔄 Step 3 — Dobara Karo (Iterate)</div>
+      <div class="step-body">
+        Ab ek round complete hua. Imputed values pahle se better hain. Lekin perfect nahi hain.<br><br>
+        Step 2 dobara karo — is baar better imputed values features ke taur pe milti hain → aur better predictions aati hain!<br><br>
+        Ye cycle <strong>kai baar</strong> chalti hai (default: 10 rounds). Har round mein values thodi aur accurate hoti hain.<br>
+        Jab values zyada change nahi karti → <span class="hl-green">converge ho gayi → bas karo!</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="mermaid-wrap mt-4">
+    <div class="mermaid">
+flowchart LR
+    A["🗃️ Data mein\nNaN hain"] --> B["Step 1️⃣\nMean se rough fill"]
+    B --> C["Step 2️⃣\nAvg_Bill predict karo\nRating + Time se"]
+    C --> D["Step 2️⃣\nRating predict karo\nBill + Time se"]
+    D --> E["Step 2️⃣\nTime predict karo\nBill + Rating se"]
+    E --> F{"Values\nstable?"}
+    F -- "Nahi → Round 2, 3..." --> C
+    F -- "Haan ✅" --> G["🎯 Final Clean\nDataset!"]
+    style A fill:#fee2e2,stroke:#dc2626,color:#991b1b,rx:10
+    style B fill:#fef9c3,stroke:#b45309,color:#713f12,rx:10
+    style C fill:#dbeafe,stroke:#2563eb,color:#1e3a8a,rx:10
+    style D fill:#ede9fe,stroke:#7c3aed,color:#4c1d95,rx:10
+    style E fill:#cffafe,stroke:#0891b2,color:#164e63,rx:10
+    style F fill:#f5f3ff,stroke:#7c3aed,color:#4c1d95,rx:10
+    style G fill:#dcfce7,stroke:#16a34a,color:#14532d,rx:10
+    </div>
+  </div>
+
+  <!-- QUIZ 2 -->
+  <div class="quiz-box" data-quiz="2" data-correct="c" data-xp="25">
+    <div class="quiz-q">🤔 MICE mein "Initial Fill" Step 1 kyun zaroori hai?</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" data-ans="a" data-explain="Nahi. Initial fill final answer nahi hota — ye sirf ek temporary placeholder hai. Asli imputed values baad mein iterations se aate hain."><span class="opt-letter">A</span>Ye hi final imputed values hain — mean se fill ho jaata hai</div>
+      <div class="quiz-opt" data-ans="b" data-explain="Nahi. Initial fill missing rows delete nahi karta — woh unhe placeholder se fill karta hai taaki koi row bhi model training ke time missing na ho."><span class="opt-letter">B</span>Missing rows ko delete karne ke liye</div>
+      <div class="quiz-opt" data-ans="c" data-explain="Bilkul sahi! MICE Step 2 mein ek column ko predict karne ke liye baaki columns ko features ki tarah use karta hai. Lekin agar baaki columns mein bhi NaN hain, toh model ko koi value chahiye train karne ke liye. Initial fill (mean se) ye placeholder deta hai — rough guess — taaki chain start ho sake!"><span class="opt-letter">C</span>Taaki prediction model train hone ke liye baaki columns mein koi value ho — NaN se model train nahi ho sakta</div>
+      <div class="quiz-opt" data-ans="d" data-explain="Nahi. Initial fill data ko standardize ya scale nahi karta — woh sirf ek temporary value deta hai NaN ki jagah. Scaling alag step hai jo imputation ke baad hoti hai."><span class="opt-letter">D</span>Data ko standardize karne ke liye</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+</div>
+
+
+<!-- ── LEVEL 2-B : MANUAL PANDAS ITERATION ── -->
+<div class="level-card lvl-cyan fade-up" id="s4">
+  <div class="corner-deco">LEVEL 2</div>
+  <div class="lv-header">
+    <div class="lv-icon-wrap ico-blue"><i class="fa-brands fa-python"></i></div>
+    <div class="lv-meta">
+      <div class="lv-eyebrow">Level 2 · Skill Unlock</div>
+      <div class="lv-title">Manual Approach — pandas se MICE ki Logic Dekhte Hain</div>
+    </div>
+  </div>
+
+  <div class="callout cb-purple">
+    <div class="ct"><i class="fa-solid fa-lightbulb"></i> Ye Code Block Kyun?</div>
+    sklearn ke <span class="inline-code">IterativeImputer</span> ke andar exactly yahi hota hai — bas zyada sophisticated tarike se. Ye manual code tumhe <strong>inside-out samajhne</strong> mein help karega taaki jab sklearn use karo toh andha use na ho!<br><br>
+    Hum sirf <strong>pandas</strong> use karenge — koi sklearn nahi, koi complex library nahi. Pure logic!
+  </div>
+
+  <!-- CODE BLOCK 1 — MANUAL MICE -->
+  <div class="code-wrap">
+    <div class="code-header">
+      <span class="code-lang">🐍 Code Block 1 — Manual MICE Logic (pandas only)</span>
+      <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+    </div>
+    <pre><code class="language-python">import pandas as pd
+import numpy as np
+
+# ─── Hamaara Zomato dataset ───
+data = {
+    'Avg_Bill':       [350,   np.nan, 180,   np.nan, 120,   480  ],
+    'Rating':         [4.2,   4.5,    np.nan, 3.8,   4.0,   np.nan],
+    'Delivery_Time':  [30,    25,     40,     np.nan, 20,   35   ],
+}
+df = pd.DataFrame(data)
+
+print("Original Data:")
+print(df)
+print("\nMissing values per column:")
+print(df.isnull().sum())
+
+# ════════════════════════════════════════════════
+# STEP 1: Initial Fill — sab NaN ko mean se bharo
+#         Ye sirf placeholder hai, final nahi!
+# ════════════════════════════════════════════════
+df_work = df.copy()
+for col in df_work.columns:
+    col_mean = df_work[col].mean()   # non-null values ka mean
+    df_work[col] = df_work[col].fillna(col_mean)
+
+print("\n--- After Initial Fill (Step 1) ---")
+print(df_work.round(2))
+# Ab koi NaN nahi — sab columns mein values hain!
+# Ye rough guess hai — asli MICE iteration abhi shuru hoga
+
+# ════════════════════════════════════════════════
+# STEP 2: Iterations — 3 rounds chalao
+#         Har round mein har column ek baar predict hogi
+# ════════════════════════════════════════════════
+
+# Yaad rakhein konse rows mein original NaN tha
+original_nan_mask = df.isnull()
+
+num_iterations = 3   # sirf 3 rounds for demonstration
+
+for iteration in range(1, num_iterations + 1):
+    print(f"\n{'='*40}")
+    print(f"  ITERATION {iteration}")
+    print(f"{'='*40}")
+
+    for target_col in df.columns:
+        # Kya is column mein originally NaN tha?
+        nan_rows = original_nan_mask[target_col]
+        if nan_rows.sum() == 0:
+            print(f"  {target_col}: koi NaN nahi — skip")
+            continue
+
+        # Features = baaki saari columns
+        feature_cols = [c for c in df.columns if c != target_col]
+
+        # Training data = jinke paas ORIGINAL value thi (non-null rows)
+        train_mask = ~nan_rows
+        X_train = df_work.loc[train_mask, feature_cols]
+        y_train = df.loc[train_mask, target_col]
+
+        # Bahut simple prediction: weighted average using correlation
+        # (sklearn ke andar BayesianRidge ya LinearRegression hoti hai)
+        # Hum simple formula use kar rahe hain samjhane ke liye:
+        # prediction = mean + (feature se adjustment)
+        col_mean = y_train.mean()
+
+        # Predict for missing rows using feature average adjustment
+        for row_idx in df_work.index[nan_rows]:
+            feature_vals = df_work.loc[row_idx, feature_cols]
+            feature_means = df_work.loc[train_mask, feature_cols].mean()
+
+            # Simple: agar features mean se upar hain toh target bhi thoda upar
+            deviation = ((feature_vals - feature_means) / (feature_means + 1e-9)).mean()
+            prediction = col_mean * (1 + deviation * 0.3)  # 0.3 = dampening factor
+            df_work.loc[row_idx, target_col] = prediction
+
+        print(f"  {target_col} → NaN rows {list(df_work.index[nan_rows])} updated")
+
+    print(f"\n  Snapshot after Iteration {iteration}:")
+    print(df_work.round(2))
+
+print("\n" + "="*40)
+print("FINAL IMPUTED VALUES:")
+print("="*40)
+print(df_work.round(2))
+
+# Compare: kahan kahan NaN tha, ab kya mila?
+print("\nKahan NaN tha → Ab kya imputed mila:")
+for col in df.columns:
+    nan_rows = original_nan_mask[col]
+    if nan_rows.sum() > 0:
+        print(f"\n  {col}:")
+        for idx in df_work.index[nan_rows]:
+            print(f"    Row {idx}: NaN → {df_work.loc[idx, col]:.2f}")</code></pre>
+    <div class="code-output">💡 Ye manual code exactly wahi logic follow karta hai jo MICE internally karta hai:
+→ Step 1: Mean se fill (placeholder)
+→ Step 2: Har column ko target banao, baaki se predict karo
+→ Iterate: Values har round mein improve hoti hain
+
+Actual sklearn IterativeImputer mein BayesianRidge model use hota hai
+(hum ne simple formula use kiya) — lekin flow bilkul same hai!</div>
+  </div>
+
+  <div class="callout cb-green mt-3">
+    <div class="ct"><i class="fa-solid fa-eye"></i> Iteration mein kya change hota hai?</div>
+    Neeche dekho — same dataset ke upar 3 iterations mein Avg_Bill aur Rating ki imputed values kaise change hoti hain:
+  </div>
+
+  <!-- ITERATION TABLES — Show evolution visually -->
+  <div class="iter-wrap mt-3">
+    <h6>🔢 Iteration 0 — Initial Fill (sirf mean se, rough placeholder)</h6>
+    <table class="iter-table">
+      <thead>
+        <tr><th>Restaurant</th><th>Avg_Bill (₹)</th><th>Rating</th><th>Delivery_Time</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>BiryaniHouse</td><td>350</td><td>4.2</td><td>30</td></tr>
+        <tr><td>PizzaPalace</td><td class="filled-cell">282 ← mean</td><td>4.5</td><td>25</td></tr>
+        <tr><td>DosaCorner</td><td>180</td><td class="filled-cell">4.0 ← mean</td><td>40</td></tr>
+        <tr><td>BurgerZone</td><td class="filled-cell">282 ← mean</td><td>3.8</td><td class="filled-cell">30 ← mean</td></tr>
+        <tr><td>ChaatWala</td><td>120</td><td>4.0</td><td>20</td></tr>
+        <tr><td>TandoorKing</td><td>480</td><td class="filled-cell">4.0 ← mean</td><td>35</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="iter-wrap">
+    <h6>🔢 Iteration 1 — Pehla Round (Rating aur features ne guide kiya)</h6>
+    <table class="iter-table">
+      <thead>
+        <tr><th>Restaurant</th><th>Avg_Bill (₹)</th><th>Rating</th><th>Delivery_Time</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>BiryaniHouse</td><td>350</td><td>4.2</td><td>30</td></tr>
+        <tr><td>PizzaPalace</td><td class="filled-cell">~348 ↑ (high rating!)</td><td>4.5</td><td>25</td></tr>
+        <tr><td>DosaCorner</td><td>180</td><td class="filled-cell">~3.8 (low bill → lower rating)</td><td>40</td></tr>
+        <tr><td>BurgerZone</td><td class="filled-cell">~238 ↓ (low rating)</td><td>3.8</td><td class="filled-cell">~32</td></tr>
+        <tr><td>ChaatWala</td><td>120</td><td>4.0</td><td>20</td></tr>
+        <tr><td>TandoorKing</td><td>480</td><td class="filled-cell">~4.4 (high bill → high rating)</td><td>35</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="iter-wrap">
+    <h6>✅ Iteration 3 — Values Stable Ho Gayi (Converged!)</h6>
+    <table class="iter-table">
+      <thead>
+        <tr><th>Restaurant</th><th>Avg_Bill (₹)</th><th>Rating</th><th>Delivery_Time</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>BiryaniHouse</td><td>350</td><td>4.2</td><td>30</td></tr>
+        <tr><td>PizzaPalace</td><td class="final-cell">~380 ✅</td><td>4.5</td><td>25</td></tr>
+        <tr><td>DosaCorner</td><td>180</td><td class="final-cell">~3.75 ✅</td><td>40</td></tr>
+        <tr><td>BurgerZone</td><td class="final-cell">~220 ✅</td><td>3.8</td><td class="final-cell">~33 ✅</td></tr>
+        <tr><td>ChaatWala</td><td>120</td><td>4.0</td><td>20</td></tr>
+        <tr><td>TandoorKing</td><td>480</td><td class="final-cell">~4.5 ✅</td><td>35</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout cb-blue mt-2">
+    <div class="ct"><i class="fa-solid fa-magnifying-glass"></i> Observe karo — MICE ne kya kiya?</div>
+    → <strong>PizzaPalace</strong> (Rating 4.5) → Bill ₹282 (mean) se badh ke ₹380 ho gaya — context-aware!<br>
+    → <strong>BurgerZone</strong> (Rating 3.8) → Bill ₹282 (mean) se ghatt ke ₹220 ho gaya — bhi context-aware!<br>
+    → <strong>TandoorKing</strong> (Bill ₹480 — sabse expensive) → Rating ₹4.0 (mean) se badh ke ₹4.5 ho gayi<br><br>
+    Mean imputation ne dono ko same ₹282 diya tha — MICE ne dono ko alag value di!
+  </div>
+</div>
+
+
+<!-- ██████████████████████████████████████████████████
+     LEVEL 3 : ITERATIONS MEIN KYA HOTA HAI
+█████████████████████████████████████████████████████ -->
+<div class="level-card lvl-purple fade-up" id="s5">
+  <div class="corner-deco">LEVEL 3</div>
+  <div class="lv-header">
+    <div class="lv-icon-wrap ico-purple"><i class="fa-solid fa-rotate"></i></div>
+    <div class="lv-meta">
+      <div class="lv-eyebrow">Level 3 · Boss Topic</div>
+      <div class="lv-title">Iterations Mein Kya Hota Hai — Intuition Build Karo</div>
+      <div class="lv-xp"><i class="fa-solid fa-star"></i> +30 XP on scroll</div>
+    </div>
+  </div>
+
+  <div class="callout cb-purple">
+    <div class="ct"><i class="fa-solid fa-lightbulb"></i> "Chained Equations" ka matlab kya hai?</div>
+    Socho teen dost hain — Aman, Bela, aur Chetan. Unhe ek doosre ka birthday guess karna hai par unhe nahi pata.<br><br>
+    → Aman guess karta hai Bela aur Chetan ki hints se<br>
+    → Bela guess karti hai Aman aur Chetan ki hints se<br>
+    → Chetan guess karta hai Aman aur Bela ki hints se<br><br>
+    Shuruaat mein sab galat hain. Phir woh ek doosre ki guesses se update karte hain. Round 2, Round 3 — har baar better guesses! Yahi <strong>chained equations</strong> hai!
+  </div>
+
+  <div class="glow-div"></div>
+
+  <h5 style="font-family:var(--font-head);font-weight:800;color:var(--text);margin-bottom:1.2rem;"><i class="fa-solid fa-question me-2" style="color:var(--neon-purple)"></i>Common Sawaal — Beginners Ke</h5>
+
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="dim-card" style="border-color:rgba(37,99,235,0.3);">
+        <div class="dim-rank" style="color:var(--neon-blue); font-size:1.5rem;">❓</div>
+        <div class="dim-name" style="color:var(--neon-blue);">Kitne iterations best hai?</div>
+        <div class="dim-code">max_iter = 10 (default)</div>
+        <div class="dim-desc">Default 10 rounds zyada tar datasets ke liye kaafi hai. Na zyada sochna! 10 se shuru karo — bus itna.</div>
+        <div class="dim-example" style="border-color:rgba(37,99,235,0.2); color:var(--muted);">✅ Beginner ke liye: max_iter=10 always</div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="dim-card" style="border-color:rgba(124,58,237,0.3);">
+        <div class="dim-rank" style="color:var(--neon-purple); font-size:1.5rem;">❓</div>
+        <div class="dim-name" style="color:var(--neon-purple);">Convergence kya hota hai?</div>
+        <div class="dim-code">Values stable ho jaati hain</div>
+        <div class="dim-desc">Jab ek iteration se agla iteration mein values bahut kam change ho rahi hon — matlab imputation stable ho gayi. MICE apne aap ruk jaata hai!</div>
+        <div class="dim-example" style="border-color:rgba(124,58,237,0.2); color:var(--muted);">Iteration 7: Bill=₹382 | Iteration 8: Bill=₹382.1 → Stable!</div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="dim-card" style="border-color:rgba(8,145,178,0.3);">
+        <div class="dim-rank" style="color:var(--neon-cyan); font-size:1.5rem;">❓</div>
+        <div class="dim-name" style="color:var(--neon-cyan);">Andar kaunsa model predict karta hai?</div>
+        <div class="dim-code">estimator = BayesianRidge (default)</div>
+        <div class="dim-desc">sklearn mein by default <strong>BayesianRidge</strong> use hota hai — ye ek linear regression ka better version hai. Beginners ke liye: default rahne do, koi change mat karo!</div>
+        <div class="dim-example" style="border-color:rgba(8,145,178,0.2); color:var(--muted);">Beginner ke liye: default estimator use karo — bas!</div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="dim-card" style="border-color:rgba(22,163,74,0.3);">
+        <div class="dim-rank" style="color:var(--neon-green); font-size:1.5rem;">❓</div>
+        <div class="dim-name" style="color:var(--neon-green);">random_state kyun set karein?</div>
+        <div class="dim-code">random_state = 42</div>
+        <div class="dim-desc">MICE mein kuch randomness hoti hai initial fill mein. <strong>random_state=42</strong> set karne se har baar same results aate hain — reproducibility ke liye!</div>
+        <div class="dim-example" style="border-color:rgba(22,163,74,0.2); color:var(--muted);">✅ Hamesha random_state=42 lagao — adat daalo!</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout cb-yellow mt-4">
+    <div class="ct"><i class="fa-solid fa-triangle-exclamation"></i> Ek Zaruri Baat — experimental import!</div>
+    sklearn mein <strong>IterativeImputer</strong> abhi "experimental" category mein hai — matlab ye officially release nahi hua, beta mein hai.<br><br>
+    Isliye use karne se pehle ek special line likhni padti hai:<br>
+    <span class="inline-code">from sklearn.experimental import enable_iterative_imputer</span><br><br>
+    Bina is line ke <span style="color:var(--neon-red); font-weight:700;">ImportError</span> aayega. <strong>Ye line likhna mat bhuolo!</strong>
+  </div>
+
+  <!-- QUIZ 3 -->
+  <div class="quiz-box" data-quiz="3" data-correct="d" data-xp="25">
+    <div class="quiz-q">🤔 MICE mein iterations kyun chahiye — ek hi round mein kyun nahi ho jaata?</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" data-ans="a" data-explain="Nahi. Speed MICE ke iterations ka reason nahi hai — actually zyada iterations slow hote hain. Reason kuch aur hai."><span class="opt-letter">A</span>Kyunki ek round mein code slow hota hai — speed ke liye multiple rounds chahiye</div>
+      <div class="quiz-opt" data-ans="b" data-explain="Nahi. Missing values ki sankhya iterations se badh nahi sakti — MICE kabhi values delete nahi karta. Ye sirf imputed values update karta hai."><span class="opt-letter">B</span>Kyunki har round mein zyada missing values discover hoti hain</div>
+      <div class="quiz-opt" data-ans="c" data-explain="Nahi. sklearn ki requirement nahi hai ye. Ye MICE ki fundamental design hai — accuracy ke liye iterative approach zaruri hai."><span class="opt-letter">C</span>Kyunki sklearn library mein aisa likha hai — koi technical requirement hai</div>
+      <div class="quiz-opt" data-ans="d" data-explain="Bilkul sahi! Round 1 mein jo values impute hoti hain woh sirf mean placeholders ke upar based hain — rough estimates. Round 2 mein in better estimates ko features ki tarah use karke aur better predictions aati hain. Har round mein chain ek dusre ko improve karti hai — isliye multiple iterations ke baad values converge hoti hain aur zyada accurate hoti hain!"><span class="opt-letter">D</span>Kyunki Round 1 ki imputed values rough hoti hain — agle rounds mein woh values better features ban ke aur accurate predictions deti hain</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+</div>
+
+
+<!-- ██████████████████████████████████████████████████
+     LEVEL 4 : SKLEARN MICE — ITERATIVEIMPUTER
+█████████████████████████████████████████████████████ -->
+<div class="level-card lvl-green fade-up" id="s6">
+  <div class="corner-deco">LEVEL 4</div>
+  <div class="lv-header">
+    <div class="lv-icon-wrap ico-green"><i class="fa-brands fa-python"></i></div>
+    <div class="lv-meta">
+      <div class="lv-eyebrow">Level 4 · Boss Topic</div>
+      <div class="lv-title">sklearn mein MICE — IterativeImputer (Asli Code!)</div>
+      <div class="lv-xp"><i class="fa-solid fa-star"></i> +30 XP on scroll</div>
+    </div>
+  </div>
+
+  <div class="callout cb-green">
+    <div class="ct"><i class="fa-solid fa-lightbulb"></i> Ab Asli Code — Simple aur Clean!</div>
+    Humne andar ki logic samajh li. Ab dekho sklearn ka <strong>IterativeImputer</strong> yahi sab automatically karta hai — ek simple function call mein!<br><br>
+    Code mein sirf <strong>zaroori parameters</strong> hi hain — koi extra confusing options nahi. Beginners ke liye perfect!
+  </div>
+
+  <!-- CODE BLOCK 2 — SKLEARN MICE -->
+  <div class="code-wrap">
+    <div class="code-header">
+      <span class="code-lang">🐍 Code Block 2 — sklearn IterativeImputer (Final Clean Code)</span>
+      <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+    </div>
+    <pre><code class="language-python">import pandas as pd
+import numpy as np
+
+# Step 1: Ye line likhna ZAROORI hai — mat bhuolo!
+from sklearn.experimental import enable_iterative_imputer
+from sklearn.impute import IterativeImputer
+
+# ─── Hamaara same Zomato dataset ───
+data = {
+    'Avg_Bill':       [350,   np.nan, 180,   np.nan, 120,   480  ],
+    'Rating':         [4.2,   4.5,    np.nan, 3.8,   4.0,   np.nan],
+    'Delivery_Time':  [30,    25,     40,     np.nan, 20,   35   ],
+}
+df = pd.DataFrame(data)
+
+print("Original Data (NaN = missing):")
+print(df)
+print(f"\nTotal missing values: {df.isnull().sum().sum()}")
+
+# ─── IterativeImputer — MICE ───
+# Sirf 2 parameters beginners ke liye zaruri hain:
+#   max_iter  = kitne rounds chalega (10 enough hai)
+#   random_state = reproducibility ke liye (hamesha 42 likho)
+imputer = IterativeImputer(max_iter=10, random_state=42)
+
+# fit_transform = dataset pe MICE apply karo
+# Ye ek numpy array return karta hai → DataFrame mein convert karo
+df_imputed = pd.DataFrame(
+    imputer.fit_transform(df),
+    columns=df.columns
+)
+
+print("\nAfter MICE Imputation (sabhi values fill ho gayi!):")
+print(df_imputed.round(2))
+
+print(f"\nTotal missing values after: {df_imputed.isnull().sum().sum()}")
+# → 0! Koi NaN nahi baka!
+
+# ─── Compare karo: Mean vs MICE ───
+print("\n--- Comparison: Mean vs MICE ---")
+mean_fill = df.fillna(df.mean())
+
+print("\nPizzaPalace Avg_Bill:")
+print(f"  Mean fill  → ₹{mean_fill.loc[1, 'Avg_Bill']:.0f}  (overall average)")
+print(f"  MICE fill  → ₹{df_imputed.loc[1, 'Avg_Bill']:.0f}  (context-aware!)")
+
+print("\nBurgerZone Avg_Bill:")
+print(f"  Mean fill  → ₹{mean_fill.loc[3, 'Avg_Bill']:.0f}  (same as PizzaPalace — wrong!)")
+print(f"  MICE fill  → ₹{df_imputed.loc[3, 'Avg_Bill']:.0f}  (lower — BurgerZone ka rating kam hai)")</code></pre>
+    <div class="code-output">Original Data:
+   Avg_Bill  Rating  Delivery_Time
+0     350.0     4.2           30.0
+1       NaN     4.5           25.0
+2     180.0     NaN           40.0
+3       NaN     3.8            NaN
+4     120.0     4.0           20.0
+5     480.0     NaN           35.0
+
+After MICE Imputation:
+   Avg_Bill  Rating  Delivery_Time
+0    350.00    4.20          30.00
+1    408.35    4.50          25.00  ← PizzaPalace: high rating = higher bill ✅
+2    180.00    3.72          40.00  ← DosaCorner: low bill = lower rating ✅
+3    217.44    3.80          32.18  ← BurgerZone: lower than PizzaPalace ✅
+4    120.00    4.00          20.00
+5    480.00    4.52          35.00  ← TandoorKing: high bill = high rating ✅
+
+Comparison: Mean vs MICE
+PizzaPalace Avg_Bill:
+  Mean fill  → ₹282  (overall average)
+  MICE fill  → ₹408  (context-aware! Rating 4.5 → premium price)
+
+BurgerZone Avg_Bill:
+  Mean fill  → ₹282  (same as PizzaPalace — wrong!)
+  MICE fill  → ₹217  (lower — BurgerZone ka rating 3.8 hai)</div>
+  </div>
+
+  <div class="callout cb-blue mt-3">
+    <div class="ct"><i class="fa-solid fa-list-check"></i> Code ke Teen Zaroori Parts — Yaad Rakhna</div>
+    <div class="row g-2 mt-1">
+      <div class="col-md-4">
+        <div style="background: rgba(37,99,235,0.05); border: 1px solid rgba(37,99,235,0.2); border-radius: 12px; padding: 1rem; text-align:center;">
+          <div style="font-size:1.5rem; margin-bottom:0.4rem;">1️⃣</div>
+          <div style="font-family:var(--font-head); font-weight:800; font-size:0.9rem; color:var(--neon-blue); margin-bottom:0.4rem;">Experimental Import</div>
+          <div style="font-family:var(--font-mono); font-size:0.78rem; color:var(--muted);">from sklearn.experimental import enable_iterative_imputer</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div style="background: rgba(22,163,74,0.05); border: 1px solid rgba(22,163,74,0.2); border-radius: 12px; padding: 1rem; text-align:center;">
+          <div style="font-size:1.5rem; margin-bottom:0.4rem;">2️⃣</div>
+          <div style="font-family:var(--font-head); font-weight:800; font-size:0.9rem; color:var(--neon-green); margin-bottom:0.4rem;">Imputer Banao</div>
+          <div style="font-family:var(--font-mono); font-size:0.78rem; color:var(--muted);">IterativeImputer(max_iter=10, random_state=42)</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div style="background: rgba(124,58,237,0.05); border: 1px solid rgba(124,58,237,0.2); border-radius: 12px; padding: 1rem; text-align:center;">
+          <div style="font-size:1.5rem; margin-bottom:0.4rem;">3️⃣</div>
+          <div style="font-family:var(--font-head); font-weight:800; font-size:0.9rem; color:var(--neon-purple); margin-bottom:0.4rem;">Apply Karo</div>
+          <div style="font-family:var(--font-mono); font-size:0.78rem; color:var(--muted);">imputer.fit_transform(df)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ 4 -->
+  <div class="quiz-box" data-quiz="4" data-correct="a" data-xp="25">
+    <div class="quiz-q">🤔 IterativeImputer use karte waqt kaunsi line likhna mandatory hai jo aksar beginners bhool jaate hain?</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" data-ans="a" data-explain="Bilkul sahi! IterativeImputer abhi sklearn mein 'experimental' status mein hai — officially released nahi hua. Isliye pehle enable_iterative_imputer import karna zaroori hai. Bina iske ImportError aayega aur code run nahi hoga. Ye ek common gotcha hai beginners ke liye!"><span class="opt-letter">A</span><span class="inline-code">from sklearn.experimental import enable_iterative_imputer</span></div>
+      <div class="quiz-opt" data-ans="b" data-explain="Nahi. numpy import karna optional hai — IterativeImputer ke liye mandatory nahi. Agar dataset mein np.nan use kar rahe ho toh numpy chahiye, lekin import sequence alag hai."><span class="opt-letter">B</span><span class="inline-code">import numpy as np</span> — ye pehle import karna zaroori hai</div>
+      <div class="quiz-opt" data-ans="c" data-explain="Nahi. pandas ka import regular hai — koi special order nahi. IterativeImputer ke saath pandas use karna optional hai, mandatory nahi."><span class="opt-letter">C</span><span class="inline-code">import pandas as pd</span> — ye sabse pehle import karo</div>
+      <div class="quiz-opt" data-ans="d" data-explain="Nahi. BayesianRidge ka import sirf tab zaroori hai jab tum explicitly estimator change karna chahte ho. Default IterativeImputer already BayesianRidge use karta hai — alag se import karne ki zaroorat nahi beginners ke liye."><span class="opt-letter">D</span><span class="inline-code">from sklearn.linear_model import BayesianRidge</span></div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+</div>
+
+
+<!-- ██████████████████████████████████████████████████
+     FINAL SUMMARY
+█████████████████████████████████████████████████████ -->
+<div class="level-card lvl-pink fade-up" id="s7" style="background:linear-gradient(135deg, rgba(124,58,237,0.04), rgba(219,39,119,0.04), #ffffff);">
+  <div class="lv-header">
+    <div class="lv-icon-wrap ico-pink"><i class="fa-solid fa-trophy"></i></div>
+    <div class="lv-meta">
+      <div class="lv-eyebrow">🏆 Quest Complete!</div>
+      <div class="lv-title">MICE — Pura Summary Ek Jagah</div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-md-6 col-lg-4">
+      <div class="ach-card ac-blue">
+        <span class="ach-icon">🐭</span>
+        <div class="ach-title">MICE kya hai?</div>
+        <div class="ach-desc">Missing values ko fill karo <strong>doosri columns ka context use karke</strong>. Mean nahi — prediction! Har column ke liye ek model train hota hai baaki columns se.</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+      <div class="ach-card ac-purple">
+        <span class="ach-icon">🌱</span>
+        <div class="ach-title">Step 1: Initial Fill</div>
+        <div class="ach-desc">Sab NaN ko pehle <strong>mean se</strong> fill karo — temporary placeholder. Ye final nahi — sirf chain start karne ke liye.</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+      <div class="ach-card ac-cyan">
+        <span class="ach-icon">🎯</span>
+        <div class="ach-title">Step 2: Column Predict Karo</div>
+        <div class="ach-desc">Har column ko <strong>target</strong> banao. Baaki columns = features. Simple model se predict karo. Sab columns ke liye yahi karo = ek round!</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+      <div class="ach-card ac-green">
+        <span class="ach-icon">🔄</span>
+        <div class="ach-title">Step 3: Iterate!</div>
+        <div class="ach-desc">Yahi process <strong>baar baar</strong> karo (10 rounds default). Har round mein values better hoti jaati hain. Stable values = convergence = done!</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+      <div class="ach-card ac-yellow">
+        <span class="ach-icon">⚠️</span>
+        <div class="ach-title">Experimental Import Mat Bhuolo!</div>
+        <div class="ach-desc"><span class="inline-code" style="font-size:0.75rem;">from sklearn.experimental import enable_iterative_imputer</span> — bina iske ImportError. Ye ek line — hamesha sabse pehle!</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+      <div class="ach-card ac-pink">
+        <span class="ach-icon">🚀</span>
+        <div class="ach-title">3 Lines Yaad Karo</div>
+        <div class="ach-desc">① experimental import ② <span class="inline-code" style="font-size:0.75rem;">IterativeImputer(max_iter=10, random_state=42)</span> ③ <span class="inline-code" style="font-size:0.75rem;">fit_transform(df)</span> — bas! MICE ho gaya!</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="glow-div"></div>
+
+  <h5 style="font-family:var(--font-head);font-weight:800;color:var(--text);margin-bottom:1rem;"><i class="fa-solid fa-scale-balanced me-2" style="color:var(--neon-pink)"></i>MICE kab use karein — Quick Guide</h5>
+
+  <div class="table-responsive">
+    <table class="gtbl">
+      <thead><tr><th>Situation</th><th>MICE use karo?</th><th>Kyun?</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Columns ek dusre se related hain (jaise Rating aur Bill)</td>
+          <td><span class="stat-pill sp-green">✅ Haan</span></td>
+          <td>MICE in relationships use karke better imputation deta hai</td>
+        </tr>
+        <tr>
+          <td>Multiple columns mein missing values hain</td>
+          <td><span class="stat-pill sp-green">✅ Haan</span></td>
+          <td>MICE sab ko saath mein handle karta hai</td>
+        </tr>
+        <tr>
+          <td>Sirf 1–2% values missing hain</td>
+          <td><span class="stat-pill sp-yellow">⚠️ Mean bhi theek</span></td>
+          <td>Itni kam missing mein mean ya median kaafi hai — MICE overkill hai</td>
+        </tr>
+        <tr>
+          <td>Dataset mein 50 se kam rows hain</td>
+          <td><span class="stat-pill sp-orange">⚠️ Careful</span></td>
+          <td>MICE ka model bahut kam data pe reliable nahi hota</td>
+        </tr>
+        <tr>
+          <td>Ek column mein 60%+ values missing hain</td>
+          <td><span class="stat-pill sp-pink">❌ Nahi</span></td>
+          <td>Itni zyada missing mein woh column drop karna better hai</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout cb-pink mt-4">
+    <div class="ct"><i class="fa-solid fa-heart"></i> Final Message — Beginners ke liye</div>
+    <strong>MICE</strong> = Detective ki tarah kaam karo — clues (doosri columns) se missing value dhundho!<br>
+    → <strong>Iteration</strong> = Pehle rough guess, phir refine, phir aur refine — jaise drawing mein pehle rough sketch phir detail<br>
+    → <strong>Convergence</strong> = Jab values stable ho jaayein — values change nahi ho rahi, matlab imputation complete!<br>
+    → <strong>sklearn mein</strong> = bas 3 lines — experimental import + IterativeImputer + fit_transform<br><br>
+    <strong style="color:var(--neon-pink)">Aaj tumne MICE ki pure andar ki logic samjhi — pandas se manually, phir sklearn se. Ye samajh hamesha kaam aayegi! 🐭🚀</strong>
+  </div>
+</div>
+
+</div><!-- /container-main -->
+
+<!-- ═══════════════════ FOOTER ═══════════════════ -->
+<footer class="gfooter">
+  <div class="container-main">
+    <div class="gfooter-logo"><i class="fa-solid fa-wand-magic-sparkles me-2"></i>MICE Algorithm Quest</div>
+    <p style="color:var(--muted); font-size:0.9rem; margin-bottom:0.5rem;">Missing Value Imputation · MICE · IterativeImputer · Beginners Edition</p>
+    <p style="color:var(--dim); font-size:0.82rem;">Made with <i class="fa-solid fa-heart" style="color:var(--neon-pink)"></i> for Hindi-speaking Data Science beginners across India 🇮🇳</p>
+  </div>
+</footer>
+
+<!-- ═══════════════════ TOAST ═══════════════════ -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ═══════════════════ MODAL ═══════════════════ -->
+<canvas id="confettiCanvas"></canvas>
+<div class="modal-overlay" id="finalModal">
+  <div class="modal-box">
+    <button class="modal-close" id="modalClose" title="Close">✕</button>
+    <div class="modal-trophy" id="modalTrophy">🏆</div>
+    <div class="modal-title" id="modalTitle">Quest Complete!</div>
+    <div class="modal-subtitle" id="modalSubtitle">Tumne saare 4 quizzes complete kar liye!</div>
+    <div class="score-ring-wrap">
+      <div class="score-ring">
+        <svg viewBox="0 0 120 120">
+          <circle class="ring-bg" cx="60" cy="60" r="52"/>
+          <circle class="ring-fill" id="ringFill" cx="60" cy="60" r="52"/>
+        </svg>
+        <div class="ring-text">
+          <div class="ring-num" id="ringNum">0/4</div>
+          <div class="ring-label">Score</div>
+        </div>
+      </div>
+    </div>
+    <div class="grade-card" id="gradeCard">
+      <div class="grade-letter" id="gradeLetter">S</div>
+      <div class="grade-msg" id="gradeMsg">Exceptional!</div>
+    </div>
+    <div class="modal-xp-row">
+      <span class="mxp-label">⚡ Total XP Earned from Quizzes</span>
+      <span class="mxp-val" id="modalXpVal">0 XP</span>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-btn-retry"    id="modalRetry">   <i class="fa-solid fa-rotate-right"></i> Retry All</button>
+      <button class="modal-btn-continue" id="modalContinue"><i class="fa-solid fa-trophy"></i> Awesome, Continue!</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ SCRIPTS ═══════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function showFinalModal() {
+  const total = quizTotal, correct = quizCorrect;
+  const pct = total > 0 ? correct / total : 0;
+  const quizXP = correct * 25;
+  const grades = [
+    { min: 1.0,  cls: 'grade-s', letter: 'S 🌟', msg: 'Zabardast! Sab 4/4 correct! MICE Grandmaster! 🐭' },
+    { min: 0.75, cls: 'grade-a', letter: 'A 🎯', msg: 'Bahut badhiya! Almost perfect!' },
+    { min: 0.5,  cls: 'grade-b', letter: 'B 📘', msg: 'Accha kiya! Kuch topics dobara dekho.' },
+    { min: 0.25, cls: 'grade-c', letter: 'C 💪', msg: 'Theek hai! Aur practice karo.' },
+    { min: 0.0,  cls: 'grade-d', letter: 'D 📚', msg: 'Tutorial dobara padho!' },
+  ];
+  const g = grades.find(gr => pct >= gr.min);
+  document.getElementById('ringNum').textContent = correct + '/' + total;
+  document.getElementById('modalXpVal').textContent = quizXP + ' XP';
+  const gradeCard = document.getElementById('gradeCard');
+  gradeCard.className = 'grade-card ' + g.cls;
+  document.getElementById('gradeLetter').textContent = g.letter;
+  document.getElementById('gradeMsg').textContent = g.msg;
+  if (pct === 1.0) {
+    document.getElementById('modalTrophy').textContent = '🏆';
+    document.getElementById('modalTitle').textContent = '🎊 Perfect Score!';
+    document.getElementById('modalSubtitle').textContent = 'Wah! Saare 4/4 sahi! MICE ka concept crystal clear hai tumhara!';
+  } else if (pct >= 0.5) {
+    document.getElementById('modalTrophy').textContent = '🎯';
+    document.getElementById('modalTitle').textContent = 'Quest Complete!';
+    document.getElementById('modalSubtitle').textContent = correct + ' out of ' + total + ' correct. Kafi accha kiya!';
+  } else {
+    document.getElementById('modalTrophy').textContent = '📚';
+    document.getElementById('modalTitle').textContent = 'Keep Trying!';
+    document.getElementById('modalSubtitle').textContent = 'Tutorial dobara padho aur retry karo!';
+  }
+  const circumference = 327, offset = circumference * (1 - pct);
+  const ringColors = {'grade-s':'#b45309','grade-a':'#16a34a','grade-b':'#2563eb','grade-c':'#7c3aed','grade-d':'#dc2626'};
+  const ringEl = document.getElementById('ringFill');
+  ringEl.style.stroke = ringColors[g.cls] || '#2563eb';
+  ringEl.style.transition = 'none'; ringEl.style.strokeDashoffset = '327';
+  setTimeout(() => { ringEl.style.transition = 'stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1)'; ringEl.style.strokeDashoffset = offset; }, 80);
+  document.getElementById('finalModal').classList.add('open');
+  if (pct >= 0.5) launchConfetti(pct);
+}
+
+function launchConfetti(pct) {
+  const canvas = document.getElementById('confettiCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+  const count = Math.floor(80 + pct * 140);
+  const colors = ['#2563eb','#7c3aed','#db2777','#16a34a','#b45309','#0891b2','#f59e0b'];
+  const pieces = Array.from({length: count}, () => ({
+    x: Math.random() * canvas.width, y: Math.random() * -canvas.height * 0.6,
+    w: Math.random() * 10 + 5, h: Math.random() * 6 + 3,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    vx: (Math.random() - 0.5) * 4, vy: Math.random() * 4 + 2,
+    rot: Math.random() * 360, vrot: (Math.random() - 0.5) * 9, alpha: 1,
+  }));
+  let frame = 0;
+  (function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height); let alive = false;
+    pieces.forEach(p => {
+      if (p.y > canvas.height + 20) return; alive = true;
+      p.x += p.vx; p.y += p.vy; p.rot += p.vrot;
+      if (p.y > canvas.height * 0.65) p.alpha -= 0.02;
+      p.alpha = Math.max(0, p.alpha);
+      ctx.save(); ctx.globalAlpha = p.alpha; ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot * Math.PI / 180);
+      ctx.fillStyle = p.color; ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h); ctx.restore();
+    });
+    frame++;
+    if (alive && frame < 260) requestAnimationFrame(draw);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  })();
+}
+
+function initQuizzes() {
+  document.querySelectorAll('.quiz-box').forEach(box => {
+    box.querySelectorAll('.quiz-opt').forEach(opt => { const n = opt.cloneNode(true); opt.parentNode.replaceChild(n, opt); });
+    const correct = box.dataset.correct, qxp = parseInt(box.dataset.xp) || 25;
+    let answered = false;
+    box.querySelectorAll('.quiz-opt').forEach(opt => {
+      opt.addEventListener('click', () => {
+        if (answered) return; answered = true;
+        const isCorrect = opt.dataset.ans === correct;
+        const fb = box.querySelector('.quiz-feedback');
+        box.querySelectorAll('.quiz-opt').forEach(o => {
+          o.classList.add('answered-opt');
+          const exDiv = box.querySelector('.quiz-explain[data-for-ans="' + o.dataset.ans + '"]');
+          if (o.dataset.ans === correct) { o.classList.add('correct'); if (exDiv) exDiv.classList.add('show-correct'); }
+          else if (o === opt && !isCorrect) { o.classList.add('wrong'); if (exDiv) exDiv.classList.add('show-wrong'); }
+          else { o.classList.add('dimmed'); if (o.dataset.ans === correct && exDiv) exDiv.classList.add('show-reveal'); }
+        });
+        if (isCorrect) {
+          quizCorrect++;
+          fb.className = 'quiz-feedback show win';
+          fb.innerHTML = '<span style="font-size:1.3rem">🎉</span>&nbsp;Zabardast! Sahi jawab! <strong>+' + qxp + ' XP</strong> earned!';
+          addXP(qxp); showToast('⚡', '+' + qxp + ' XP!', 'Bilkul sahi jawab!', '#16a34a');
+        } else {
+          fb.className = 'quiz-feedback show lose';
+          fb.innerHTML = '<span style="font-size:1.3rem">💡</span>&nbsp;Galat! Sahi jawab highlight ho gaya — concept dobara padho!';
+          showToast('💡', 'Galat!', 'Sahi jawab dekho aur concept review karo.', '#dc2626');
+        }
+        const doneCount = Array.from(document.querySelectorAll('.quiz-box')).filter(b => b.querySelector('.quiz-opt.answered-opt')).length;
+        if (doneCount === quizTotal) setTimeout(showFinalModal, 1200);
+      });
+    });
+  });
+}
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({
+  startOnLoad: true, theme: 'base',
+  themeVariables: { primaryColor: '#dbeafe', primaryTextColor: '#1e3a8a', primaryBorderColor: '#2563eb', lineColor: '#94a3b8', secondaryColor: '#d1fae5', tertiaryColor: '#ede9fe', fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: '13px' },
+  flowchart: { curve: 'basis', padding: 24 }
+});
+
+/* ═══ XP SYSTEM ═══ */
+let xp = 0, scrollXpEarned = 0;
+const XP_MAX = 220;
+const earnedBadges = new Set();
+
+function addXP(amount, badgeId) {
+  if (badgeId) scrollXpEarned = Math.min(scrollXpEarned + amount, 120);
+  xp = Math.min(xp + amount, XP_MAX);
+  document.getElementById('xpFill').style.width = (xp / XP_MAX * 100) + '%';
+  document.getElementById('xpScore').textContent = xp + ' / ' + XP_MAX + ' XP';
+  if (badgeId && !earnedBadges.has(badgeId)) {
+    earnedBadges.add(badgeId);
+    const el = document.getElementById(badgeId);
+    if (el) el.classList.add('earned');
+  }
+  if (xp >= XP_MAX) showToast('🏆', 'QUEST COMPLETE! 🎊', 'MICE Grandmaster ban gaye! 220/220 XP!', '#b45309');
+}
+
+function showToast(icon, title, msg, color) {
+  const container = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = 'gtoast';
+  t.innerHTML = `<span class="gtoast-icon">${icon}</span><div><div style="font-weight:800;color:${color};font-size:0.9rem;">${title}</div><div style="color:#6b7280;font-size:0.8rem;font-weight:400;">${msg}</div></div>`;
+  container.appendChild(t);
+  setTimeout(() => t.classList.add('show'), 50);
+  setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 3500);
+}
+
+/* ═══ QUIZ SYSTEM ═══ */
+let quizTotal = 0, quizCorrect = 0;
+
+document.querySelectorAll('.quiz-box').forEach(box => {
+  quizTotal++;
+  const correct = box.dataset.correct, qxp = parseInt(box.dataset.xp) || 25;
+  let answered = false;
+  box.querySelectorAll('.quiz-opt').forEach(opt => {
+    const explain = opt.dataset.explain || '';
+    if (explain) {
+      const div = document.createElement('div');
+      div.className = 'quiz-explain'; div.dataset.forAns = opt.dataset.ans; div.textContent = explain;
+      opt.parentNode.insertBefore(div, opt.nextSibling);
+    }
+  });
+  box.querySelectorAll('.quiz-opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      if (answered) return; answered = true;
+      const ans = opt.dataset.ans, fb = box.querySelector('.quiz-feedback');
+      const isCorrect = ans === correct;
+      box.querySelectorAll('.quiz-opt').forEach(o => {
+        o.classList.add('answered-opt');
+        const explainDiv = box.querySelector('.quiz-explain[data-for-ans="' + o.dataset.ans + '"]');
+        if (o.dataset.ans === correct) { o.classList.add('correct'); if (explainDiv) explainDiv.classList.add('show-correct'); }
+        else if (o === opt && !isCorrect) { o.classList.add('wrong'); if (explainDiv) explainDiv.classList.add('show-wrong'); }
+        else { o.classList.add('dimmed'); if (o.dataset.ans === correct && explainDiv) explainDiv.classList.add('show-reveal'); }
+      });
+      if (isCorrect) {
+        quizCorrect++;
+        fb.className = 'quiz-feedback show win';
+        fb.innerHTML = '<span style="font-size:1.3rem">🎉</span> Zabardast! Sahi jawab! <strong>+' + qxp + ' XP</strong> earned!';
+        addXP(qxp); showToast('⚡', '+' + qxp + ' XP!', 'Bilkul sahi jawab!', '#16a34a');
+      } else {
+        fb.className = 'quiz-feedback show lose';
+        fb.innerHTML = '<span style="font-size:1.3rem">💡</span> Galat! Sahi jawab highlight ho gaya — concept dobara padho!';
+        showToast('💡', 'Galat!', 'Sahi jawab dekho aur concept review karo.', '#dc2626');
+      }
+      const doneCount = Array.from(document.querySelectorAll('.quiz-box')).filter(b => b.querySelector('.quiz-opt.answered-opt')).length;
+      if (doneCount === quizTotal) setTimeout(showFinalModal, 1200);
+    });
+  });
+});
+
+/* ═══ FADE-UP ═══ */
+const fadeObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); fadeObserver.unobserve(e.target); } });
+}, { threshold: 0.12 });
+document.querySelectorAll('.fade-up').forEach(el => fadeObserver.observe(el));
+
+/* ═══ SCROLL XP ═══ */
+const sectionXP = {
+  's1': { xp: 30, badge: 'badge1', msg: '🐭 MICE Initiate badge unlocked!' },
+  's3': { xp: 30, badge: 'badge2', msg: '🔄 Loop Learner badge unlocked!' },
+  's5': { xp: 30, badge: 'badge3', msg: '💡 Logic Solver badge unlocked!' },
+  's6': { xp: 30, badge: 'badge4', msg: '🏆 Imputation Pro badge unlocked!' },
+};
+const xpObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id;
+      if (sectionXP[id] && !earnedBadges.has(sectionXP[id].badge)) {
+        const { xp: sx, badge, msg } = sectionXP[id];
+        addXP(sx, badge); showToast('🏅', 'Badge Unlocked!', msg, '#7c3aed');
+      }
+      xpObserver.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.12 });
+['s1','s3','s5','s6'].forEach(id => { const el = document.getElementById(id); if (el) xpObserver.observe(el); });
+
+/* ═══ SMOOTH SCROLL ═══ */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const t = document.querySelector(a.getAttribute('href'));
+    if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+
+/* ═══ MODAL BUTTONS ═══ */
+function closeModal() { document.getElementById('finalModal').classList.remove('open'); }
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.getElementById('modalContinue').addEventListener('click', closeModal);
+document.getElementById('modalRetry').addEventListener('click', () => {
+  closeModal(); quizCorrect = 0;
+  xp = scrollXpEarned;
+  document.getElementById('xpFill').style.width = (xp / XP_MAX * 100) + '%';
+  document.getElementById('xpScore').textContent = xp + ' / ' + XP_MAX + ' XP';
+  document.querySelectorAll('.quiz-box').forEach(box => {
+    box.querySelectorAll('.quiz-opt').forEach(o => o.classList.remove('correct','wrong','dimmed','answered-opt'));
+    box.querySelectorAll('.quiz-explain').forEach(ex => ex.classList.remove('show-correct','show-wrong','show-reveal'));
+    const fb = box.querySelector('.quiz-feedback');
+    if (fb) { fb.className = 'quiz-feedback'; fb.innerHTML = ''; }
+  });
+  initQuizzes();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+document.getElementById('finalModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+</script>
+</body>
+</html>

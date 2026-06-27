@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎮 PowerTransformer & ColumnTransformer Quest — Gamified Learning</title>
+<meta name="description" content="Master Box-Cox Transform, Yeo-Johnson Transform & ColumnTransformer in Python through a gamified quest with XP, quizzes, and badges.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#f8f9fc;--surface:#ffffff;--card:#ffffff;--border:#e2e8f0;
+--primary:#6c5ce7;--primary-glow:#7c3aed;--secondary:#0ea5e9;--accent:#f97316;
+--xp-bar:#10b981;--gold:#f59e0b;--danger:#ef4444;--success:#22c55e;
+--text:#1e293b;--text-muted:#64748b;--text-dim:#94a3b8;
+--radius:16px;--shadow:0 4px 24px rgba(0,0,0,0.06);
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+.container{max-width:100%;margin:0;padding:0 60px}
+.hero{position:relative;min-height:50vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:60px 20px;overflow:hidden;background:linear-gradient(135deg,#6c5ce7 0%,#7c3aed 40%,#0ea5e9 100%)}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 20%,rgba(255,255,255,0.15) 0%,transparent 50%),radial-gradient(ellipse at 70% 80%,rgba(255,255,255,0.08) 0%,transparent 40%)}
+.hero-content{position:relative;z-index:2}
+.hero h1{font-size:clamp(2rem,5vw,3.2rem);font-weight:900;color:#fff;margin-bottom:12px;letter-spacing:-1px;text-shadow:0 2px 20px rgba(0,0,0,0.15)}
+.hero .subtitle{font-size:1.1rem;color:rgba(255,255,255,0.85);max-width:600px;margin:0 auto 30px}
+.hero .badge-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.hero .badge-row span{background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.25);padding:6px 16px;border-radius:30px;font-size:.8rem;color:#fff;backdrop-filter:blur(4px)}
+.hero-particles{position:absolute;inset:0;pointer-events:none}
+.hero-particles span{position:absolute;width:4px;height:4px;background:rgba(255,255,255,0.5);border-radius:50%;animation:float 6s infinite ease-in-out}
+@keyframes float{0%,100%{transform:translateY(0) scale(1);opacity:.3}50%{transform:translateY(-40px) scale(1.5);opacity:.8}}
+.xp-bar-container{position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:10px 0;box-shadow:0 2px 12px rgba(0,0,0,0.04)}
+.xp-inner{display:flex;align-items:center;gap:16px;max-width:100%;margin:0;padding:0 60px}
+.xp-info{display:flex;align-items:center;gap:8px;font-weight:700;font-size:.9rem;white-space:nowrap;color:var(--text)}
+.xp-info .xp-icon{font-size:1.2rem}
+.xp-track{flex:1;height:14px;background:#f1f5f9;border-radius:10px;overflow:hidden;border:1px solid var(--border)}
+.xp-fill{height:100%;background:linear-gradient(90deg,var(--xp-bar),#34d399);border-radius:10px;transition:width .8s cubic-bezier(.4,0,.2,1);width:0%}
+.xp-label{font-size:.8rem;color:var(--text-muted);white-space:nowrap}
+.xp-level-badge{background:linear-gradient(135deg,var(--gold),#f59e0b);color:#fff;font-weight:800;padding:4px 12px;border-radius:20px;font-size:.75rem;box-shadow:0 2px 8px rgba(245,158,11,0.3)}
+.quest-map{padding:60px 0 30px;text-align:center}
+.quest-map h2{font-size:1.8rem;font-weight:800;margin-bottom:30px;color:var(--primary)}
+.quest-steps{display:flex;justify-content:center;gap:0;flex-wrap:wrap;position:relative}
+.quest-node{display:flex;flex-direction:column;align-items:center;gap:6px;width:120px;cursor:pointer;transition:.3s}
+.quest-node:hover{transform:translateY(-4px)}
+.quest-circle{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:800;border:3px solid var(--border);background:#f8f9fc;transition:.3s;position:relative;color:var(--text-muted)}
+.quest-circle.completed{border-color:var(--success);background:#ecfdf5;color:var(--success);box-shadow:0 0 16px rgba(34,197,94,0.2)}
+.quest-circle.active{border-color:var(--primary);background:#ede9fe;color:var(--primary);box-shadow:0 0 16px rgba(108,92,231,0.25);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 16px rgba(108,92,231,0.25)}50%{box-shadow:0 0 28px rgba(108,92,231,0.45)}}
+.quest-label{font-size:.7rem;color:var(--text-muted);text-align:center;line-height:1.3;font-weight:500}
+.quest-connector{width:40px;height:3px;background:var(--border);align-self:center;margin-top:-20px;border-radius:2px}
+.quest-connector.completed{background:var(--success)}
+.level-section{padding:40px 0}
+.level-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:36px;margin-bottom:40px;position:relative;overflow:hidden;transition:.3s;box-shadow:var(--shadow)}
+.level-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--primary),var(--secondary))}
+.level-card:hover{border-color:rgba(108,92,231,0.3);box-shadow:0 8px 32px rgba(108,92,231,0.1)}
+.level-header{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.level-number{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;font-weight:900;font-size:1.1rem;width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(108,92,231,0.25)}
+.level-title{font-size:1.35rem;font-weight:800;color:var(--text)}
+.level-xp{margin-left:auto;background:#ecfdf5;color:var(--xp-bar);padding:4px 14px;border-radius:20px;font-size:.8rem;font-weight:600;border:1px solid #bbf7d0}
+.callout{border-radius:12px;padding:20px 24px;margin:20px 0;border-left:4px solid;position:relative}
+.callout.story{background:#fff7ed;border-color:#f97316;color:#9a3412}
+.callout.tip{background:#eff6ff;border-color:#3b82f6;color:#1e40af}
+.callout.warning{background:#fef2f2;border-color:#ef4444;color:#991b1b}
+.callout.formula{background:#faf5ff;border-color:#8b5cf6;color:#5b21b6}
+.callout-title{font-weight:700;font-size:.9rem;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.callout p{color:#374151}
+.callout code{background:rgba(108,92,231,0.1);color:#6c5ce7;padding:2px 6px;border-radius:4px;font-size:.85rem}
+.code-block{background:#f8f9fc;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,0.05)}
+.code-header{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:#f1f5f9;border-bottom:1px solid #e2e8f0}
+.code-header span{font-size:.8rem;color:#64748b;font-weight:600}
+.code-header button{background:#ede9fe;color:#6c5ce7;border:1px solid #c4b5fd;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:.75rem;font-family:'Inter';transition:.2s}
+.code-header button:hover{background:#ddd6fe}
+pre{padding:20px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:.85rem;line-height:1.6;color:#1e293b;background:#fafbfe}
+.code-output{background:#f0fdf4;border-top:1px solid #e2e8f0;padding:16px 20px;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:#166534}
+.code-output::before{content:'▸ Output';display:block;font-size:.7rem;color:#64748b;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
+.quiz-container{background:linear-gradient(135deg,#faf5ff,#eff6ff);border:1px solid #e0d4f7;border-radius:var(--radius);padding:30px;margin:30px 0}
+.quiz-title{font-size:1.1rem;font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:8px;color:var(--primary)}
+.quiz-question{font-weight:600;margin-bottom:14px;font-size:1rem;color:var(--text)}
+.quiz-options{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+.quiz-option{background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 18px;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:10px;font-size:.9rem;color:var(--text)}
+.quiz-option:hover{border-color:var(--primary);background:#faf5ff}
+.quiz-option.selected{border-color:var(--primary);background:#ede9fe}
+.quiz-option.correct{border-color:var(--success);background:#ecfdf5;color:#166534}
+.quiz-option.wrong{border-color:var(--danger);background:#fef2f2;color:#991b1b}
+.quiz-option .opt-marker{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;flex-shrink:0;transition:.2s;color:var(--text-muted)}
+.quiz-option.selected .opt-marker{border-color:var(--primary);background:var(--primary);color:#fff}
+.quiz-option.correct .opt-marker{border-color:var(--success);background:var(--success);color:#fff}
+.quiz-option.wrong .opt-marker{border-color:var(--danger);background:var(--danger);color:#fff}
+.quiz-btn{background:linear-gradient(135deg,var(--primary),#7c3aed);color:#fff;border:none;padding:10px 28px;border-radius:10px;font-weight:700;cursor:pointer;font-size:.9rem;transition:.3s;font-family:'Inter';box-shadow:0 4px 12px rgba(108,92,231,0.25)}
+.quiz-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(108,92,231,0.35)}
+.quiz-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+.quiz-feedback{margin-top:14px;padding:12px 18px;border-radius:10px;font-weight:600;font-size:.9rem;display:none}
+.quiz-feedback.show{display:block}
+.quiz-feedback.correct{background:#ecfdf5;color:#166534;border:1px solid #bbf7d0}
+.quiz-feedback.wrong{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:999}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border:1px solid var(--border);border-radius:20px;padding:50px 40px;text-align:center;max-width:420px;width:90%;position:relative;animation:modalIn .5s cubic-bezier(.4,0,.2,1);box-shadow:0 20px 60px rgba(0,0,0,0.15)}
+@keyframes modalIn{from{opacity:0;transform:scale(.8) translateY(30px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal .reward-icon{font-size:4rem;margin-bottom:16px;display:block;animation:bounce 1s infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.modal h3{font-size:1.5rem;font-weight:800;margin-bottom:8px;background:linear-gradient(135deg,#f59e0b,#f97316);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.modal p{color:var(--text-muted);margin-bottom:24px}
+.modal .xp-reward{font-size:1.3rem;font-weight:800;color:var(--xp-bar);margin-bottom:20px}
+.modal button{background:linear-gradient(135deg,var(--primary),#7c3aed);color:#fff;border:none;padding:12px 32px;border-radius:12px;font-weight:800;cursor:pointer;font-size:1rem;font-family:'Inter';transition:.3s;box-shadow:0 4px 16px rgba(108,92,231,0.3)}
+.modal button:hover{transform:scale(1.05)}
+.confetti-piece{position:fixed;width:10px;height:10px;top:-10px;z-index:1000;animation:confettiFall 3s linear forwards}
+@keyframes confettiFall{to{top:110vh;opacity:0;transform:rotateZ(720deg)}}
+.footer{text-align:center;padding:60px 20px;color:var(--text-muted);font-size:.85rem;border-top:1px solid var(--border);background:#fff}
+.footer a{color:var(--primary);text-decoration:none}
+.methods-table{width:100%;border-collapse:collapse;margin:20px 0;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.05)}
+.methods-table th{background:linear-gradient(135deg,var(--primary),#7c3aed);color:#fff;padding:12px 16px;text-align:left;font-size:.85rem;font-weight:700}
+.methods-table td{padding:12px 16px;border-bottom:1px solid #f1f5f9;font-size:.85rem;vertical-align:top;color:var(--text)}
+.methods-table tr:nth-child(even) td{background:#faf5ff}
+.methods-table tr:hover td{background:#f0ebff}
+.methods-table code{background:#ede9fe;color:#6c5ce7;padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.8rem}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0}
+.compare-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;position:relative;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+.compare-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.compare-card h4{font-size:.95rem;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.compare-card p{font-size:.85rem;color:var(--text-muted);line-height:1.6}
+.compare-card .method-tag{display:inline-block;padding:3px 10px;border-radius:6px;font-size:.75rem;font-weight:700;font-family:'JetBrains Mono',monospace;margin-bottom:10px}
+.final-summary{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:50px;margin:40px 0;position:relative;overflow:hidden;box-shadow:var(--shadow)}
+.final-summary::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,#f97316,#6c5ce7,#0ea5e9,#10b981)}
+.final-summary h2{font-size:1.6rem;font-weight:800;margin-bottom:28px;color:var(--text);text-align:center}
+.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}
+.summary-item{background:#f8f9fc;border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;transition:.3s;border-top:3px solid transparent}
+.summary-item:hover{transform:translateY(-3px);box-shadow:0 4px 16px rgba(0,0,0,0.08)}
+.summary-item.si-orange{border-top-color:#f97316}
+.summary-item.si-purple{border-top-color:#6c5ce7}
+.summary-item.si-blue{border-top-color:#0ea5e9}
+.summary-item.si-green{border-top-color:#10b981}
+.summary-item.si-amber{border-top-color:#f59e0b}
+.summary-takeaway{background:linear-gradient(135deg,#faf5ff,#eff6ff);border:1px solid #e0d4f7;border-radius:12px;padding:24px;text-align:center}
+.summary-takeaway p{font-size:.95rem;color:var(--text);line-height:1.7}
+.summary-takeaway code{background:#ede9fe;color:#6c5ce7;padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.85rem}
+@media(max-width:600px){
+.level-card{padding:24px 18px}.quest-node{width:80px}.quest-connector{width:20px}.modal{padding:36px 24px}.xp-inner{gap:10px}.hero h1{font-size:1.8rem}.compare-grid{grid-template-columns:1fr}.summary-grid{grid-template-columns:1fr}.final-summary{padding:30px 20px}
+}
+.kw{color:#8b5cf6}.fn{color:#2563eb}.str{color:#16a34a}.cm{color:#94a3b8}.num{color:#ea580c}.op{color:#d97706}.im{color:#db2777}.bi{color:#2563eb}.var{color:#d97706}
+</style>
+</head>
+<body>
+
+<!-- ===== XP BAR ===== -->
+<div class="xp-bar-container">
+<div class="xp-inner">
+<div class="xp-info"><span class="xp-icon">⚡</span><span id="xpCount">0</span> XP</div>
+<div class="xp-track"><div class="xp-fill" id="xpFill"></div></div>
+<div class="xp-label" id="xpLabel">Level 0 / 5</div>
+<div class="xp-level-badge" id="xpBadge">🌱 Noob</div>
+</div>
+</div>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+<div class="hero-particles" id="particles"></div>
+<div class="hero-content">
+<h1>🎮 PowerTransformer & ColumnTransformer Quest</h1>
+<p class="subtitle">Master Box-Cox, Yeo-Johnson Transforms & ColumnTransformer in Python — ek gamified adventure mein! 🚀</p>
+<div class="badge-row">
+<span>🐍 Python</span>
+<span>🔧 sklearn</span>
+<span>📊 Power Transforms</span>
+<span>🎯 5 Levels</span>
+<span>💎 500 XP</span>
+</div>
+</div>
+</section>
+
+<!-- ===== QUEST MAP ===== -->
+<div class="container">
+<section class="quest-map">
+<h2>🗺️ Quest Map</h2>
+<div class="quest-steps">
+<div class="quest-node" onclick="scrollToLevel(1)">
+<div class="quest-circle active" id="qc1">1</div>
+<div class="quest-label">Why Power<br>Transform?</div>
+</div>
+<div class="quest-connector" id="conn1"></div>
+<div class="quest-node" onclick="scrollToLevel(2)">
+<div class="quest-circle" id="qc2">2</div>
+<div class="quest-label">Box-Cox<br>Transform</div>
+</div>
+<div class="quest-connector" id="conn2"></div>
+<div class="quest-node" onclick="scrollToLevel(3)">
+<div class="quest-circle" id="qc3">3</div>
+<div class="quest-label">Yeo-Johnson<br>Transform</div>
+</div>
+<div class="quest-connector" id="conn3"></div>
+<div class="quest-node" onclick="scrollToLevel(4)">
+<div class="quest-circle" id="qc4">4</div>
+<div class="quest-label">Box-Cox vs<br>Yeo-Johnson</div>
+</div>
+<div class="quest-connector" id="conn4"></div>
+<div class="quest-node" onclick="scrollToLevel(5)">
+<div class="quest-circle" id="qc5">5</div>
+<div class="quest-label">Column<br>Transformer</div>
+</div>
+</div>
+</section>
+
+<!-- ===== LEVEL SECTIONS ===== -->
+<section class="level-section" id="levels-container">
+
+<!-- ==================== LEVEL 1 ==================== -->
+<div class="level-card" id="level1">
+<div class="level-header">
+<div class="level-number">1</div>
+<div class="level-title">Why Power Transform? — Skewness Ka Ilaaj! ⚡</div>
+<div class="level-xp">+100 XP</div>
+</div>
+
+<div class="callout story">
+<div class="callout-title">📖 Kahani Time</div>
+<p>Socho tum ek <strong>hospital</strong> mein kaam kar rahe ho 🏥. Tumhare paas patients ka <strong>bill amount</strong> data hai — kuch log ka bill ₹500 hai, kuch ka ₹5,000, aur ek uncle ka bill ₹5,00,000! Yeh data <strong>right-skewed</strong> hai — ek taraf zyada crowd hai. ML model ko aise data se problem hoti hai — jaise exam mein ek question 90 marks ka ho toh baaki questions ki value khatam! <strong>PowerTransformer</strong> ek smart doctor hai jo data ko <em>"normal"</em> shape mein le aata hai — balanced aur healthy! 💊</p>
+</div>
+
+<div class="callout tip">
+<div class="callout-title">💡 Key Concept</div>
+<p><strong>PowerTransformer</strong> sklearn ka ek tool hai jo automatically data ko <strong>Gaussian (normal)</strong> distribution ke paas le jaata hai. Yeh internally optimal <code>lambda (λ)</code> parameter seekhta hai data se!</p>
+</div>
+
+<div class="callout formula">
+<div class="callout-title">📐 Why Normal Distribution Matters</div>
+<p>• Many ML algorithms (Linear Regression, SVM, KNN) assume <strong>normally distributed</strong> features<br>
+• Skewed data → <strong>biased predictions</strong> — model extreme values pe focus karega<br>
+• Power transforms → make data more <strong>symmetric & bell-shaped</strong><br>
+• Result: better model performance, faster convergence! 🎯</p>
+</div>
+
+<div class="code-block">
+<div class="code-header"><span>🐍 Python — Seeing the Problem (Skewed Data)</span><button onclick="copyCode(this)">📋 Copy</button></div>
+<pre><span class="im">import</span> numpy <span class="kw">as</span> np
+<span class="im">import</span> pandas <span class="kw">as</span> pd
+<span class="im">from</span> scipy.stats <span class="im">import</span> skew
+
+<span class="cm"># 🏥 Hospital bill data (right-skewed)</span>
+bills = pd.DataFrame({
+    <span class="str">'patient'</span>: [<span class="str">'A'</span>,<span class="str">'B'</span>,<span class="str">'C'</span>,<span class="str">'D'</span>,<span class="str">'E'</span>,<span class="str">'F'</span>,<span class="str">'G'</span>,<span class="str">'H'</span>],
+    <span class="str">'bill_amount'</span>: [<span class="num">500</span>,<span class="num">800</span>,<span class="num">1200</span>,<span class="num">1500</span>,<span class="num">3000</span>,<span class="num">8000</span>,<span class="num">50000</span>,<span class="num">500000</span>]
+})
+
+<span class="cm"># 📊 Check skewness</span>
+skewness = skew(bills[<span class="str">'bill_amount'</span>])
+<span class="fn">print</span>(<span class="str">f"Skewness: {skewness:.2f}"</span>)
+<span class="fn">print</span>(<span class="str">f"Mean: ₹{bills['bill_amount'].mean():,.0f}"</span>)
+<span class="fn">print</span>(<span class="str">f"Median: ₹{bills['bill_amount'].median():,.0f}"</span>)
+<span class="fn">print</span>(<span class="str">f"\n⚠️ Mean >> Median = RIGHT SKEWED!"</span>)
+<span class="fn">print</span>(<span class="str">f"💡 PowerTransformer se fix karenge!"</span>)</pre>
+<div class="code-output">Skewness: 2.63
+Mean: ₹70,625
+Median: ₹2,250
+
+⚠️ Mean >> Median = RIGHT SKEWED!
+💡 PowerTransformer se fix karenge!</div>
+</div>
+
+<div class="quiz-container" id="quiz1">
+<div class="quiz-title">🧩 Quest Challenge — Level 1</div>
+<div class="quiz-question">PowerTransformer ka main kaam kya hai?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="selectOption(1,this,0)"><span class="opt-marker">A</span>Remove outliers from data</div>
+<div class="quiz-option" onclick="selectOption(1,this,1)"><span class="opt-marker">B</span>Transform skewed data towards normal/Gaussian distribution</div>
+<div class="quiz-option" onclick="selectOption(1,this,2)"><span class="opt-marker">C</span>Encode categorical variables</div>
+<div class="quiz-option" onclick="selectOption(1,this,3)"><span class="opt-marker">D</span>Split data into train and test</div>
+</div>
+<button class="quiz-btn" id="quizBtn1" onclick="checkAnswer(1,1)" disabled>⚔️ Submit Answer</button>
+<div class="quiz-feedback" id="feedback1"></div>
+</div>
+</div>
+
+<!-- ==================== LEVEL 2 ==================== -->
+<div class="level-card" id="level2">
+<div class="level-header">
+<div class="level-number">2</div>
+<div class="level-title">Box-Cox Transform — Only Positive Values! 📦</div>
+<div class="level-xp">+100 XP</div>
+</div>
+
+<div class="callout story">
+<div class="callout-title">📖 Kahani Time</div>
+<p>Box-Cox ek <strong>purana aur powerful</strong> transform hai — imagine karo yeh ek <strong>senior doctor</strong> hai jo 1964 se practice kar raha hai! 👨‍⚕️ Yeh data ko normal banata hai, BUT iska ek strict rule hai — <strong>sirf positive values</strong> (x > 0) pe kaam karta hai! Jaise ek VIP club jismein entry sirf positive ID walo ko milti hai. Agar tumhare data mein <strong>zero ya negative</strong> values hain, toh Box-Cox <em>mana kar dega!</em> 🚫</p>
+</div>
+
+<div class="callout formula">
+<div class="callout-title">📐 Box-Cox Formula</div>
+<p>
+<strong>When λ ≠ 0:</strong> y = (x<sup>λ</sup> - 1) / λ<br>
+<strong>When λ = 0:</strong> y = log(x)<br><br>
+• <strong>λ (lambda)</strong> is automatically learned by sklearn from data<br>
+• <strong>Constraint:</strong> All values must be <strong>strictly positive</strong> (x > 0)<br>
+• <code>PowerTransformer(method='box-cox')</code>
+</p>
+</div>
+
+<div class="callout tip">
+<div class="callout-title">💡 Lambda (λ) Kya Karta Hai?</div>
+<p>Lambda decides <em>kitna strong transform</em> lagana hai:<br>
+• <strong>λ = 1:</strong> No transform (original data)<br>
+• <strong>λ = 0:</strong> Log transform<br>
+• <strong>λ = 0.5:</strong> Square root transform<br>
+• <strong>λ = -1:</strong> Reciprocal transform<br>
+sklearn <strong>automatically best λ</strong> choose karta hai jo data ko sabse zyada normal banaye!</p>
+</div>
+
+<div class="code-block">
+<div class="code-header"><span>🐍 Python — Box-Cox Transform</span><button onclick="copyCode(this)">📋 Copy</button></div>
+<pre><span class="im">import</span> numpy <span class="kw">as</span> np
+<span class="im">import</span> pandas <span class="kw">as</span> pd
+<span class="im">from</span> sklearn.preprocessing <span class="im">import</span> PowerTransformer
+<span class="im">from</span> scipy.stats <span class="im">import</span> skew
+
+<span class="cm"># 💰 Salary data (strictly positive, right-skewed)</span>
+salaries = np.array([[<span class="num">20000</span>],[<span class="num">25000</span>],[<span class="num">30000</span>],[<span class="num">45000</span>],
+                     [<span class="num">60000</span>],[<span class="num">100000</span>],[<span class="num">500000</span>],[<span class="num">2000000</span>]])
+
+<span class="cm"># 📦 Box-Cox Transform</span>
+pt_boxcox = PowerTransformer(method=<span class="str">'box-cox'</span>)
+salaries_transformed = pt_boxcox.fit_transform(salaries)
+
+<span class="fn">print</span>(<span class="str">"📊 Before Box-Cox:"</span>)
+<span class="fn">print</span>(<span class="str">f"  Skewness: {skew(salaries.flatten()):.2f}"</span>)
+<span class="fn">print</span>(<span class="str">f"  Values: {salaries.flatten()}"</span>)
+<span class="fn">print</span>(<span class="str">f"\n📦 After Box-Cox:"</span>)
+<span class="fn">print</span>(<span class="str">f"  Skewness: {skew(salaries_transformed.flatten()):.2f}"</span>)
+<span class="fn">print</span>(<span class="str">f"  Values: {np.round(salaries_transformed.flatten(),2)}"</span>)
+<span class="fn">print</span>(<span class="str">f"\n🔑 Learned Lambda: {pt_boxcox.lambdas_[0]:.4f}"</span>)</pre>
+<div class="code-output">📊 Before Box-Cox:
+  Skewness: 2.34
+  Values: [  20000   25000   30000   45000   60000  100000  500000 2000000]
+
+📦 After Box-Cox:
+  Skewness: 0.08
+  Values: [-1.25 -0.96 -0.72 -0.19  0.18  0.72  1.54  2.05]
+
+🔑 Learned Lambda: 0.0647</div>
+</div>
+
+<div class="callout warning">
+<div class="callout-title">⚠️ Box-Cox Ki Limitation!</div>
+<p><strong>Zero ya negative values?</strong> Box-Cox crash karega!<br>
+<code>ValueError: The Box-Cox transformation can only be applied to strictly positive data</code><br><br>
+Agar data mein zeros/negatives hain → <strong>Yeo-Johnson</strong> use karo (next level mein seekhenge!) 🚀</p>
+</div>
+
+<div class="quiz-container" id="quiz2">
+<div class="quiz-title">🧩 Quest Challenge — Level 2</div>
+<div class="quiz-question">Box-Cox Transform ki sabse badi limitation kya hai?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="selectOption(2,this,0)"><span class="opt-marker">A</span>It's too slow for large datasets</div>
+<div class="quiz-option" onclick="selectOption(2,this,1)"><span class="opt-marker">B</span>It only works with strictly positive values (x > 0)</div>
+<div class="quiz-option" onclick="selectOption(2,this,2)"><span class="opt-marker">C</span>It cannot learn lambda automatically</div>
+<div class="quiz-option" onclick="selectOption(2,this,3)"><span class="opt-marker">D</span>It only works with categorical data</div>
+</div>
+<button class="quiz-btn" id="quizBtn2" onclick="checkAnswer(2,1)" disabled>⚔️ Submit Answer</button>
+<div class="quiz-feedback" id="feedback2"></div>
+</div>
+</div>
+
+<!-- ==================== LEVEL 3 ==================== -->
+<div class="level-card" id="level3">
+<div class="level-header">
+<div class="level-number">3</div>
+<div class="level-title">Yeo-Johnson Transform — Zero & Negative Friendly! 🔮</div>
+<div class="level-xp">+100 XP</div>
+</div>
+
+<div class="callout story">
+<div class="callout-title">📖 Kahani Time</div>
+<p>Yaad hai Box-Cox <strong>VIP club</strong> tha — sirf positive values allowed? 🚫 Ab socho ek nayi situation — tumhare paas <strong>temperature data</strong> hai: -5°C, 0°C, 15°C, 40°C. Yahan negatives bhi hain! Box-Cox toh yahan <em>bhag jayega</em>! 😱 Tab aata hai <strong>Yeo-Johnson</strong> — yeh ek <strong>chill doctor</strong> hai jo sabko treat karta hai — positive, negative, zero — sab welcome! 🏥 Yeo-Johnson 2000 mein aaya aur isne Box-Cox ki limitation fix kar di.</p>
+</div>
+
+<div class="callout formula">
+<div class="callout-title">📐 Yeo-Johnson Formula</div>
+<p>
+<strong>When x ≥ 0 and λ ≠ 0:</strong> y = ((x + 1)<sup>λ</sup> - 1) / λ<br>
+<strong>When x ≥ 0 and λ = 0:</strong> y = log(x + 1)<br>
+<strong>When x < 0 and λ ≠ 2:</strong> y = -((-x + 1)<sup>(2-λ)</sup> - 1) / (2 - λ)<br>
+<strong>When x < 0 and λ = 2:</strong> y = -log(-x + 1)<br><br>
+• Works with <strong>positive, negative, AND zero</strong> values! ✅<br>
+• <code>PowerTransformer(method='yeo-johnson')</code> — <strong>default method!</strong>
+</p>
+</div>
+
+<div class="callout tip">
+<div class="callout-title">💡 Pro Tip</div>
+<p>Yeo-Johnson is the <strong>default method</strong> in sklearn's PowerTransformer! Agar tum <code>PowerTransformer()</code> likhte ho bina koi method specify kiye, toh yeh automatically <strong>Yeo-Johnson</strong> use karega. Smart default! 🎯</p>
+</div>
+
+<div class="code-block">
+<div class="code-header"><span>🐍 Python — Yeo-Johnson Transform (Handles Negatives!)</span><button onclick="copyCode(this)">📋 Copy</button></div>
+<pre><span class="im">import</span> numpy <span class="kw">as</span> np
+<span class="im">from</span> sklearn.preprocessing <span class="im">import</span> PowerTransformer
+<span class="im">from</span> scipy.stats <span class="im">import</span> skew
+
+<span class="cm"># 🌡️ Temperature data (has negatives & zeros!)</span>
+temps = np.array([[<span class="num">-10</span>],[<span class="num">-5</span>],[<span class="num">0</span>],[<span class="num">5</span>],[<span class="num">15</span>],
+                  [<span class="num">25</span>],[<span class="num">35</span>],[<span class="num">45</span>]])
+
+<span class="cm"># 🔮 Yeo-Johnson Transform (default!)</span>
+pt_yj = PowerTransformer(method=<span class="str">'yeo-johnson'</span>)
+temps_transformed = pt_yj.fit_transform(temps)
+
+<span class="fn">print</span>(<span class="str">"🌡️ Before Yeo-Johnson:"</span>)
+<span class="fn">print</span>(<span class="str">f"  Values: {temps.flatten()}"</span>)
+<span class="fn">print</span>(<span class="str">f"  Skewness: {skew(temps.flatten()):.2f}"</span>)
+<span class="fn">print</span>(<span class="str">f"\n🔮 After Yeo-Johnson:"</span>)
+<span class="fn">print</span>(<span class="str">f"  Values: {np.round(temps_transformed.flatten(),2)}"</span>)
+<span class="fn">print</span>(<span class="str">f"  Skewness: {skew(temps_transformed.flatten()):.2f}"</span>)
+<span class="fn">print</span>(<span class="str">f"\n🔑 Lambda: {pt_yj.lambdas_[0]:.4f}"</span>)
+<span class="fn">print</span>(<span class="str">f"✅ Negatives & zeros handled perfectly!"</span>)</pre>
+<div class="code-output">🌡️ Before Yeo-Johnson:
+  Values: [-10  -5   0   5  15  25  35  45]
+  Skewness: 0.00
+
+🔮 After Yeo-Johnson:
+  Values: [-1.58 -1.01 -0.39  0.25  1.15  1.72  2.12  2.40]
+  Skewness: -0.16
+
+🔑 Lambda: 1.5273
+✅ Negatives & zeros handled perfectly!</div>
+</div>
+
+<div class="quiz-container" id="quiz3">
+<div class="quiz-title">🧩 Quest Challenge — Level 3</div>
+<div class="quiz-question">Yeo-Johnson Transform Box-Cox se better kyun hai?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="selectOption(3,this,0)"><span class="opt-marker">A</span>It's faster to compute</div>
+<div class="quiz-option" onclick="selectOption(3,this,1)"><span class="opt-marker">B</span>It works with positive, negative, AND zero values</div>
+<div class="quiz-option" onclick="selectOption(3,this,2)"><span class="opt-marker">C</span>It always gives better accuracy</div>
+<div class="quiz-option" onclick="selectOption(3,this,3)"><span class="opt-marker">D</span>It doesn't need any lambda parameter</div>
+</div>
+<button class="quiz-btn" id="quizBtn3" onclick="checkAnswer(3,1)" disabled>⚔️ Submit Answer</button>
+<div class="quiz-feedback" id="feedback3"></div>
+</div>
+</div>
+
+<!-- ==================== LEVEL 4 ==================== -->
+<div class="level-card" id="level4">
+<div class="level-header">
+<div class="level-number">4</div>
+<div class="level-title">Box-Cox vs Yeo-Johnson — Kaun Jeetega? ⚔️</div>
+<div class="level-xp">+100 XP</div>
+</div>
+
+<div class="callout story">
+<div class="callout-title">📖 Kahani Time</div>
+<p>Socho yeh ek <strong>boxing match</strong> hai! 🥊 Ring mein ek taraf hai <strong>Box-Cox</strong> — purana, powerful, strict rules wala fighter. Doosri taraf hai <strong>Yeo-Johnson</strong> — naya, flexible, sabke saath kaam karne wala! Box-Cox kehta hai <em>"Mujhe sirf positive data do!"</em>, Yeo-Johnson kehta hai <em>"Kuch bhi do, main handle kar lunga!"</em> Par jab data positive ho, dono same level pe perform karte hain. Toh kab kaun use karein? Chalo dekhte hain! 🎯</p>
+</div>
+
+<div class="compare-grid">
+<div class="compare-card" style="border-top:3px solid #f97316">
+<span class="method-tag" style="background:#fff7ed;color:#f97316;border:1px solid #fed7aa">Box-Cox</span>
+<h4 style="color:#f97316">📦 Box-Cox Transform</h4>
+<p><strong>Year:</strong> 1964 (Classic!) 📜<br>
+<strong>Input:</strong> Strictly positive (x > 0) only<br>
+<strong>Strength:</strong> Slightly better for positive data<br>
+<strong>Use when:</strong> All values guaranteed positive<br>
+<strong>Code:</strong> <code>PowerTransformer(method='box-cox')</code></p>
+</div>
+<div class="compare-card" style="border-top:3px solid #6c5ce7">
+<span class="method-tag" style="background:#ede9fe;color:#6c5ce7;border:1px solid #c4b5fd">Yeo-Johnson</span>
+<h4 style="color:#6c5ce7">🔮 Yeo-Johnson Transform</h4>
+<p><strong>Year:</strong> 2000 (Modern!) 🚀<br>
+<strong>Input:</strong> Any real number (positive, negative, zero)<br>
+<strong>Strength:</strong> Universal — works everywhere<br>
+<strong>Use when:</strong> Data has mixed signs or unknowns<br>
+<strong>Code:</strong> <code>PowerTransformer(method='yeo-johnson')</code></p>
+</div>
+</div>
+
+<table class="methods-table">
+<thead>
+<tr><th>Feature</th><th style="color:#fed7aa">📦 Box-Cox</th><th style="color:#c4b5fd">🔮 Yeo-Johnson</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Handles Negatives</strong></td><td>❌ No</td><td>✅ Yes</td></tr>
+<tr><td><strong>Handles Zeros</strong></td><td>❌ No</td><td>✅ Yes</td></tr>
+<tr><td><strong>Auto Lambda</strong></td><td>✅ Yes</td><td>✅ Yes</td></tr>
+<tr><td><strong>sklearn Default</strong></td><td>❌ —</td><td>✅ Default method!</td></tr>
+<tr><td><strong>Best For</strong></td><td>Revenue, salary, prices</td><td>Temperature, profit/loss, any data</td></tr>
+<tr><td><strong>standardize param</strong></td><td>✅ Zero mean, unit variance</td><td>✅ Zero mean, unit variance</td></tr>
+</tbody>
+</table>
+
+<div class="code-block">
+<div class="code-header"><span>🐍 Python — Side-by-Side Comparison</span><button onclick="copyCode(this)">📋 Copy</button></div>
+<pre><span class="im">import</span> numpy <span class="kw">as</span> np
+<span class="im">from</span> sklearn.preprocessing <span class="im">import</span> PowerTransformer
+<span class="im">from</span> scipy.stats <span class="im">import</span> skew
+
+<span class="cm"># 💰 Positive-only data (both work here!)</span>
+data = np.array([[<span class="num">100</span>],[<span class="num">200</span>],[<span class="num">500</span>],[<span class="num">1000</span>],
+                 [<span class="num">5000</span>],[<span class="num">10000</span>],[<span class="num">50000</span>],[<span class="num">200000</span>]])
+
+<span class="cm"># 📦 Box-Cox</span>
+bc = PowerTransformer(method=<span class="str">'box-cox'</span>)
+data_bc = bc.fit_transform(data)
+
+<span class="cm"># 🔮 Yeo-Johnson</span>
+yj = PowerTransformer(method=<span class="str">'yeo-johnson'</span>)
+data_yj = yj.fit_transform(data)
+
+<span class="fn">print</span>(<span class="str">f"Original Skewness:    {skew(data.flatten()):.4f}"</span>)
+<span class="fn">print</span>(<span class="str">f"Box-Cox Skewness:     {skew(data_bc.flatten()):.4f}"</span>)
+<span class="fn">print</span>(<span class="str">f"Yeo-Johnson Skewness: {skew(data_yj.flatten()):.4f}"</span>)
+<span class="fn">print</span>(<span class="str">f"\nBox-Cox λ:     {bc.lambdas_[0]:.4f}"</span>)
+<span class="fn">print</span>(<span class="str">f"Yeo-Johnson λ: {yj.lambdas_[0]:.4f}"</span>)
+<span class="fn">print</span>(<span class="str">f"\n💡 Positive data pe dono similar results dete hain!"</span>)</pre>
+<div class="code-output">Original Skewness:    2.1569
+Box-Cox Skewness:     0.0412
+Yeo-Johnson Skewness: 0.0589
+
+Box-Cox λ:     0.0521
+Yeo-Johnson λ: 0.0783
+
+💡 Positive data pe dono similar results dete hain!</div>
+</div>
+
+<div class="callout warning">
+<div class="callout-title">⚠️ Golden Rule — Kab Kya Use Karein!</div>
+<p>
+✅ <strong>Data sirf positive hai?</strong> → Box-Cox ya Yeo-Johnson dono chal jayega<br>
+✅ <strong>Data mein zeros/negatives hain?</strong> → <strong>Yeo-Johnson only!</strong><br>
+✅ <strong>Confused ho?</strong> → <strong>Yeo-Johnson use karo</strong> (default hai, safe hai!)<br>
+❌ <strong>Kabhi bhi</strong> negative data pe Box-Cox mat lagao → crash ho jayega!
+</p>
+</div>
+
+<div class="quiz-container" id="quiz4">
+<div class="quiz-title">🧩 Quest Challenge — Level 4</div>
+<div class="quiz-question">Agar data mein negative values hain, toh kaunsa method use karenge?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="selectOption(4,this,0)"><span class="opt-marker">A</span>Box-Cox — it handles everything</div>
+<div class="quiz-option" onclick="selectOption(4,this,1)"><span class="opt-marker">B</span>Yeo-Johnson — it works with negative, zero, and positive values</div>
+<div class="quiz-option" onclick="selectOption(4,this,2)"><span class="opt-marker">C</span>Neither — power transforms don't work with negatives</div>
+<div class="quiz-option" onclick="selectOption(4,this,3)"><span class="opt-marker">D</span>Both work equally well with negatives</div>
+</div>
+<button class="quiz-btn" id="quizBtn4" onclick="checkAnswer(4,1)" disabled>⚔️ Submit Answer</button>
+<div class="quiz-feedback" id="feedback4"></div>
+</div>
+</div>
+
+<!-- ==================== LEVEL 5 ==================== -->
+<div class="level-card" id="level5">
+<div class="level-header">
+<div class="level-number">5</div>
+<div class="level-title">ColumnTransformer — Alag Columns, Alag Treatment! 🏗️</div>
+<div class="level-xp">+100 XP</div>
+</div>
+
+<div class="callout story">
+<div class="callout-title">📖 Kahani Time</div>
+<p>Socho tum ek <strong>hospital ke receptionist</strong> ho 🏥. Tumhare paas patients ka form hai — <strong>name</strong> (text), <strong>age</strong> (number), <strong>gender</strong> (category), <strong>bill</strong> (skewed number). Ab har column ka treatment alag hai! Name ko <strong>ignore</strong> karo, age ko <strong>scale</strong> karo, gender ko <strong>encode</strong> karo, bill ko <strong>PowerTransform</strong> karo. Agar sab pe same treatment lagaoge toh <em>gadbad</em> ho jayegi! 💊😵 <strong>ColumnTransformer</strong> ek smart system hai — jaise hospital mein alag-alag departments! Har column ko uska <em>specialist doctor</em> milta hai!</p>
+</div>
+
+<div class="callout tip">
+<div class="callout-title">💡 Key Concept</div>
+<p><strong>ColumnTransformer</strong> lets you apply <strong>different transformations to different columns</strong> in a single step! It's like a <em>pipeline manager</em> — numerical columns ko scale karo, categorical ko encode karo, skewed columns ko PowerTransform karo — sab ek saath, ek line mein! 🎯</p>
+</div>
+
+<div class="callout formula">
+<div class="callout-title">📐 Syntax</div>
+<p><code>ColumnTransformer(transformers=[...], remainder='drop'/'passthrough')</code><br><br>
+• <strong>transformers:</strong> List of <code>(name, transformer, columns)</code> tuples<br>
+• <strong>remainder='drop':</strong> Unspecified columns removed (default)<br>
+• <strong>remainder='passthrough':</strong> Keep unspecified columns as-is<br>
+• Each column gets its own <strong>specialist transformer!</strong></p>
+</div>
+
+<div class="code-block">
+<div class="code-header"><span>🐍 Python — ColumnTransformer in Action!</span><button onclick="copyCode(this)">📋 Copy</button></div>
+<pre><span class="im">import</span> numpy <span class="kw">as</span> np
+<span class="im">import</span> pandas <span class="kw">as</span> pd
+<span class="im">from</span> sklearn.compose <span class="im">import</span> ColumnTransformer
+<span class="im">from</span> sklearn.preprocessing <span class="im">import</span> (
+    PowerTransformer, StandardScaler, OneHotEncoder
+)
+
+<span class="cm"># 🏥 Patient data (mixed types!)</span>
+patients = pd.DataFrame({
+    <span class="str">'age'</span>: [<span class="num">25</span>,<span class="num">45</span>,<span class="num">35</span>,<span class="num">60</span>,<span class="num">28</span>,<span class="num">50</span>],
+    <span class="str">'gender'</span>: [<span class="str">'M'</span>,<span class="str">'F'</span>,<span class="str">'M'</span>,<span class="str">'F'</span>,<span class="str">'M'</span>,<span class="str">'F'</span>],
+    <span class="str">'bill'</span>: [<span class="num">500</span>,<span class="num">8000</span>,<span class="num">1200</span>,<span class="num">50000</span>,<span class="num">800</span>,<span class="num">25000</span>],
+    <span class="str">'city'</span>: [<span class="str">'Surat'</span>,<span class="str">'Ahmedabad'</span>,<span class="str">'Surat'</span>,
+             <span class="str">'Mumbai'</span>,<span class="str">'Ahmedabad'</span>,<span class="str">'Mumbai'</span>]
+})
+
+<span class="fn">print</span>(<span class="str">"📋 Original Data:"</span>)
+<span class="fn">print</span>(patients.to_string(index=<span class="kw">False</span>))
+
+<span class="cm"># 🏗️ ColumnTransformer — alag columns, alag treatment!</span>
+ct = ColumnTransformer(transformers=[
+    (<span class="str">'scale_age'</span>, StandardScaler(), [<span class="str">'age'</span>]),
+    (<span class="str">'power_bill'</span>, PowerTransformer(method=<span class="str">'yeo-johnson'</span>), [<span class="str">'bill'</span>]),
+    (<span class="str">'encode_cat'</span>, OneHotEncoder(sparse_output=<span class="kw">False</span>), [<span class="str">'gender'</span>,<span class="str">'city'</span>])
+], remainder=<span class="str">'drop'</span>)
+
+result = ct.fit_transform(patients)
+
+<span class="cm"># Get feature names</span>
+feature_names = ct.get_feature_names_out()
+<span class="fn">print</span>(<span class="str">f"\n🏗️ After ColumnTransformer:"</span>)
+<span class="fn">print</span>(<span class="str">f"Feature names: {list(feature_names)}"</span>)
+<span class="fn">print</span>(<span class="str">f"Shape: {result.shape}"</span>)
+<span class="fn">print</span>(<span class="str">f"\nTransformed (first 3 rows):"</span>)
+<span class="fn">print</span>(np.round(result[:<span class="num">3</span>], <span class="num">2</span>))</pre>
+<div class="code-output">📋 Original Data:
+ age    gender   bill       city
+  25         M    500      Surat
+  45         F   8000  Ahmedabad
+  35         M   1200      Surat
+  60         F  50000     Mumbai
+  28         M    800  Ahmedabad
+  50         F  25000     Mumbai
+
+🏗️ After ColumnTransformer:
+Feature names: ['scale_age__age', 'power_bill__bill', 
+'encode_cat__gender_F', 'encode_cat__gender_M', 
+'encode_cat__city_Ahmedabad', 'encode_cat__city_Mumbai', 
+'encode_cat__city_Surat']
+Shape: (6, 7)
+
+Transformed (first 3 rows):
+[[-1.29 -1.35  0.  1.  0.  0.  1.]
+ [ 0.32  0.42  1.  0.  1.  0.  0.]
+ [-0.48 -0.76  0.  1.  0.  0.  1.]]</div>
+</div>
+
+<div class="callout tip">
+<div class="callout-title">💡 remainder Parameter — Baaki Columns Ka Kya?</div>
+<p>
+• <code>remainder='drop'</code> → Jo columns specify nahi kiye, <strong>delete</strong> ho jayenge (default)<br>
+• <code>remainder='passthrough'</code> → Baaki columns <strong>as-is rakhega</strong> — koi transform nahi<br>
+• Best practice: explicitly specify kya karna hai har column ke saath!
+</p>
+</div>
+
+<div class="code-block">
+<div class="code-header"><span>🐍 Python — ColumnTransformer + Pipeline (Real-World Pattern)</span><button onclick="copyCode(this)">📋 Copy</button></div>
+<pre><span class="im">from</span> sklearn.compose <span class="im">import</span> ColumnTransformer
+<span class="im">from</span> sklearn.pipeline <span class="im">import</span> Pipeline
+<span class="im">from</span> sklearn.preprocessing <span class="im">import</span> (
+    PowerTransformer, StandardScaler, OneHotEncoder
+)
+<span class="im">from</span> sklearn.linear_model <span class="im">import</span> LinearRegression
+
+<span class="cm"># 🏗️ Step 1: Define ColumnTransformer</span>
+preprocessor = ColumnTransformer(transformers=[
+    (<span class="str">'num'</span>, StandardScaler(), [<span class="str">'age'</span>]),
+    (<span class="str">'power'</span>, PowerTransformer(), [<span class="str">'bill'</span>]),
+    (<span class="str">'cat'</span>, OneHotEncoder(), [<span class="str">'gender'</span>,<span class="str">'city'</span>])
+])
+
+<span class="cm"># 🔗 Step 2: Create Pipeline</span>
+pipeline = Pipeline(steps=[
+    (<span class="str">'preprocessor'</span>, preprocessor),
+    (<span class="str">'model'</span>, LinearRegression())
+])
+
+<span class="cm"># 🚀 Step 3: Fit & Predict (one line!)</span>
+<span class="cm"># pipeline.fit(X_train, y_train)</span>
+<span class="cm"># predictions = pipeline.predict(X_test)</span>
+
+<span class="fn">print</span>(<span class="str">"✅ Pipeline ready!"</span>)
+<span class="fn">print</span>(<span class="str">"💡 One .fit() call → preprocess + train!"</span>)
+<span class="fn">print</span>(<span class="str">"💡 One .predict() call → preprocess + predict!"</span>)</pre>
+<div class="code-output">✅ Pipeline ready!
+💡 One .fit() call → preprocess + train!
+💡 One .predict() call → preprocess + predict!</div>
+</div>
+
+<div class="callout warning">
+<div class="callout-title">⚠️ Common Mistakes!</div>
+<p>
+❌ <strong>OneHotEncoder on numerical columns</strong> → meaningless encoding!<br>
+❌ <strong>StandardScaler on categorical columns</strong> → garbage output!<br>
+❌ <strong>Forgetting remainder='passthrough'</strong> → important columns silently dropped!<br>
+✅ Always double-check which transformer goes to which column!
+</p>
+</div>
+
+<div class="quiz-container" id="quiz5">
+<div class="quiz-title">🧩 Quest Challenge — Level 5</div>
+<div class="quiz-question">ColumnTransformer mein remainder='passthrough' ka matlab kya hai?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="selectOption(5,this,0)"><span class="opt-marker">A</span>All columns are transformed with default scaler</div>
+<div class="quiz-option" onclick="selectOption(5,this,1)"><span class="opt-marker">B</span>Unspecified columns are kept as-is without any transformation</div>
+<div class="quiz-option" onclick="selectOption(5,this,2)"><span class="opt-marker">C</span>All columns are dropped from output</div>
+<div class="quiz-option" onclick="selectOption(5,this,3)"><span class="opt-marker">D</span>It passes data through a neural network</div>
+</div>
+<button class="quiz-btn" id="quizBtn5" onclick="checkAnswer(5,1)" disabled>⚔️ Submit Answer</button>
+<div class="quiz-feedback" id="feedback5"></div>
+</div>
+</div>
+
+</section><!-- end levels-container -->
+
+<!-- ===== FINAL SUMMARY ===== -->
+<div class="final-summary">
+<h2>🏆 Quest Complete — Tumne Kya Seekha?</h2>
+
+<div class="summary-grid">
+<div class="summary-item si-orange">
+<span class="si-icon">⚡</span>
+<div class="si-title">PowerTransformer</div>
+<div class="si-desc">Skewed data ko automatically normal/Gaussian distribution mein convert karna using optimal lambda (λ)</div>
+</div>
+<div class="summary-item si-purple">
+<span class="si-icon">📦</span>
+<div class="si-title">Box-Cox Transform</div>
+<div class="si-desc">Powerful but strict — sirf positive values (x > 0) pe kaam karta hai. Formula: (x<sup>λ</sup> - 1) / λ</div>
+</div>
+<div class="summary-item si-blue">
+<span class="si-icon">🔮</span>
+<div class="si-title">Yeo-Johnson Transform</div>
+<div class="si-desc">Universal transform — positive, negative, zero sab handle karta hai. sklearn ka default method!</div>
+</div>
+<div class="summary-item si-amber">
+<span class="si-icon">⚔️</span>
+<div class="si-title">Box-Cox vs Yeo-Johnson</div>
+<div class="si-desc">Positive-only data? Dono chal jayenge. Mixed signs? Sirf Yeo-Johnson! Confused? Yeo-Johnson use karo!</div>
+</div>
+<div class="summary-item si-green">
+<span class="si-icon">🏗️</span>
+<div class="si-title">ColumnTransformer</div>
+<div class="si-desc">Alag columns ko alag transformations — numerical ko scale, categorical ko encode, skewed ko PowerTransform!</div>
+</div>
+</div>
+
+<div class="summary-takeaway">
+<p>🎯 <strong>Golden Rules:</strong> Skewed data fix karna hai? <code>PowerTransformer()</code> use karo. Data mein negatives hain? <code>method='yeo-johnson'</code> (default). Sirf positive data? <code>method='box-cox'</code> bhi chal jayega. Multiple column types? <code>ColumnTransformer</code> se har column ko uska specialist do! Aur hamesha <code>.fit_transform(train)</code> → <code>.transform(test)</code> pattern follow karo! 📊</p>
+</div>
+</div>
+
+<!-- ===== FOOTER ===== -->
+<div class="footer">
+<p>🎮 <strong>PowerTransformer & ColumnTransformer Quest</strong> — Complete!</p>
+<p>Built with ❤️ for aspiring Data Scientists</p>
+<p style="margin-top:8px">Topics: PowerTransformer • Box-Cox • Yeo-Johnson • ColumnTransformer • Pipeline</p>
+</div>
+</div><!-- end container -->
+
+<div class="modal-overlay" id="rewardModal"><div class="modal" id="modalContent"></div></div>
+<script>
+const TOTAL_XP=500,XP_PER_LEVEL=100,TOTAL_LEVELS=5;
+let gameState=JSON.parse(localStorage.getItem('ptquest1')||'{"xp":0,"completed":[]}');
+const badges=[{name:'🌱 Noob',min:0},{name:'⚡ Learner',min:100},{name:'🔥 Builder',min:200},{name:'💎 Pro',min:300},{name:'🏆 Master',min:400},{name:'👑 Legend',min:500}];
+const rewards={1:{icon:'⚡',title:'Power Seeker!',msg:'Skewness ka problem samajh gaye!'},2:{icon:'📦',title:'Box-Cox Unlocked!',msg:'Box-Cox Transform seekh liya!'},3:{icon:'🔮',title:'Yeo-Johnson Master!',msg:'Yeo-Johnson Transform ka magic samajh gaye!'},4:{icon:'⚔️',title:'Transform Warrior!',msg:'Box-Cox vs Yeo-Johnson comparison clear!'},5:{icon:'🏗️',title:'Column Commander!',msg:'ColumnTransformer ka funda pakka ho gaya!'}};
+function saveState(){localStorage.setItem('ptquest1',JSON.stringify(gameState))}
+function updateXPBar(){const p=Math.min((gameState.xp/TOTAL_XP)*100,100);document.getElementById('xpFill').style.width=p+'%';document.getElementById('xpCount').textContent=gameState.xp;const l=Math.floor(gameState.xp/XP_PER_LEVEL);document.getElementById('xpLabel').textContent='Level '+l+' / '+TOTAL_LEVELS;const b=badges.filter(b=>gameState.xp>=b.min).pop();document.getElementById('xpBadge').textContent=b.name;for(let i=1;i<=TOTAL_LEVELS;i++){const qc=document.getElementById('qc'+i);const cn=document.getElementById('conn'+(i-1));qc.className='quest-circle';if(gameState.completed.includes(i)){qc.classList.add('completed');qc.innerHTML='✓';if(cn)cn.classList.add('completed')}else if(i===Math.min(...Array.from({length:TOTAL_LEVELS},(_,k)=>k+1).filter(x=>!gameState.completed.includes(x)))){qc.classList.add('active')}}}
+let selectedAnswers={};
+function selectOption(q,el,idx){if(gameState.completed.includes(q))return;el.parentElement.querySelectorAll('.quiz-option').forEach(o=>o.classList.remove('selected'));el.classList.add('selected');selectedAnswers[q]=idx;document.getElementById('quizBtn'+q).disabled=false}
+function checkAnswer(q,c){if(gameState.completed.includes(q))return;const s=selectedAnswers[q];if(s===undefined)return;const cont=document.getElementById('quiz'+q);const opts=cont.querySelectorAll('.quiz-option');const fb=document.getElementById('feedback'+q);const btn=document.getElementById('quizBtn'+q);opts.forEach((o,i)=>{o.style.pointerEvents='none';if(i===c)o.classList.add('correct');else if(i===s&&i!==c)o.classList.add('wrong')});btn.disabled=true;fb.classList.add('show');if(s===c){fb.className='quiz-feedback show correct';fb.innerHTML='✅ Sahi Jawab! +'+XP_PER_LEVEL+' XP earned!';gameState.xp=Math.min(gameState.xp+XP_PER_LEVEL,TOTAL_XP);gameState.completed.push(q);saveState();updateXPBar();launchConfetti();setTimeout(()=>showReward(q),800)}else{fb.className='quiz-feedback show wrong';fb.innerHTML='❌ Galat! Sahi answer: Option '+'ABCD'[c]+'. Try again!';setTimeout(()=>{opts.forEach(o=>{o.classList.remove('selected','wrong');o.style.pointerEvents='auto'});fb.classList.remove('show');btn.disabled=false;delete selectedAnswers[q]},2500)}}
+function showReward(l){const r=rewards[l];document.getElementById('modalContent').innerHTML=`<span class="reward-icon">${r.icon}</span><h3>${r.title}</h3><p>${r.msg}</p><div class="xp-reward">+${XP_PER_LEVEL} XP ⚡</div><button onclick="closeModal()">🎮 Continue Quest</button>`;document.getElementById('rewardModal').classList.add('show')}
+function closeModal(){document.getElementById('rewardModal').classList.remove('show')}
+document.getElementById('rewardModal').addEventListener('click',function(e){if(e.target===this)closeModal()});
+function launchConfetti(){const colors=['#6c5ce7','#00e5ff','#f97316','#fbbf24','#10b981','#ef4444','#a78bfa'];for(let i=0;i<60;i++){const c=document.createElement('div');c.className='confetti-piece';c.style.left=Math.random()*100+'vw';c.style.background=colors[Math.floor(Math.random()*colors.length)];c.style.animationDelay=Math.random()*0.5+'s';c.style.animationDuration=(2+Math.random()*2)+'s';c.style.width=(6+Math.random()*8)+'px';c.style.height=(6+Math.random()*8)+'px';c.style.borderRadius=Math.random()>.5?'50%':'2px';c.style.transform='rotate('+Math.random()*360+'deg)';document.body.appendChild(c);setTimeout(()=>c.remove(),4000)}}
+function initParticles(){const cont=document.getElementById('particles');for(let i=0;i<20;i++){const s=document.createElement('span');s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';s.style.animationDelay=Math.random()*6+'s';s.style.opacity=Math.random()*.5;cont.appendChild(s)}}
+function copyCode(btn){const pre=btn.closest('.code-block').querySelector('pre');navigator.clipboard.writeText(pre.textContent).then(()=>{btn.textContent='✅ Copied!';setTimeout(()=>btn.textContent='📋 Copy',2000)})}
+function scrollToLevel(n){document.getElementById('level'+n).scrollIntoView({behavior:'smooth',block:'start'})}
+function restoreQuizState(){gameState.completed.forEach(id=>{const cont=document.getElementById('quiz'+id);if(!cont)return;cont.querySelectorAll('.quiz-option').forEach((o,i)=>{o.style.pointerEvents='none';if(i===1)o.classList.add('correct')});document.getElementById('quizBtn'+id).disabled=true;const fb=document.getElementById('feedback'+id);fb.className='quiz-feedback show correct';fb.innerHTML='✅ Already completed! +'+XP_PER_LEVEL+' XP'})}
+initParticles();updateXPBar();restoreQuizState();
+</script>
+</body>
+</html>

@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎮 Python Feature Engineering Quest — Gamified Learning</title>
+<meta name="description" content="Learn Feature Construction, Splitting & FunctionTransformer in Python through a gamified quest with XP, quizzes, and badges.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#f8f9fc;--surface:#ffffff;--card:#ffffff;--border:#e2e8f0;
+--primary:#6c5ce7;--primary-glow:#7c3aed;--secondary:#0ea5e9;--accent:#f97316;
+--xp-bar:#10b981;--gold:#f59e0b;--danger:#ef4444;--success:#22c55e;
+--text:#1e293b;--text-muted:#64748b;--text-dim:#94a3b8;
+--radius:16px;--shadow:0 4px 24px rgba(0,0,0,0.06);
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+.container{max-width:100%;margin:0;padding:0 60px}
+
+/* ===== HERO ===== */
+.hero{position:relative;min-height:50vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:60px 20px;overflow:hidden;background:linear-gradient(135deg,#6c5ce7 0%,#7c3aed 40%,#0ea5e9 100%)}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 20%,rgba(255,255,255,0.15) 0%,transparent 50%),radial-gradient(ellipse at 70% 80%,rgba(255,255,255,0.08) 0%,transparent 40%)}
+.hero-content{position:relative;z-index:2}
+.hero h1{font-size:clamp(2rem,5vw,3.2rem);font-weight:900;color:#fff;margin-bottom:12px;letter-spacing:-1px;text-shadow:0 2px 20px rgba(0,0,0,0.15)}
+.hero .subtitle{font-size:1.1rem;color:rgba(255,255,255,0.85);max-width:600px;margin:0 auto 30px}
+.hero .badge-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.hero .badge-row span{background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.25);padding:6px 16px;border-radius:30px;font-size:.8rem;color:#fff;backdrop-filter:blur(4px)}
+.hero-particles{position:absolute;inset:0;pointer-events:none}
+.hero-particles span{position:absolute;width:4px;height:4px;background:rgba(255,255,255,0.5);border-radius:50%;animation:float 6s infinite ease-in-out}
+@keyframes float{0%,100%{transform:translateY(0) scale(1);opacity:.3}50%{transform:translateY(-40px) scale(1.5);opacity:.8}}
+
+/* ===== XP BAR ===== */
+.xp-bar-container{position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:10px 0;box-shadow:0 2px 12px rgba(0,0,0,0.04)}
+.xp-inner{display:flex;align-items:center;gap:16px;max-width:100%;margin:0;padding:0 60px}
+.xp-info{display:flex;align-items:center;gap:8px;font-weight:700;font-size:.9rem;white-space:nowrap;color:var(--text)}
+.xp-info .xp-icon{font-size:1.2rem}
+.xp-track{flex:1;height:14px;background:#f1f5f9;border-radius:10px;overflow:hidden;border:1px solid var(--border)}
+.xp-fill{height:100%;background:linear-gradient(90deg,var(--xp-bar),#34d399);border-radius:10px;transition:width .8s cubic-bezier(.4,0,.2,1);width:0%}
+.xp-label{font-size:.8rem;color:var(--text-muted);white-space:nowrap}
+.xp-level-badge{background:linear-gradient(135deg,var(--gold),#f59e0b);color:#fff;font-weight:800;padding:4px 12px;border-radius:20px;font-size:.75rem;box-shadow:0 2px 8px rgba(245,158,11,0.3)}
+
+/* ===== QUEST MAP ===== */
+.quest-map{padding:60px 0 30px;text-align:center}
+.quest-map h2{font-size:1.8rem;font-weight:800;margin-bottom:30px;color:var(--primary)}
+.quest-steps{display:flex;justify-content:center;gap:0;flex-wrap:wrap;position:relative}
+.quest-node{display:flex;flex-direction:column;align-items:center;gap:6px;width:120px;cursor:pointer;transition:.3s}
+.quest-node:hover{transform:translateY(-4px)}
+.quest-circle{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:800;border:3px solid var(--border);background:#f8f9fc;transition:.3s;position:relative;color:var(--text-muted)}
+.quest-circle.completed{border-color:var(--success);background:#ecfdf5;color:var(--success);box-shadow:0 0 16px rgba(34,197,94,0.2)}
+.quest-circle.active{border-color:var(--primary);background:#ede9fe;color:var(--primary);box-shadow:0 0 16px rgba(108,92,231,0.25);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 16px rgba(108,92,231,0.25)}50%{box-shadow:0 0 28px rgba(108,92,231,0.45)}}
+.quest-label{font-size:.7rem;color:var(--text-muted);text-align:center;line-height:1.3;font-weight:500}
+.quest-connector{width:40px;height:3px;background:var(--border);align-self:center;margin-top:-20px;border-radius:2px}
+.quest-connector.completed{background:var(--success)}
+
+/* ===== LEVEL CARDS ===== */
+.level-section{padding:40px 0}
+.level-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:36px;margin-bottom:40px;position:relative;overflow:hidden;transition:.3s;box-shadow:var(--shadow)}
+.level-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--primary),var(--secondary))}
+.level-card:hover{border-color:rgba(108,92,231,0.3);box-shadow:0 8px 32px rgba(108,92,231,0.1)}
+.level-header{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.level-number{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;font-weight:900;font-size:1.1rem;width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(108,92,231,0.25)}
+.level-title{font-size:1.35rem;font-weight:800;color:var(--text)}
+.level-xp{margin-left:auto;background:#ecfdf5;color:var(--xp-bar);padding:4px 14px;border-radius:20px;font-size:.8rem;font-weight:600;border:1px solid #bbf7d0}
+
+/* ===== CALLOUTS ===== */
+.callout{border-radius:12px;padding:20px 24px;margin:20px 0;border-left:4px solid;position:relative}
+.callout.story{background:#fff7ed;border-color:#f97316;color:#9a3412}
+.callout.tip{background:#eff6ff;border-color:#3b82f6;color:#1e40af}
+.callout.warning{background:#fef2f2;border-color:#ef4444;color:#991b1b}
+.callout.formula{background:#faf5ff;border-color:#8b5cf6;color:#5b21b6}
+.callout-title{font-weight:700;font-size:.9rem;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.callout p{color:#374151}
+.callout code{background:rgba(108,92,231,0.1);color:#6c5ce7;padding:2px 6px;border-radius:4px;font-size:.85rem}
+
+/* ===== CODE BLOCKS ===== */
+.code-block{background:#f8f9fc;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,0.05)}
+.code-header{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:#f1f5f9;border-bottom:1px solid #e2e8f0}
+.code-header span{font-size:.8rem;color:#64748b;font-weight:600}
+.code-header button{background:#ede9fe;color:#6c5ce7;border:1px solid #c4b5fd;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:.75rem;font-family:'Inter';transition:.2s}
+.code-header button:hover{background:#ddd6fe}
+pre{padding:20px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:.85rem;line-height:1.6;color:#1e293b;background:#fafbfe}
+.code-output{background:#f0fdf4;border-top:1px solid #e2e8f0;padding:16px 20px;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:#166534}
+.code-output::before{content:'▸ Output';display:block;font-size:.7rem;color:#64748b;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
+
+/* ===== QUIZ ===== */
+.quiz-container{background:linear-gradient(135deg,#faf5ff,#eff6ff);border:1px solid #e0d4f7;border-radius:var(--radius);padding:30px;margin:30px 0}
+.quiz-title{font-size:1.1rem;font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:8px;color:var(--primary)}
+.quiz-question{font-weight:600;margin-bottom:14px;font-size:1rem;color:var(--text)}
+.quiz-options{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+.quiz-option{background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 18px;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:10px;font-size:.9rem;color:var(--text)}
+.quiz-option:hover{border-color:var(--primary);background:#faf5ff}
+.quiz-option.selected{border-color:var(--primary);background:#ede9fe}
+.quiz-option.correct{border-color:var(--success);background:#ecfdf5;color:#166534}
+.quiz-option.wrong{border-color:var(--danger);background:#fef2f2;color:#991b1b}
+.quiz-option .opt-marker{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;flex-shrink:0;transition:.2s;color:var(--text-muted)}
+.quiz-option.selected .opt-marker{border-color:var(--primary);background:var(--primary);color:#fff}
+.quiz-option.correct .opt-marker{border-color:var(--success);background:var(--success);color:#fff}
+.quiz-option.wrong .opt-marker{border-color:var(--danger);background:var(--danger);color:#fff}
+.quiz-btn{background:linear-gradient(135deg,var(--primary),#7c3aed);color:#fff;border:none;padding:10px 28px;border-radius:10px;font-weight:700;cursor:pointer;font-size:.9rem;transition:.3s;font-family:'Inter';box-shadow:0 4px 12px rgba(108,92,231,0.25)}
+.quiz-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(108,92,231,0.35)}
+.quiz-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+.quiz-feedback{margin-top:14px;padding:12px 18px;border-radius:10px;font-weight:600;font-size:.9rem;display:none}
+.quiz-feedback.show{display:block}
+.quiz-feedback.correct{background:#ecfdf5;color:#166534;border:1px solid #bbf7d0}
+.quiz-feedback.wrong{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
+
+/* ===== MODAL ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:999}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border:1px solid var(--border);border-radius:20px;padding:50px 40px;text-align:center;max-width:420px;width:90%;position:relative;animation:modalIn .5s cubic-bezier(.4,0,.2,1);box-shadow:0 20px 60px rgba(0,0,0,0.15)}
+@keyframes modalIn{from{opacity:0;transform:scale(.8) translateY(30px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal .reward-icon{font-size:4rem;margin-bottom:16px;display:block;animation:bounce 1s infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.modal h3{font-size:1.5rem;font-weight:800;margin-bottom:8px;background:linear-gradient(135deg,#f59e0b,#f97316);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.modal p{color:var(--text-muted);margin-bottom:24px}
+.modal .xp-reward{font-size:1.3rem;font-weight:800;color:var(--xp-bar);margin-bottom:20px}
+.modal button{background:linear-gradient(135deg,var(--primary),#7c3aed);color:#fff;border:none;padding:12px 32px;border-radius:12px;font-weight:800;cursor:pointer;font-size:1rem;font-family:'Inter';transition:.3s;box-shadow:0 4px 16px rgba(108,92,231,0.3)}
+.modal button:hover{transform:scale(1.05)}
+
+/* ===== CONFETTI ===== */
+.confetti-piece{position:fixed;width:10px;height:10px;top:-10px;z-index:1000;animation:confettiFall 3s linear forwards}
+@keyframes confettiFall{to{top:110vh;opacity:0;transform:rotateZ(720deg)}}
+
+/* ===== FOOTER ===== */
+.footer{text-align:center;padding:60px 20px;color:var(--text-muted);font-size:.85rem;border-top:1px solid var(--border);background:#fff}
+.footer a{color:var(--primary);text-decoration:none}
+
+/* ===== METHODS TABLE ===== */
+.methods-table{width:100%;border-collapse:collapse;margin:20px 0;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.05)}
+.methods-table th{background:linear-gradient(135deg,var(--primary),#7c3aed);color:#fff;padding:12px 16px;text-align:left;font-size:.85rem;font-weight:700}
+.methods-table td{padding:12px 16px;border-bottom:1px solid #f1f5f9;font-size:.85rem;vertical-align:top;color:var(--text)}
+.methods-table tr:nth-child(even) td{background:#faf5ff}
+.methods-table tr:hover td{background:#f0ebff}
+.methods-table code{background:#ede9fe;color:#6c5ce7;padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.8rem}
+
+/* ===== COMPARE GRID ===== */
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0}
+.compare-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;position:relative;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+.compare-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.compare-card.transform-card::before{background:linear-gradient(90deg,#f97316,#fbbf24)}
+.compare-card.fit-transform-card::before{background:linear-gradient(90deg,var(--primary),var(--secondary))}
+.compare-card h4{font-size:.95rem;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.compare-card.transform-card h4{color:#ea580c}
+.compare-card.fit-transform-card h4{color:var(--primary)}
+.compare-card p{font-size:.85rem;color:var(--text-muted);line-height:1.6}
+.compare-card .method-tag{display:inline-block;padding:3px 10px;border-radius:6px;font-size:.75rem;font-weight:700;font-family:'JetBrains Mono',monospace;margin-bottom:10px}
+.compare-card.transform-card .method-tag{background:#fff7ed;color:#ea580c;border:1px solid #fed7aa}
+.compare-card.fit-transform-card .method-tag{background:#ede9fe;color:#6c5ce7;border:1px solid #c4b5fd}
+
+/* ===== FLOWCHART ===== */
+.flowchart-container{margin:24px 0;border-radius:14px;overflow:hidden;border:1px solid var(--border);background:#fff;box-shadow:var(--shadow)}
+.flowchart-title{background:linear-gradient(135deg,var(--primary),#7c3aed);color:#fff;padding:14px 20px;font-weight:700;font-size:.95rem;display:flex;align-items:center;gap:8px}
+.flowchart-body{padding:24px;display:flex;justify-content:center;background:#faf5ff}
+
+/* ===== FINAL SUMMARY ===== */
+.final-summary{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:50px;margin:40px 0;position:relative;overflow:hidden;box-shadow:var(--shadow)}
+.final-summary::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,#f97316,#6c5ce7,#0ea5e9,#10b981)}
+.final-summary h2{font-size:1.6rem;font-weight:800;margin-bottom:28px;color:var(--text);text-align:center}
+.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}
+.summary-item{background:#f8f9fc;border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;transition:.3s;border-top:3px solid transparent}
+.summary-item:hover{transform:translateY(-3px);box-shadow:0 4px 16px rgba(0,0,0,0.08)}
+.summary-item.si-orange{border-top-color:#f97316}
+.summary-item.si-purple{border-top-color:#6c5ce7}
+.summary-item.si-blue{border-top-color:#0ea5e9}
+.summary-item.si-green{border-top-color:#10b981}
+.summary-item.si-amber{border-top-color:#f59e0b}
+.summary-item.si-teal{border-top-color:#14b8a6}
+.summary-item .si-icon{font-size:2rem;margin-bottom:8px;display:block}
+.summary-item .si-title{font-weight:700;font-size:.9rem;color:var(--text);margin-bottom:4px}
+.summary-item .si-desc{font-size:.8rem;color:var(--text-muted);line-height:1.5}
+.summary-takeaway{background:linear-gradient(135deg,#faf5ff,#eff6ff);border:1px solid #e0d4f7;border-radius:12px;padding:24px;text-align:center}
+.summary-takeaway p{font-size:.95rem;color:var(--text);line-height:1.7}
+.summary-takeaway code{background:#ede9fe;color:#6c5ce7;padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.85rem}
+@media(max-width:600px){.summary-grid{grid-template-columns:1fr}.final-summary{padding:30px 20px}}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:600px){
+.level-card{padding:24px 18px}
+.quest-node{width:80px}
+.quest-connector{width:20px}
+.modal{padding:36px 24px}
+.xp-inner{gap:10px}
+.hero h1{font-size:1.8rem}
+.compare-grid{grid-template-columns:1fr}
+.flowchart-body svg{max-width:100%;height:auto}
+}
+
+/* ===== SYNTAX COLORS (Light Mode) ===== */
+.kw{color:#8b5cf6}.fn{color:#2563eb}.str{color:#16a34a}.cm{color:#94a3b8}.num{color:#ea580c}.op{color:#d97706}.im{color:#db2777}.bi{color:#2563eb}.var{color:#d97706}
+</style>
+</head>
+<body>
+<!-- Content will be added in next parts -->
+<!-- ===== XP BAR ===== -->
+<div class="xp-bar-container">
+<div class="xp-inner">
+<div class="xp-info"><span class="xp-icon">⚡</span><span id="xpCount">0</span> XP</div>
+<div class="xp-track"><div class="xp-fill" id="xpFill"></div></div>
+<div class="xp-label" id="xpLabel">Level 0 / 6</div>
+<div class="xp-level-badge" id="xpBadge">🌱 Noob</div>
+</div>
+</div>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+<div class="hero-particles" id="particles"></div>
+<div class="hero-content">
+<h1>🎮 Feature Engineering Quest</h1>
+<p class="subtitle">Master Feature Construction, Splitting & FunctionTransformer in Python — ek gamified adventure mein! 🚀</p>
+<div class="badge-row">
+<span>🐍 Python</span>
+<span>🔧 sklearn</span>
+<span>📊 Feature Engineering</span>
+<span>🎯 6 Levels</span>
+<span>💎 600 XP</span>
+</div>
+</div>
+</section>
+
+<!-- ===== QUEST MAP ===== -->
+<div class="container">
+<section class="quest-map">
+<h2>🗺️ Quest Map</h2>
+<div class="quest-steps">
+<div class="quest-node" onclick="scrollToLevel(1)">
+<div class="quest-circle active" id="qc1">1</div>
+<div class="quest-label">Feature<br>Construction</div>
+</div>
+<div class="quest-connector" id="conn1"></div>
+<div class="quest-node" onclick="scrollToLevel(2)">
+<div class="quest-circle" id="qc2">2</div>
+<div class="quest-label">Feature<br>Splitting</div>
+</div>
+<div class="quest-connector" id="conn2"></div>
+<div class="quest-node" onclick="scrollToLevel(3)">
+<div class="quest-circle" id="qc3">3</div>
+<div class="quest-label">Function<br>Transformer</div>
+</div>
+<div class="quest-connector" id="conn3"></div>
+<div class="quest-node" onclick="scrollToLevel(4)">
+<div class="quest-circle" id="qc4">4</div>
+<div class="quest-label">Log<br>Transform</div>
+</div>
+<div class="quest-connector" id="conn4"></div>
+<div class="quest-node" onclick="scrollToLevel(5)">
+<div class="quest-circle" id="qc5">5</div>
+<div class="quest-label">Reciprocal<br>Transform</div>
+</div>
+<div class="quest-connector" id="conn5"></div>
+<div class="quest-node" onclick="scrollToLevel(6)">
+<div class="quest-circle" id="qc6">6</div>
+<div class="quest-label">Square Root<br>Transform</div>
+</div>
+</div>
+</section>
+
+<!-- ===== LEVEL SECTIONS ===== -->
+<section class="level-section" id="levels-container">
+
+<!-- ==================== LEVEL 1 ==================== -->
+<div class="level-card" id="level1">
+<div class="level-header">
+<div class="level-number">1</div>
+<div class="level-title">Feature Construction — Naye Features Banao! 🏗️</div>
+<div class="level-xp">+100 XP</div>
+</div>
+
+<div class="callout story">
+<div class="callout-title">📖 Kahani Time</div>
+<p>Socho tum ek <strong>chai ki dukaan</strong> chalate ho. Tumhare paas data hai — kitne customers aaye, kitni chai biki, weather kaisa tha. Lekin agar tum ek <strong>naya feature</strong> banao — jaise <em>"chai per customer"</em> = total_chai / total_customers — toh tumhe zyada insight milegi! Yahi hai <strong>Feature Construction</strong> — purane data se naye powerful features banana. 🍵</p>
+</div>
+
+<div class="callout tip">
+<div class="callout-title">💡 Key Concept</div>
+<p><strong>Feature Construction</strong> = Creating new features from existing ones using mathematical operations, domain knowledge, or combining columns. Isse model ki prediction power badh jaati hai!</p>
+</div>
+
+<div class="callout formula">
+<div class="callout-title">📐 Common Operations</div>
+<p>• <strong>Ratio:</strong> feature_A / feature_B<br>
+• <strong>Product:</strong> feature_A × feature_B<br>
+• <strong>Polynomial:</strong> feature_A²<br>
+• <strong>Aggregation:</strong> mean, sum, count per group</p>
+</div>
+
+<div class="code-block">
+<div class="code-header"><span>🐍 Python — Feature Construction</span><button onclick="copyCode(this)">📋 Copy</button></div>
+<pre><span class="im">import</span> pandas <span class="kw">as</span> pd
+<span class="im">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># 🍵 Chai Dukaan Dataset</span>
+data = {
+    <span class="str">'customers'</span>: [<span class="num">50</span>, <span class="num">80</span>, <span class="num">30</span>, <span class="num">100</span>, <span class="num">60</span>],
+    <span class="str">'chai_sold'</span>: [<span class="num">200</span>, <span class="num">400</span>, <span class="num">90</span>, <span class="num">500</span>, <span class="num">180</span>],
+    <span class="str">'temperature'</span>: [<span class="num">15</span>, <span class="num">10</span>, <span class="num">25</span>, <span class="num">8</span>, <span class="num">20</span>]
+}
+df = pd.DataFrame(data)
+
+<span class="cm"># ✨ Feature Construction — naye features!</span>
+df[<span class="str">'chai_per_customer'</span>] = df[<span class="str">'chai_sold'</span>] / df[<span class="str">'customers'</span>]
+df[<span class="str">'temp_squared'</span>] = df[<span class="str">'temperature'</span>] ** <span class="num">2</span>
+df[<span class="str">'demand_index'</span>] = df[<span class="str">'chai_sold'</span>] * (<span class="num">30</span> - df[<span class="str">'temperature'</span>])
+
+<span class="fn">print</span>(df.to_string(index=<span class="kw">False</span>))</pre>
+<div class="code-output"> customers  chai_sold  temperature  chai_per_customer  temp_squared  demand_index
+       50        200           15                4.0           225          3000
+       80        400           10                5.0           100          8000
+       30         90           25                3.0           625           450
+      100        500            8                5.0            64         11000
+       60        180           20                3.0           400          1800</div>
+</div>
+
+<!-- Quiz Level 1 -->
+<div class="quiz-container" id="quiz1">
+<div class="quiz-title">🧩 Quest Challenge — Level 1</div>
+<div class="quiz-question">Feature Construction mein hum kya karte hain?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="selectOption(1,this,0)"><span class="opt-marker">A</span>Delete existing columns</div>
+<div class="quiz-option" onclick="selectOption(1,this,1)"><span class="opt-marker">B</span>Create new features from existing data</div>
+<div class="quiz-option" onclick="selectOption(1,this,2)"><span class="opt-marker">C</span>Only rename columns</div>
+<div class="quiz-option" onclick="selectOption(1,this,3)"><span class="opt-marker">D</span>Remove missing values</div>
+</div>
+<button class="quiz-btn" id="quizBtn1" onclick="checkAnswer(1,1)" disabled>⚔️ Submit Answer</button>
+<div class="quiz-feedback" id="feedback1"></div>
+</div>
+</div>
+
+<!-- ==================== LEVEL 2 ==================== -->
+<div class="level-card" id="level2">
+<div class="level-header">
+<div class="level-number">2</div>
+<div class="level-title">Feature Splitting — Data Ko Todo! ✂️</div>
+<div class="level-xp">+100 XP</div>
+</div>
+
+<div class="callout story">
+<div class="callout-title">📖 Kahani Time</div>
+<p>Imagine karo tumhare paas ek column hai — <strong>"2024-01-15 14:30:00"</strong>. Yeh ek datetime hai, lekin isme chhupe hain — <em>saal, mahina, din, ghanta</em>! Agar tum ise <strong>split</strong> karo alag columns mein, toh model ko zyada samajh aayega. Jaise ek <strong>Maggi packet</strong> ko kholo toh andar masala, noodles sab alag milta hai! 🍜</p>
+</div>
+
+<div class="callout tip">
+<div class="callout-title">💡 Key Concept</div>
+<p><strong>Feature Splitting</strong> = Breaking a single feature into multiple meaningful features. Common examples: datetime → (year, month, day, hour), full name → (first, last), address → (city, state, pin).</p>
+</div>
+
+<div class="code-block">
+<div class="code-header"><span>🐍 Python — Feature Splitting</span><button onclick="copyCode(this)">📋 Copy</button></div>
+<pre><span class="im">import</span> pandas <span class="kw">as</span> pd
+
+<span class="cm"># 📅 Order data with datetime</span>
+orders = pd.DataFrame({
+    <span class="str">'order_date'</span>: pd.to_datetime([
+        <span class="str">'2024-01-15 14:30'</span>, <span class="str">'2024-03-22 09:15'</span>,
+        <span class="str">'2024-07-04 18:45'</span>, <span class="str">'2024-12-25 11:00'</span>
+    ]),
+    <span class="str">'customer_name'</span>: [<span class="str">'Rahul Sharma'</span>, <span class="str">'Priya Patel'</span>,
+                       <span class="str">'Amit Singh'</span>, <span class="str">'Neha Gupta'</span>],
+    <span class="str">'amount'</span>: [<span class="num">1500</span>, <span class="num">2300</span>, <span class="num">800</span>, <span class="num">5000</span>]
+})
+
+<span class="cm"># ✂️ Datetime Splitting</span>
+orders[<span class="str">'year'</span>] = orders[<span class="str">'order_date'</span>].dt.year
+orders[<span class="str">'month'</span>] = orders[<span class="str">'order_date'</span>].dt.month
+orders[<span class="str">'day'</span>] = orders[<span class="str">'order_date'</span>].dt.day
+orders[<span class="str">'hour'</span>] = orders[<span class="str">'order_date'</span>].dt.hour
+orders[<span class="str">'day_name'</span>] = orders[<span class="str">'order_date'</span>].dt.day_name()
+
+<span class="cm"># ✂️ Name Splitting</span>
+orders[[<span class="str">'first_name'</span>,<span class="str">'last_name'</span>]] = orders[<span class="str">'customer_name'</span>].str.split(<span class="str">' '</span>,expand=<span class="kw">True</span>)
+
+<span class="fn">print</span>(orders[[<span class="str">'customer_name'</span>,<span class="str">'first_name'</span>,<span class="str">'last_name'</span>,
+             <span class="str">'year'</span>,<span class="str">'month'</span>,<span class="str">'day'</span>,<span class="str">'hour'</span>,<span class="str">'day_name'</span>]].to_string(index=<span class="kw">False</span>))</pre>
+<div class="code-output">  customer_name first_name last_name  year  month  day  hour   day_name
+  Rahul Sharma      Rahul    Sharma  2024      1   15    14     Monday
+   Priya Patel      Priya     Patel  2024      3   22     9     Friday
+    Amit Singh       Amit     Singh  2024      7    4    18   Thursday
+    Neha Gupta       Neha     Gupta  2024     12   25    11  Wednesday</div>
+</div>
+
+<!-- Quiz Level 2 -->
+<div class="quiz-container" id="quiz2">
+<div class="quiz-title">🧩 Quest Challenge — Level 2</div>
+<div class="quiz-question">orders['order_date'].dt.month kya return karega?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="selectOption(2,this,0)"><span class="opt-marker">A</span>Month name like "January"</div>
+<div class="quiz-option" onclick="selectOption(2,this,1)"><span class="opt-marker">B</span>Month number like 1, 3, 7, 12</div>
+<div class="quiz-option" onclick="selectOption(2,this,2)"><span class="opt-marker">C</span>Full date string</div>
+<div class="quiz-option" onclick="selectOption(2,this,3)"><span class="opt-marker">D</span>Error — dt accessor doesn't exist</div>
+</div>
+<button class="quiz-btn" id="quizBtn2" onclick="checkAnswer(2,1)" disabled>⚔️ Submit Answer</button>
+<div class="quiz-feedback" id="feedback2"></div>
+</div>
+</div>
+
+<!-- ==================== LEVEL 3 ==================== -->
+<div class="level-card" id="level3">
+<div class="level-header">
+<div class="level-number">3</div>
+<div class="level-title">FunctionTransformer — Custom Magic! 🪄</div>
+<div class="level-xp">+100 XP</div>
+</div>
+
+<div class="callout story">
+<div class="callout-title">📖 Kahani Time</div>
+<p>Socho tumhare paas ek <strong>magic wand</strong> hai 🪄 — tum usse kisi bhi data ko transform kar sakte ho! <code>FunctionTransformer</code> bilkul wahi hai — sklearn ka ek tool jo <strong>tumhari custom function</strong> ko ek proper transformer mein badal deta hai. Matlab tum apni recipe bana sakte ho aur usse directly sklearn mein use kar sakte ho, jaise ek <strong>naya tarka</strong> recipe mein! 🍳</p>
+</div>
+
+<div class="callout tip">
+<div class="callout-title">💡 Key Concept</div>
+<p><strong>FunctionTransformer</strong> wraps any Python function into an sklearn-compatible transformer. This means your custom transformations can plug into any sklearn workflow seamlessly!</p>
+</div>
+
+<div class="callout formula">
+<div class="callout-title">📐 Syntax</div>
+<p><code>FunctionTransformer(func, inverse_func=None, validate=False)</code><br><br>
+• <strong>func:</strong> The transformation function (e.g., np.log1p)<br>
+• <strong>inverse_func:</strong> Reverse transformation (optional)<br>
+• <strong>validate:</strong> Whether to check input arrays</p>
+</div>
+
+<div class="code-block">
+<div class="code-header"><span>🐍 Python — FunctionTransformer Basics</span><button onclick="copyCode(this)">📋 Copy</button></div>
+<pre><span class="im">import</span> numpy <span class="kw">as</span> np
+<span class="im">from</span> sklearn.preprocessing <span class="im">import</span> FunctionTransformer
+
+<span class="cm"># 🪄 Custom function — double the values</span>
+<span class="kw">def</span> <span class="fn">double_it</span>(X):
+    <span class="kw">return</span> X * <span class="num">2</span>
+
+<span class="cm"># Wrap it as a transformer</span>
+doubler = FunctionTransformer(func=double_it)
+
+<span class="cm"># Test data</span>
+data = np.array([[<span class="num">10</span>], [<span class="num">20</span>], [<span class="num">30</span>], [<span class="num">40</span>]])
+result = doubler.transform(data)
+
+<span class="fn">print</span>(<span class="str">"Original:"</span>, data.flatten())
+<span class="fn">print</span>(<span class="str">"Doubled: "</span>, result.flatten())</pre>
+<div class="code-output">Original: [10 20 30 40]
+Doubled:  [20 40 60 80]</div>
+</div>
+
+<!-- ===== .transform() vs .fit_transform() Comparison ===== -->
+<div class="callout tip">
+<div class="callout-title">💡 .transform() vs .fit_transform() — Kya Farak Hai?</div>
+<p>FunctionTransformer ke paas <strong>3 key methods</strong> hain. Samjho isse — jaise ek <strong>chef</strong> ki recipe: <code>.fit()</code> = recipe seekhna, <code>.transform()</code> = recipe se khaana banana, <code>.fit_transform()</code> = ek hi step mein dono karna! 👨‍🍳</p>
+</div>
+
+<div class="compare-grid">
+<div class="compare-card transform-card">
+<span class="method-tag">.transform(data)</span>
+<h4>🔧 Transform Only</h4>
+<p>Sirf <strong>transformation apply</strong> karta hai — pehle se fit hona zaroori hai. Training data pe <code>.fit()</code> call hone ke baad, new/test data pe use karo.</p>
+<p style="margin-top:8px;color:#fbbf24;font-weight:600;font-size:.8rem">✅ Test data ke liye use karo</p>
+</div>
+<div class="compare-card fit-transform-card">
+<span class="method-tag">.fit_transform(data)</span>
+<h4>⚡ Fit + Transform Together</h4>
+<p><strong>Ek hi call</strong> mein fit aur transform dono! Internally <code>.fit(data).transform(data)</code> karta hai. Training data ke liye shortcut — time bachata hai.</p>
+<p style="margin-top:8px;color:var(--secondary);font-weight:600;font-size:.8rem">✅ Training data ke liye use karo</p>
+</div>
+</div>
+
+<div class="code-block">
+<div class="code-header"><span>🐍 Python — .transform() vs .fit_transform() Comparison</span><button onclick="copyCode(this)">📋 Copy</button></div>
+<pre><span class="im">import</span> numpy <span class="kw">as</span> np
+<span class="im">from</span> sklearn.preprocessing <span class="im">import</span> FunctionTransformer
+
+<span class="cm"># 🪄 Create transformer</span>
+doubler = FunctionTransformer(func=<span class="kw">lambda</span> x: x * <span class="num">2</span>)
+
+data = np.array([[<span class="num">10</span>], [<span class="num">20</span>], [<span class="num">30</span>]])
+
+<span class="cm"># Method 1: fit() + transform() — 2 steps</span>
+doubler.fit(data)               <span class="cm"># Step 1: Learn (no-op for FunctionTransformer)</span>
+result_1 = doubler.transform(data)  <span class="cm"># Step 2: Apply transformation</span>
+
+<span class="cm"># Method 2: fit_transform() — 1 step (shortcut!)</span>
+result_2 = doubler.fit_transform(data)  <span class="cm"># Both in one call</span>
+
+<span class="fn">print</span>(<span class="str">"fit() + transform():"</span>, result_1.flatten())
+<span class="fn">print</span>(<span class="str">"fit_transform():    "</span>, result_2.flatten())
+<span class="fn">print</span>(<span class="str">"Same result?"</span>, np.array_equal(result_1, result_2))
+
+<span class="cm"># ⚠️ Real-world pattern: Train vs Test</span>
+train_data = np.array([[<span class="num">100</span>], [<span class="num">200</span>], [<span class="num">300</span>]])
+test_data = np.array([[<span class="num">150</span>], [<span class="num">250</span>]])
+
+<span class="cm"># Training: fit_transform (ek hi step)</span>
+train_result = doubler.fit_transform(train_data)
+
+<span class="cm"># Testing: sirf transform (fit NAHI karna!)</span>
+test_result = doubler.transform(test_data)
+
+<span class="fn">print</span>(<span class="str">"\nTrain transformed:"</span>, train_result.flatten())
+<span class="fn">print</span>(<span class="str">"Test transformed: "</span>, test_result.flatten())</pre>
+<div class="code-output">fit() + transform(): [20 40 60]
+fit_transform():     [20 40 60]
+Same result? True
+
+Train transformed: [200 400 600]
+Test transformed:  [300 500]</div>
+</div>
+
+<!-- Methods Reference Table -->
+<table class="methods-table">
+<thead>
+<tr><th>Method</th><th>Kya Karta Hai</th><th>Kab Use Karo</th><th>Example</th></tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.fit(X)</code></td>
+<td>Parameters <strong>seekhta</strong> hai data se (FunctionTransformer mein no-op — kuch nahi seekhta)</td>
+<td>Jab sirf "learning" chahiye, transform baad mein</td>
+<td><code>tf.fit(train_data)</code></td>
+</tr>
+<tr>
+<td><code>.transform(X)</code></td>
+<td>Seekhe hue params se data <strong>transform</strong> karta hai</td>
+<td><strong>Test/new data</strong> pe — fit already ho chuka hai</td>
+<td><code>tf.transform(test_data)</code></td>
+</tr>
+<tr>
+<td><code>.fit_transform(X)</code></td>
+<td><strong>fit + transform</strong> ek saath — shortcut!</td>
+<td><strong>Training data</strong> pe — pehli baar use karne pe</td>
+<td><code>tf.fit_transform(train_data)</code></td>
+</tr>
+<tr>
+<td><code>.inverse_transform(X)</code></td>
+<td>Transform ko <strong>ulta</strong> karta hai (original value wapas)</td>
+<td>Predictions ko original scale pe laana</td>
+<td><code>tf.inverse_transform(result)</code></td>
+</tr>
+</tbody>
+</table>
+
+<div class="callout warning">
+<div class="callout-title">⚠️ Golden Rule — Data Leakage Se Bachao!</div>
+<p><strong>Test data pe kabhi .fit_transform() mat use karo!</strong> Kyunki yeh test data se "seekhega" — aur yeh cheating hai ML mein! 🚫<br><br>
+✅ <strong>Sahi Tarika:</strong> <code>fit_transform(train)</code> → <code>transform(test)</code><br>
+❌ <strong>Galat Tarika:</strong> <code>fit_transform(train)</code> → <code>fit_transform(test)</code><br><br>
+<em>Note: FunctionTransformer mein fit() kuch nahi seekhta (stateless hai), par StandardScaler, MinMaxScaler jaise transformers mein yeh rule bohot important hai!</em></p>
+</div>
+
+<!-- Decision Flowchart -->
+<div class="flowchart-container">
+<div class="flowchart-title">🗺️ Decision Flowchart — Kaunsa Method Use Karein?</div>
+<div class="flowchart-body">
+<svg viewBox="0 0 720 480" width="100%" xmlns="http://www.w3.org/2000/svg" style="font-family:'Inter',sans-serif">
+<defs>
+<linearGradient id="gPurple" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6c5ce7"/><stop offset="100%" stop-color="#7c3aed"/></linearGradient>
+<linearGradient id="gCyan" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#6c5ce7"/><stop offset="100%" stop-color="#0ea5e9"/></linearGradient>
+<linearGradient id="gOrange" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#f97316"/><stop offset="100%" stop-color="#fbbf24"/></linearGradient>
+<marker id="mP" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0,0 10,3.5 0,7" fill="#6c5ce7"/></marker>
+<marker id="mG" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0,0 10,3.5 0,7" fill="#10b981"/></marker>
+<marker id="mR" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0,0 10,3.5 0,7" fill="#ef4444"/></marker>
+<marker id="mGray" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0,0 10,3.5 0,7" fill="#94a3b8"/></marker>
+</defs>
+
+<!-- ======== ROW 1: START ======== -->
+<!-- Start pill: center=360, top=10, bottom=54 -->
+<rect x="260" y="10" width="200" height="44" rx="22" fill="url(#gPurple)"/>
+<text x="360" y="38" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">🚀 Start: Kya karna hai?</text>
+
+<!-- Arrow: Start(360,54) → Q1 top(360,80) -->
+<line x1="360" y1="54" x2="360" y2="80" stroke="#6c5ce7" stroke-width="2" marker-end="url(#mP)"/>
+
+<!-- ======== ROW 2: Q1 DIAMOND ======== -->
+<!-- Diamond: top=80, right=490, bottom=200, left=230, center=(360,140) -->
+<polygon points="360,80 490,140 360,200 230,140" fill="#faf5ff" stroke="#6c5ce7" stroke-width="2"/>
+<text x="360" y="134" text-anchor="middle" fill="#1e293b" font-size="11" font-weight="600">Kya yeh TRAINING</text>
+<text x="360" y="150" text-anchor="middle" fill="#1e293b" font-size="11" font-weight="600">data hai?</text>
+
+<!-- ======== YES BRANCH (LEFT) ======== -->
+<!-- Path: Q1 left(230,140) → bend at (150,140) → down to Q2 top(150,210) -->
+<path d="M230,140 L150,140 L150,210" fill="none" stroke="#10b981" stroke-width="2" marker-end="url(#mG)"/>
+<!-- YES label on horizontal segment -->
+<rect x="174" y="128" width="36" height="18" rx="4" fill="#10b981"/><text x="192" y="141" text-anchor="middle" fill="#fff" font-size="9" font-weight="700">YES</text>
+
+<!-- Q2 DIAMOND: top=212, right=220, bottom=282, left=80, center=(150,247) -->
+<polygon points="150,212 220,247 150,282 80,247" fill="#fffbeb" stroke="#f59e0b" stroke-width="1.5"/>
+<text x="150" y="243" text-anchor="middle" fill="#92400e" font-size="9" font-weight="600">Pehli baar</text>
+<text x="150" y="255" text-anchor="middle" fill="#92400e" font-size="9" font-weight="600">fit kar rahe?</text>
+
+<!-- YES from Q2: bottom(150,282) → .fit_transform top(150,316) -->
+<line x1="150" y1="282" x2="150" y2="316" stroke="#10b981" stroke-width="2" marker-end="url(#mG)"/>
+<rect x="128" y="288" width="36" height="16" rx="4" fill="#10b981"/><text x="146" y="300" text-anchor="middle" fill="#fff" font-size="8" font-weight="700">YES</text>
+
+<!-- .fit_transform() box: center=150, top=318, bottom=366 -->
+<rect x="80" y="318" width="140" height="48" rx="12" fill="url(#gCyan)"/>
+<text x="150" y="338" text-anchor="middle" fill="#fff" font-size="11" font-weight="800">.fit_transform()</text>
+<text x="150" y="354" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-size="9">fit + transform ek saath 🚀</text>
+
+<!-- NO from Q2: right(220,247) → .transform() left(275,247) -->
+<line x1="220" y1="247" x2="275" y2="247" stroke="#ef4444" stroke-width="2" marker-end="url(#mR)"/>
+<rect x="230" y="237" width="26" height="16" rx="4" fill="#ef4444"/><text x="243" y="249" text-anchor="middle" fill="#fff" font-size="8" font-weight="700">NO</text>
+
+<!-- .transform() (already fit): center=340, top=223, bottom=271 -->
+<rect x="277" y="223" width="126" height="48" rx="12" fill="url(#gOrange)"/>
+<text x="340" y="243" text-anchor="middle" fill="#fff" font-size="11" font-weight="800">.transform()</text>
+<text x="340" y="259" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-size="9">already fit hai ✅</text>
+
+<!-- ======== NO BRANCH (RIGHT) ======== -->
+<!-- Path: Q1 right(490,140) → .transform() left(548,140) -->
+<line x1="490" y1="140" x2="548" y2="140" stroke="#ef4444" stroke-width="2" marker-end="url(#mR)"/>
+<rect x="498" y="128" width="30" height="18" rx="4" fill="#ef4444"/><text x="513" y="141" text-anchor="middle" fill="#fff" font-size="9" font-weight="700">NO</text>
+
+<!-- .transform() Test: center=618, top=112, bottom=168 -->
+<rect x="550" y="112" width="136" height="56" rx="12" fill="url(#gOrange)"/>
+<text x="618" y="136" text-anchor="middle" fill="#fff" font-size="11" font-weight="800">.transform()</text>
+<text x="618" y="152" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-size="9">Sirf test/new data 🧪</text>
+
+<!-- Danger zone: below test box -->
+<rect x="543" y="180" width="150" height="40" rx="8" fill="#fef2f2" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="5,3"/>
+<text x="618" y="196" text-anchor="middle" fill="#991b1b" font-size="9" font-weight="700">🚫 .fit_transform(test)</text>
+<text x="618" y="210" text-anchor="middle" fill="#991b1b" font-size="8">Data leakage hoga!</text>
+
+<!-- ======== BOTTOM NOTES ======== -->
+<!-- Dashed connector: .fit_transform(150,366) down to note box top(160,390) -->
+<path d="M150,366 L150,402 L200,402" fill="none" stroke="#94a3b8" stroke-width="1" stroke-dasharray="5,3"/>
+
+<!-- Stateless note box -->
+<rect x="200" y="384" width="360" height="42" rx="10" fill="#faf5ff" stroke="#6c5ce7" stroke-width="1.5"/>
+<text x="380" y="402" text-anchor="middle" fill="#6c5ce7" font-size="10" font-weight="700">💡 FunctionTransformer = Stateless</text>
+<text x="380" y="416" text-anchor="middle" fill="#64748b" font-size="9">.fit() kuch nahi seekhta → .transform() = .fit_transform()</text>
+
+<!-- Best Practice box -->
+<rect x="200" y="436" width="360" height="34" rx="10" fill="#ecfdf5" stroke="#10b981" stroke-width="1"/>
+<text x="380" y="458" text-anchor="middle" fill="#166534" font-size="10" font-weight="600">✅ Best Practice: .fit_transform(train) → .transform(test)</text>
+</svg>
+</div>
+</div>
+
+<!-- Quiz Level 3 -->
+<div class="quiz-container" id="quiz3">
+<div class="quiz-title">🧩 Quest Challenge — Level 3</div>
+<div class="quiz-question">FunctionTransformer ka main kaam kya hai?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="selectOption(3,this,0)"><span class="opt-marker">A</span>Automatically select best features</div>
+<div class="quiz-option" onclick="selectOption(3,this,1)"><span class="opt-marker">B</span>Wrap a custom function into sklearn transformer</div>
+<div class="quiz-option" onclick="selectOption(3,this,2)"><span class="opt-marker">C</span>Train a neural network</div>
+<div class="quiz-option" onclick="selectOption(3,this,3)"><span class="opt-marker">D</span>Split data into train/test sets</div>
+</div>
+<button class="quiz-btn" id="quizBtn3" onclick="checkAnswer(3,1)" disabled>⚔️ Submit Answer</button>
+<div class="quiz-feedback" id="feedback3"></div>
+</div>
+</div>
+
+<!-- ==================== TRANSFORM SELECTION GUIDE ==================== -->
+<div class="level-card" id="transform-guide" style="border-top:3px solid;border-image:linear-gradient(90deg,#f97316,#6c5ce7,#10b981) 1">
+<div class="level-header" style="justify-content:center">
+<div class="level-title">🗺️ Which Transform Should You Use? — Decision Guide</div>
+</div>
+
+<div class="callout story">
+<div class="callout-title">📖 Analogy — Doctor Ka Diagnosis! 🩺</div>
+<p>Jaise doctor <strong>symptoms dekh ke medicine</strong> deta hai, waise hi data ki <strong>skewness dekh ke transform</strong> choose karo! Halka bukhar mein paracetamol (Sqrt), zyada bukhar mein antibiotic (Log), aur inverse problem mein specialist (Reciprocal). Galat dawai doge toh side effects honge! 💊</p>
+</div>
+
+<!-- 3-column comparison cards -->
+<div class="compare-grid" style="grid-template-columns:1fr 1fr 1fr">
+<div class="compare-card" style="border-top:3px solid #f97316">
+<span class="method-tag" style="background:rgba(249,115,22,.12);color:#f97316;border:1px solid rgba(249,115,22,.25)">np.log1p(x)</span>
+<h4 style="color:#f97316">📈 Log Transform</h4>
+<p><strong>Kab:</strong> Extreme right skew →<br>salary, house prices, revenue</p>
+<p style="margin-top:6px"><strong>Kyun:</strong> Bohot bade values ko heavily compress karta hai</p>
+<p style="margin-top:6px"><strong>Power:</strong> ⚡⚡⚡ Strong</p>
+<p style="margin-top:8px;font-size:.78rem;color:#f97316">Range: 50K → 5M ✅</p>
+</div>
+<div class="compare-card" style="border-top:3px solid #a78bfa">
+<span class="method-tag" style="background:rgba(108,92,231,.12);color:#a78bfa;border:1px solid rgba(108,92,231,.25)">1/(x+1)</span>
+<h4 style="color:#a78bfa">🔄 Reciprocal Transform</h4>
+<p><strong>Kab:</strong> Inverse relationships →<br>speed↔time, dose↔response</p>
+<p style="margin-top:6px"><strong>Kyun:</strong> Non-linear inverse ko linear banata hai</p>
+<p style="margin-top:6px"><strong>Power:</strong> ⚡⚡ Specialized</p>
+<p style="margin-top:8px;font-size:.78rem;color:#a78bfa">y = 1/x relationship ✅</p>
+</div>
+<div class="compare-card" style="border-top:3px solid #10b981">
+<span class="method-tag" style="background:rgba(16,185,129,.12);color:#10b981;border:1px solid rgba(16,185,129,.25)">np.sqrt(x)</span>
+<h4 style="color:#10b981">🌿 Sqrt Transform</h4>
+<p><strong>Kab:</strong> Moderate right skew →<br>likes, views, counts, frequency</p>
+<p style="margin-top:6px"><strong>Kyun:</strong> Gentle compression — Log se halka</p>
+<p style="margin-top:6px"><strong>Power:</strong> ⚡ Mild</p>
+<p style="margin-top:8px;font-size:.78rem;color:#10b981">Count data (≥0) ✅</p>
+</div>
+</div>
+
+<!-- Quick Reference Table -->
+<table class="methods-table">
+<thead>
+<tr><th>Feature</th><th style="color:#f97316">📈 Log Transform</th><th style="color:#a78bfa">🔄 Reciprocal</th><th style="color:#10b981">🌿 Sqrt Transform</th></tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Skewness Level</strong></td>
+<td>Extreme (heavily right-skewed)</td>
+<td>Inverse relationship (not skewness)</td>
+<td>Moderate (slightly right-skewed)</td>
+</tr>
+<tr>
+<td><strong>Data Type</strong></td>
+<td>Salary, Prices, Revenue, Population</td>
+<td>Speed, Concentration, Frequency</td>
+<td>Likes, Views, Counts, Word Freq</td>
+</tr>
+<tr>
+<td><strong>Zero Handling</strong></td>
+<td><code>log1p</code> handles zeros ✅</td>
+<td><code>1/(x+1)</code> needed for zeros ⚠️</td>
+<td><code>sqrt(0) = 0</code> ✅</td>
+</tr>
+<tr>
+<td><strong>Negative Values</strong></td>
+<td>❌ Not allowed</td>
+<td>✅ Works (but be careful)</td>
+<td>❌ Returns NaN</td>
+</tr>
+<tr>
+<td><strong>Compression</strong></td>
+<td>🔥 Heavy compression</td>
+<td>📉 Inverts values</td>
+<td>🍃 Gentle compression</td>
+</tr>
+<tr>
+<td><strong>sklearn Code</strong></td>
+<td><code>FunctionTransformer(np.log1p)</code></td>
+<td><code>FunctionTransformer(lambda x: 1/(x+1))</code></td>
+<td><code>FunctionTransformer(np.sqrt)</code></td>
+</tr>
+</tbody>
+</table>
+
+<!-- SVG Decision Flowchart -->
+<div class="flowchart-container">
+<div class="flowchart-title">🧭 Transform Selection Flowchart — Kaunsa Transform Lagayein?</div>
+<div class="flowchart-body">
+<svg viewBox="0 0 780 570" width="100%" xmlns="http://www.w3.org/2000/svg" style="font-family:'Inter',sans-serif">
+<defs>
+<linearGradient id="tgPurple" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6c5ce7"/><stop offset="100%" stop-color="#7c3aed"/></linearGradient>
+<linearGradient id="tgLog" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#f97316"/><stop offset="100%" stop-color="#fbbf24"/></linearGradient>
+<linearGradient id="tgRecip" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#a78bfa"/></linearGradient>
+<linearGradient id="tgSqrt" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#10b981"/><stop offset="100%" stop-color="#34d399"/></linearGradient>
+<marker id="tArr" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0,0 10,3.5 0,7" fill="#6c5ce7"/></marker>
+<marker id="tArrG" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0,0 10,3.5 0,7" fill="#10b981"/></marker>
+<marker id="tArrO" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0,0 10,3.5 0,7" fill="#f97316"/></marker>
+<marker id="tArrP" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0,0 10,3.5 0,7" fill="#7c3aed"/></marker>
+<marker id="tArrR" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0,0 10,3.5 0,7" fill="#ef4444"/></marker>
+<marker id="tArrGray" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0,0 10,3.5 0,7" fill="#94a3b8"/></marker>
+</defs>
+
+<!-- ======== ROW 1: START ======== -->
+<!-- Start pill: center=390, top=10, bottom=54 -->
+<rect x="290" y="10" width="200" height="44" rx="22" fill="url(#tgPurple)"/>
+<text x="390" y="38" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">📊 Data Dekho — Samjho!</text>
+
+<!-- Arrow: Start(390,54) → Q1 top(390,90) -->
+<line x1="390" y1="54" x2="390" y2="90" stroke="#6c5ce7" stroke-width="2" marker-end="url(#tArr)"/>
+
+<!-- ======== ROW 2: Q1 DIAMOND — Inverse? ======== -->
+<!-- Diamond: top=92, right=530, bottom=232, left=250, center=(390,162) -->
+<polygon points="390,92 530,162 390,232 250,162" fill="#faf5ff" stroke="#7c3aed" stroke-width="2"/>
+<text x="390" y="152" text-anchor="middle" fill="#1e293b" font-size="11" font-weight="600">Kya data mein</text>
+<text x="390" y="168" text-anchor="middle" fill="#1e293b" font-size="11" font-weight="600">INVERSE relationship hai?</text>
+<text x="390" y="183" text-anchor="middle" fill="#64748b" font-size="9">(speed↔time, dose↔effect)</text>
+
+<!-- ======== YES → RIGHT → Reciprocal ======== -->
+<!-- Arrow: Q1 right(530,162) → Reciprocal left(640,162) -->
+<line x1="530" y1="162" x2="640" y2="162" stroke="#7c3aed" stroke-width="2" marker-end="url(#tArrP)"/>
+<rect x="560" y="150" width="36" height="20" rx="4" fill="#7c3aed"/><text x="578" y="164" text-anchor="middle" fill="#fff" font-size="9" font-weight="700">YES</text>
+
+<!-- Reciprocal box: left=642, top=128, bottom=198, center=704 -->
+<rect x="642" y="128" width="125" height="70" rx="14" fill="url(#tgRecip)"/>
+<text x="704" y="152" text-anchor="middle" fill="#fff" font-size="12" font-weight="800">🔄 Reciprocal</text>
+<text x="704" y="168" text-anchor="middle" fill="rgba(255,255,255,0.9)" font-size="10">1 / (x + 1)</text>
+<text x="704" y="184" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">Inverse → Linear</text>
+
+<!-- ======== NO → DOWN → Q2 ======== -->
+<!-- Arrow: Q1 bottom(390,232) → Q2 top(390,270) -->
+<line x1="390" y1="232" x2="390" y2="270" stroke="#ef4444" stroke-width="2" marker-end="url(#tArrR)"/>
+<rect x="374" y="240" width="28" height="18" rx="4" fill="#ef4444"/><text x="388" y="253" text-anchor="middle" fill="#fff" font-size="9" font-weight="700">NO</text>
+
+<!-- ======== ROW 3: Q2 DIAMOND — Skewness? ======== -->
+<!-- Diamond: top=272, right=530, bottom=412, left=250, center=(390,342) -->
+<polygon points="390,272 530,342 390,412 250,342" fill="#fffbeb" stroke="#f59e0b" stroke-width="2"/>
+<text x="390" y="332" text-anchor="middle" fill="#1e293b" font-size="11" font-weight="600">Data kitna</text>
+<text x="390" y="348" text-anchor="middle" fill="#1e293b" font-size="11" font-weight="600">SKEWED hai?</text>
+<text x="390" y="363" text-anchor="middle" fill="#64748b" font-size="9">(right-skewed distribution)</text>
+
+<!-- ======== EXTREME → LEFT → Log ======== -->
+<!-- Arrow: Q2 left(250,342) → Log right(140,342) -->
+<line x1="250" y1="342" x2="140" y2="342" stroke="#f97316" stroke-width="2" marker-end="url(#tArrO)"/>
+<rect x="174" y="329" width="64" height="20" rx="4" fill="#f97316"/><text x="206" y="343" text-anchor="middle" fill="#fff" font-size="9" font-weight="700">EXTREME</text>
+
+<!-- Log box: right=140, left=10, top=308, bottom=376, center=75 -->
+<rect x="10" y="308" width="130" height="68" rx="14" fill="url(#tgLog)"/>
+<text x="75" y="330" text-anchor="middle" fill="#fff" font-size="12" font-weight="800">📈 Log Transform</text>
+<text x="75" y="346" text-anchor="middle" fill="rgba(255,255,255,0.9)" font-size="10">np.log1p(x)</text>
+<text x="75" y="362" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">Salary, Prices 💰</text>
+
+<!-- Dashed line: Log bottom(75,376) → Constraint top(75,396) -->
+<line x1="75" y1="376" x2="75" y2="396" stroke="#f97316" stroke-width="1" stroke-dasharray="4,3"/>
+
+<!-- Constraint note under Log -->
+<rect x="15" y="396" width="120" height="36" rx="8" fill="#fff7ed" stroke="#f97316" stroke-width="1"/>
+<text x="75" y="411" text-anchor="middle" fill="#9a3412" font-size="9" font-weight="600">⚠️ x ≥ 0 zaroori</text>
+<text x="75" y="424" text-anchor="middle" fill="#c2410c" font-size="8">use log1p for x=0</text>
+
+<!-- ======== MODERATE → RIGHT → Sqrt ======== -->
+<!-- Arrow: Q2 right(530,342) → Sqrt left(640,342) -->
+<line x1="530" y1="342" x2="640" y2="342" stroke="#10b981" stroke-width="2" marker-end="url(#tArrG)"/>
+<rect x="556" y="329" width="72" height="20" rx="4" fill="#10b981"/><text x="592" y="343" text-anchor="middle" fill="#fff" font-size="9" font-weight="700">MODERATE</text>
+
+<!-- Sqrt box: left=642, top=308, bottom=376, center=704 -->
+<rect x="642" y="308" width="125" height="68" rx="14" fill="url(#tgSqrt)"/>
+<text x="704" y="330" text-anchor="middle" fill="#fff" font-size="12" font-weight="800">🌿 Sqrt Transform</text>
+<text x="704" y="346" text-anchor="middle" fill="rgba(255,255,255,0.9)" font-size="10">np.sqrt(x)</text>
+<text x="704" y="362" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">Likes, Views 📱</text>
+
+<!-- Dashed line: Sqrt bottom(704,376) → Constraint top(707,396) -->
+<line x1="704" y1="376" x2="704" y2="396" stroke="#10b981" stroke-width="1" stroke-dasharray="4,3"/>
+
+<!-- Constraint note under Sqrt -->
+<rect x="644" y="396" width="120" height="36" rx="8" fill="#ecfdf5" stroke="#10b981" stroke-width="1"/>
+<text x="704" y="411" text-anchor="middle" fill="#166534" font-size="9" font-weight="600">⚠️ Only non-negative</text>
+<text x="704" y="424" text-anchor="middle" fill="#15803d" font-size="8">count data = perfect ✅</text>
+
+<!-- ======== NONE → DOWN → No Transform ======== -->
+<!-- Arrow: Q2 bottom(390,412) → No Transform top(390,448) -->
+<line x1="390" y1="412" x2="390" y2="448" stroke="#94a3b8" stroke-width="2" marker-end="url(#tArrGray)"/>
+<rect x="369" y="420" width="42" height="18" rx="4" fill="#94a3b8"/><text x="390" y="433" text-anchor="middle" fill="#fff" font-size="9" font-weight="700">NONE</text>
+
+<!-- No Transform box: center=390, top=450, bottom=495 -->
+<rect x="310" y="450" width="160" height="45" rx="12" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
+<text x="390" y="470" text-anchor="middle" fill="#475569" font-size="11" font-weight="600">🤷 No Transform</text>
+<text x="390" y="486" text-anchor="middle" fill="#94a3b8" font-size="9">Data already normal hai!</text>
+
+<!-- ======== PRO TIP ======== -->
+<rect x="140" y="515" width="500" height="46" rx="14" fill="#faf5ff" stroke="#6c5ce7" stroke-width="1.5"/>
+<text x="390" y="534" text-anchor="middle" fill="#6c5ce7" font-size="11" font-weight="700">💡 Pro Tip — Samajh Nahi Aa Raha?</text>
+<text x="390" y="550" text-anchor="middle" fill="#64748b" font-size="10">Try all three → check skewness with df.skew() → jo abs(skew) kam kare woh use karo! 🎯</text>
+</svg>
+</div>
+</div>
+
+</div><!-- end transform-guide card -->
+
+<!-- ==================== LEVEL 4: LOG TRANSFORM ==================== -->
+<div class="level-card" id="level4">
+<div class="level-header">
+<div class="level-number">4</div>
+<div class="level-title">Log Transform — Skewed Data Ka Doctor! 📈</div>
+<div class="level-xp">+100 XP</div>
+</div>
+
+<div class="callout story">
+<div class="callout-title">📖 Kahani Time</div>
+<p>Socho ek company mein salary data hai — CEO ka ₹50 lakh, manager ka ₹5 lakh, intern ka ₹20,000. Yeh data <strong>right-skewed</strong> hai — kuch log bohot zyada kamaa rahe hain! 💰 Agar hum directly ML model lagayein toh CEO ki salary dominate karegi. Solution? <strong>Log Transform</strong> lagao — sab values ko ek <strong>comparable scale</strong> pe le aao. Jaise volume knob ko thoda neeche karo taaki sab sunai de! 🔊</p>
+</div>
+
+<div class="callout tip">
+<div class="callout-title">💡 Key Concept</div>
+<p><strong>Log Transform</strong> compresses large values and stretches small values, making right-skewed distributions more normal. Perfect for: salary, house prices, population, revenue — koi bhi data jisme <em>kuch values bohot bade hain</em>!</p>
+</div>
+
+<div class="callout formula">
+<div class="callout-title">📐 Formula</div>
+<p>
+• <strong>y = log(1 + x)</strong> → use <code>np.log1p(x)</code><br>
+• <strong>Inverse:</strong> x = e^y - 1 → use <code>np.expm1(y)</code><br>
+• <strong>Why log1p?</strong> Because log(0) = -infinity! Adding 1 makes it safe.
+</p>
+</div>
+
+<div class="code-block">
+<div class="code-header"><span>🐍 Python — Log Transform with FunctionTransformer</span><button onclick="copyCode(this)">📋 Copy</button></div>
+<pre><span class="im">import</span> numpy <span class="kw">as</span> np
+<span class="im">import</span> pandas <span class="kw">as</span> pd
+<span class="im">from</span> sklearn.preprocessing <span class="im">import</span> FunctionTransformer
+
+<span class="cm"># 💰 Salary data (right-skewed)</span>
+salaries = pd.DataFrame({
+    <span class="str">'employee'</span>: [<span class="str">'Intern'</span>, <span class="str">'Junior'</span>, <span class="str">'Senior'</span>, <span class="str">'Manager'</span>, <span class="str">'CEO'</span>],
+    <span class="str">'salary'</span>: [<span class="num">20000</span>, <span class="num">50000</span>, <span class="num">120000</span>, <span class="num">500000</span>, <span class="num">5000000</span>]
+})
+
+<span class="cm"># 📈 Apply Log Transform</span>
+log_transformer = FunctionTransformer(
+    func=np.log1p,
+    inverse_func=np.expm1
+)
+
+salaries[<span class="str">'salary_log'</span>] = log_transformer.transform(
+    salaries[[<span class="str">'salary'</span>]]
+)
+
+<span class="cm"># 🔄 Verify inverse works</span>
+salaries[<span class="str">'salary_restored'</span>] = log_transformer.inverse_transform(
+    salaries[[<span class="str">'salary_log'</span>]]
+).round(<span class="num">0</span>)
+
+<span class="fn">print</span>(salaries.to_string(index=<span class="kw">False</span>))</pre>
+<div class="code-output"> employee   salary  salary_log  salary_restored
+   Intern    20000        9.90          20000.0
+   Junior    50000       10.82          50000.0
+   Senior   120000       11.70         120000.0
+  Manager   500000       13.12         500000.0
+      CEO  5000000       15.42        5000000.0</div>
+</div>
+
+<div class="callout warning">
+<div class="callout-title">⚠️ Yaad Rakho!</div>
+<p><strong>np.log(x)</strong> mat use karo directly — agar x = 0 toh <code>-infinity</code> aa jayega!<br>
+Hamesha <strong>np.log1p(x)</strong> use karo — yeh internally <code>log(1 + x)</code> karta hai, so zero bhi safe hai. ✅</p>
+</div>
+
+<!-- Quiz Level 4 -->
+<div class="quiz-container" id="quiz4">
+<div class="quiz-title">🧩 Quest Challenge — Level 4</div>
+<div class="quiz-question">Log1p(x) use karna better hai kyunki:</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="selectOption(4,this,0)"><span class="opt-marker">A</span>It makes all values negative</div>
+<div class="quiz-option" onclick="selectOption(4,this,1)"><span class="opt-marker">B</span>It handles x=0 safely (log(0) is undefined)</div>
+<div class="quiz-option" onclick="selectOption(4,this,2)"><span class="opt-marker">C</span>It's faster than np.log</div>
+<div class="quiz-option" onclick="selectOption(4,this,3)"><span class="opt-marker">D</span>It doubles the values first</div>
+</div>
+<button class="quiz-btn" id="quizBtn4" onclick="checkAnswer(4,1)" disabled>⚔️ Submit Answer</button>
+<div class="quiz-feedback" id="feedback4"></div>
+</div>
+</div>
+
+<!-- ==================== LEVEL 5: RECIPROCAL TRANSFORM ==================== -->
+<div class="level-card" id="level5">
+<div class="level-header">
+<div class="level-number">5</div>
+<div class="level-title">Reciprocal Transform — Ultaa Kar Do! 🔄</div>
+<div class="level-xp">+100 XP</div>
+</div>
+
+<div class="callout story">
+<div class="callout-title">📖 Kahani Time</div>
+<p>Socho tum <strong>delivery time</strong> predict kar rahe ho. Speed 10 km/h wale ko 6 hours lagte hain, par 100 km/h wale ko sirf 36 minutes. Speed badhne se time <strong>exponentially</strong> kam hota hai — yeh <strong>reciprocal relationship</strong> hai! 🏍️ Agar hum <code>1/speed</code> karein toh yeh linear ho jayega — aur ML models ko linear relationships zyada pasand hain! 📏</p>
+</div>
+
+<div class="callout tip">
+<div class="callout-title">💡 Key Concept</div>
+<p><strong>Reciprocal Transform</strong> = <code>1/x</code>. Yeh inversely proportional relationships ko linear banata hai. Use cases: speed → time, concentration → dilution, frequency → wavelength. Extreme large values ko compress karta hai!</p>
+</div>
+
+<div class="callout formula">
+<div class="callout-title">📐 Formula</div>
+<p>
+• <strong>y = 1 / x</strong> → simple reciprocal<br>
+• <strong>Safe version:</strong> y = 1 / (x + 1) → avoids division by zero<br>
+• <strong>⚠️ x = 0</strong> pe crash hoga bina protection ke!
+</p>
+</div>
+
+<div class="code-block">
+<div class="code-header"><span>🐍 Python — Reciprocal Transform with FunctionTransformer</span><button onclick="copyCode(this)">📋 Copy</button></div>
+<pre><span class="im">import</span> numpy <span class="kw">as</span> np
+<span class="im">import</span> pandas <span class="kw">as</span> pd
+<span class="im">from</span> sklearn.preprocessing <span class="im">import</span> FunctionTransformer
+
+<span class="cm"># 🏍️ Delivery data</span>
+data = pd.DataFrame({
+    <span class="str">'vehicle'</span>: [<span class="str">'Cycle'</span>, <span class="str">'Scooter'</span>, <span class="str">'Bike'</span>, <span class="str">'Car'</span>, <span class="str">'Bullet Train'</span>],
+    <span class="str">'speed_kmph'</span>: [<span class="num">10</span>, <span class="num">40</span>, <span class="num">60</span>, <span class="num">100</span>, <span class="num">300</span>]
+})
+
+<span class="cm"># 🔄 Reciprocal Transform (safe version with +1)</span>
+recip_transformer = FunctionTransformer(
+    func=<span class="kw">lambda</span> x: <span class="num">1</span> / (x + <span class="num">1</span>)
+)
+
+data[<span class="str">'speed_reciprocal'</span>] = recip_transformer.transform(
+    data[[<span class="str">'speed_kmph'</span>]]
+)
+
+<span class="cm"># Also show simple 1/x for non-zero values</span>
+data[<span class="str">'speed_1_over_x'</span>] = <span class="num">1</span> / data[<span class="str">'speed_kmph'</span>]
+
+<span class="fn">print</span>(data.to_string(index=<span class="kw">False</span>))</pre>
+<div class="code-output">      vehicle  speed_kmph  speed_reciprocal  speed_1_over_x
+        Cycle          10          0.090909        0.100000
+      Scooter          40          0.024390        0.025000
+         Bike          60          0.016393        0.016667
+          Car         100          0.009901        0.010000
+ Bullet Train         300          0.003322        0.003333</div>
+</div>
+
+<div class="callout warning">
+<div class="callout-title">⚠️ Yaad Rakho!</div>
+<p><strong>Division by zero</strong> sabse bada danger hai! Agar x = 0 ho toh <code>1/x = infinity</code>.<br>
+Hamesha <strong>1/(x + 1)</strong> ya <strong>1/(x + epsilon)</strong> use karo for safety. Epsilon = 1e-6 bhi chal jayega. 🛡️</p>
+</div>
+
+<!-- Quiz Level 5 -->
+<div class="quiz-container" id="quiz5">
+<div class="quiz-title">🧩 Quest Challenge — Level 5</div>
+<div class="quiz-question">Reciprocal Transform mein 1/(x+1) kyun use karte hain instead of 1/x?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="selectOption(5,this,0)"><span class="opt-marker">A</span>It makes the output larger</div>
+<div class="quiz-option" onclick="selectOption(5,this,1)"><span class="opt-marker">B</span>To avoid division by zero when x=0</div>
+<div class="quiz-option" onclick="selectOption(5,this,2)"><span class="opt-marker">C</span>It's mathematically more accurate</div>
+<div class="quiz-option" onclick="selectOption(5,this,3)"><span class="opt-marker">D</span>sklearn requires +1 in all transforms</div>
+</div>
+<button class="quiz-btn" id="quizBtn5" onclick="checkAnswer(5,1)" disabled>⚔️ Submit Answer</button>
+<div class="quiz-feedback" id="feedback5"></div>
+</div>
+</div>
+
+<!-- ==================== LEVEL 6: SQUARE ROOT TRANSFORM ==================== -->
+<div class="level-card" id="level6">
+<div class="level-header">
+<div class="level-number">6</div>
+<div class="level-title">Square Root Transform — Halka Sa Touch! 🌿</div>
+<div class="level-xp">+100 XP</div>
+</div>
+
+<div class="callout story">
+<div class="callout-title">📖 Kahani Time</div>
+<p>Instagram pe socho — kisi ko <strong>10 likes</strong> milte hain, kisi ko <strong>10,000</strong>! Yeh data thoda skewed hai, par utna nahi jitna salary data tha. Iske liye Log Transform bohot heavy ho jayega — jaise <strong>cold mein bulldozer</strong> lana! 🏗️ Yahan chahiye ek <strong>gentle fix</strong> — Square Root Transform. Yeh <em>moderate skewness</em> ko fix karta hai bina data ko zyada compress kiye. Jaise <strong>halka sa nimbu</strong> chai mein — perfect balance! 🍋</p>
+</div>
+
+<div class="callout tip">
+<div class="callout-title">💡 Key Concept</div>
+<p><strong>Square Root Transform</strong> = <code>√x</code> or <code>np.sqrt(x)</code>. Yeh Log se <em>milder</em> transform hai — count data ke liye perfect hai (likes, views, clicks, word frequency). Jab data slightly right-skewed ho, yeh best choice hai!</p>
+</div>
+
+<div class="callout formula">
+<div class="callout-title">📐 Formula</div>
+<p>
+• <strong>y = √x</strong> → use <code>np.sqrt(x)</code><br>
+• <strong>Inverse:</strong> x = y² → use <code>np.square(y)</code><br>
+• <strong>⚠️ x must be ≥ 0</strong> — negative values pe NaN aayega!
+</p>
+</div>
+
+<div class="code-block">
+<div class="code-header"><span>🐍 Python — Square Root Transform with FunctionTransformer</span><button onclick="copyCode(this)">📋 Copy</button></div>
+<pre><span class="im">import</span> numpy <span class="kw">as</span> np
+<span class="im">import</span> pandas <span class="kw">as</span> pd
+<span class="im">from</span> sklearn.preprocessing <span class="im">import</span> FunctionTransformer
+
+<span class="cm"># 📱 Social media engagement data</span>
+posts = pd.DataFrame({
+    <span class="str">'post_type'</span>: [<span class="str">'Text'</span>, <span class="str">'Image'</span>, <span class="str">'Reel'</span>, <span class="str">'Story'</span>, <span class="str">'Viral Reel'</span>],
+    <span class="str">'likes'</span>: [<span class="num">15</span>, <span class="num">150</span>, <span class="num">2500</span>, <span class="num">45</span>, <span class="num">50000</span>],
+    <span class="str">'comments'</span>: [<span class="num">3</span>, <span class="num">25</span>, <span class="num">400</span>, <span class="num">8</span>, <span class="num">8000</span>]
+})
+
+<span class="cm"># 🌿 Square Root Transform</span>
+sqrt_transformer = FunctionTransformer(
+    func=np.sqrt,
+    inverse_func=np.square
+)
+
+posts[<span class="str">'likes_sqrt'</span>] = sqrt_transformer.transform(
+    posts[[<span class="str">'likes'</span>]]
+)
+posts[<span class="str">'comments_sqrt'</span>] = sqrt_transformer.transform(
+    posts[[<span class="str">'comments'</span>]]
+)
+
+<span class="cm"># 🔄 Verify inverse</span>
+posts[<span class="str">'likes_restored'</span>] = sqrt_transformer.inverse_transform(
+    posts[[<span class="str">'likes_sqrt'</span>]]
+).round(<span class="num">0</span>)
+
+<span class="fn">print</span>(posts[[<span class="str">'post_type'</span>,<span class="str">'likes'</span>,<span class="str">'likes_sqrt'</span>,
+            <span class="str">'comments'</span>,<span class="str">'comments_sqrt'</span>]].to_string(index=<span class="kw">False</span>))</pre>
+<div class="code-output">  post_type  likes  likes_sqrt  comments  comments_sqrt
+       Text     15        3.87         3           1.73
+      Image    150       12.25        25           5.00
+       Reel   2500       50.00       400          20.00
+      Story     45        6.71         8           2.83
+ Viral Reel  50000      223.61      8000          89.44</div>
+</div>
+
+<div class="callout warning">
+<div class="callout-title">⚠️ Yaad Rakho!</div>
+<p><strong>Negative values</strong> pe sqrt kaam nahi karega — <code>NaN</code> return hoga!<br>
+Agar negative values hain toh pehle shift karo: <code>np.sqrt(x - x.min())</code>. Count data (likes, views) mein yeh problem nahi aati kyunki counts always ≥ 0 hote hain. 🎯</p>
+</div>
+
+<!-- Quiz Level 6 -->
+<div class="quiz-container" id="quiz6">
+<div class="quiz-title">🧩 Quest Challenge — Level 6</div>
+<div class="quiz-question">Square Root Transform kab best choice hai?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="selectOption(6,this,0)"><span class="opt-marker">A</span>When data has extreme right skew (salary, house prices)</div>
+<div class="quiz-option" onclick="selectOption(6,this,1)"><span class="opt-marker">B</span>When data has moderate right skew (count data like likes, views)</div>
+<div class="quiz-option" onclick="selectOption(6,this,2)"><span class="opt-marker">C</span>When data is perfectly normally distributed</div>
+<div class="quiz-option" onclick="selectOption(6,this,3)"><span class="opt-marker">D</span>When data contains only negative values</div>
+</div>
+<button class="quiz-btn" id="quizBtn6" onclick="checkAnswer(6,1)" disabled>⚔️ Submit Answer</button>
+<div class="quiz-feedback" id="feedback6"></div>
+</div>
+</div>
+
+</section><!-- end levels-container -->
+
+<!-- ===== FINAL SUMMARY ===== -->
+<div class="final-summary">
+<h2>🏆 Quest Complete — Tumne Kya Seekha?</h2>
+
+<div class="summary-grid">
+<div class="summary-item si-orange">
+<span class="si-icon">🏗️</span>
+<div class="si-title">Feature Construction</div>
+<div class="si-desc">Existing features se naye meaningful features banana — jaise date se month, year, day extract karna</div>
+</div>
+<div class="summary-item si-purple">
+<span class="si-icon">✂️</span>
+<div class="si-title">Feature Splitting</div>
+<div class="si-desc">Ek column ko multiple useful columns mein todna — jaise full name se first & last name</div>
+</div>
+<div class="summary-item si-blue">
+<span class="si-icon">🪄</span>
+<div class="si-title">FunctionTransformer</div>
+<div class="si-desc">Custom function ko sklearn-compatible transformer mein convert karna — <code>.fit()</code>, <code>.transform()</code>, <code>.fit_transform()</code></div>
+</div>
+<div class="summary-item si-amber">
+<span class="si-icon">📈</span>
+<div class="si-title">Log Transform</div>
+<div class="si-desc">Extreme right-skewed data ke liye — salary, prices jaise data ko normal banana using <code>np.log1p(x)</code></div>
+</div>
+<div class="summary-item si-teal">
+<span class="si-icon">🔄</span>
+<div class="si-title">Reciprocal Transform</div>
+<div class="si-desc">Inverse relationships ke liye — speed↔time jaise data ko linear banana using <code>1/(x+1)</code></div>
+</div>
+<div class="summary-item si-green">
+<span class="si-icon">🌿</span>
+<div class="si-title">Sqrt Transform</div>
+<div class="si-desc">Moderate skew ke liye gentlest fix — likes, views jaise count data ke liye <code>np.sqrt(x)</code></div>
+</div>
+</div>
+
+<div class="summary-takeaway">
+<p>🎯 <strong>Golden Rule yaad rakho:</strong> Training data pe <code>.fit_transform()</code> use karo, aur test data pe sirf <code>.transform()</code>. Data ka skewness dekho — extreme ho toh <strong>Log</strong>, moderate ho toh <strong>Sqrt</strong>, inverse relationship ho toh <strong>Reciprocal</strong>. Aur hamesha <code>df.skew()</code> se verify karo! 📊</p>
+</div>
+</div>
+
+<!-- ===== FOOTER ===== -->
+<div class="footer">
+<p>🎮 <strong>Feature Engineering Quest</strong> — Complete!</p>
+<p>Built with ❤️ for aspiring Data Scientists</p>
+<p style="margin-top:8px">Topics: Feature Construction • Feature Splitting • FunctionTransformer • Log Transform • Reciprocal Transform • Square Root Transform</p>
+</div>
+</div><!-- end container -->
+<div class="modal-overlay" id="rewardModal"><div class="modal" id="modalContent"></div></div>
+
+<script>
+// ===== GAME STATE =====
+const TOTAL_XP = 600;
+const XP_PER_LEVEL = 100;
+const TOTAL_LEVELS = 6;
+let gameState = JSON.parse(localStorage.getItem('fequest2') || '{"xp":0,"completed":[]}');
+
+const badges = [
+  {name:'🌱 Noob', min:0},
+  {name:'⚡ Learner', min:100},
+  {name:'🔥 Builder', min:200},
+  {name:'💎 Pro', min:300},
+  {name:'🏆 Master', min:400},
+  {name:'⭐ Expert', min:500},
+  {name:'👑 Legend', min:600}
+];
+
+const rewards = {
+  1:{icon:'🏗️', title:'Constructor Unlocked!', msg:'Feature Construction master ho gaye!'},
+  2:{icon:'✂️', title:'Splitter Unlocked!', msg:'Feature Splitting seekh liya — level up!'},
+  3:{icon:'🪄', title:'Transformer Unlocked!', msg:'FunctionTransformer ka magic samajh gaye!'},
+  4:{icon:'📈', title:'Log Master!', msg:'Log Transform se skewed data fix karna seekh liya!'},
+  5:{icon:'🔄', title:'Reciprocal Pro!', msg:'Reciprocal Transform ka funda clear ho gaya!'},
+  6:{icon:'🌿', title:'Sqrt Champion!', msg:'Square Root Transform — ab sab transforms aate hain! 🏆'}
+};
+
+function saveState(){localStorage.setItem('fequest2',JSON.stringify(gameState))}
+
+function updateXPBar(){
+  const pct = Math.min((gameState.xp / TOTAL_XP)*100, 100);
+  document.getElementById('xpFill').style.width = pct+'%';
+  document.getElementById('xpCount').textContent = gameState.xp;
+  const lvl = Math.floor(gameState.xp / XP_PER_LEVEL);
+  document.getElementById('xpLabel').textContent = 'Level '+lvl+' / '+TOTAL_LEVELS;
+  const b = badges.filter(b=>gameState.xp>=b.min).pop();
+  document.getElementById('xpBadge').textContent = b.name;
+
+  // Update quest map
+  for(let i=1;i<=TOTAL_LEVELS;i++){
+    const qc = document.getElementById('qc'+i);
+    const cn = document.getElementById('conn'+(i-1));
+    qc.className = 'quest-circle';
+    if(gameState.completed.includes(i)) {
+      qc.classList.add('completed');
+      qc.innerHTML = '✓';
+      if(cn) cn.classList.add('completed');
+    } else if(i === Math.min(...Array.from({length:TOTAL_LEVELS},(_,k)=>k+1).filter(x=>!gameState.completed.includes(x)))) {
+      qc.classList.add('active');
+    }
+  }
+}
+
+// ===== QUIZ SYSTEM =====
+let selectedAnswers = {};
+
+function selectOption(quizId, el, idx){
+  if(gameState.completed.includes(quizId)) return;
+  const opts = el.parentElement.querySelectorAll('.quiz-option');
+  opts.forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedAnswers[quizId] = idx;
+  document.getElementById('quizBtn'+quizId).disabled = false;
+}
+
+function checkAnswer(quizId, correctIdx){
+  if(gameState.completed.includes(quizId)) return;
+  const selected = selectedAnswers[quizId];
+  if(selected === undefined) return;
+  
+  const container = document.getElementById('quiz'+quizId);
+  const opts = container.querySelectorAll('.quiz-option');
+  const fb = document.getElementById('feedback'+quizId);
+  const btn = document.getElementById('quizBtn'+quizId);
+  
+  opts.forEach((o,i) => {
+    o.style.pointerEvents = 'none';
+    if(i === correctIdx) o.classList.add('correct');
+    else if(i === selected && i !== correctIdx) o.classList.add('wrong');
+  });
+  
+  btn.disabled = true;
+  fb.classList.add('show');
+  
+  if(selected === correctIdx){
+    fb.className = 'quiz-feedback show correct';
+    fb.innerHTML = '✅ Sahi Jawab! +'+XP_PER_LEVEL+' XP earned!';
+    gameState.xp = Math.min(gameState.xp + XP_PER_LEVEL, TOTAL_XP);
+    gameState.completed.push(quizId);
+    saveState();
+    updateXPBar();
+    launchConfetti();
+    setTimeout(()=>showReward(quizId), 800);
+  } else {
+    fb.className = 'quiz-feedback show wrong';
+    fb.innerHTML = '❌ Galat! Sahi answer: Option '+'ABCD'[correctIdx]+'. Try understanding the concept again!';
+    // Allow retry after delay
+    setTimeout(()=>{
+      opts.forEach(o=>{o.classList.remove('selected','wrong');o.style.pointerEvents='auto'});
+      fb.classList.remove('show');
+      btn.disabled = false;
+      delete selectedAnswers[quizId];
+    }, 2500);
+  }
+}
+
+// ===== REWARD MODAL =====
+function showReward(level){
+  const r = rewards[level];
+  const m = document.getElementById('modalContent');
+  m.innerHTML = `
+    <span class="reward-icon">${r.icon}</span>
+    <h3>${r.title}</h3>
+    <p>${r.msg}</p>
+    <div class="xp-reward">+${XP_PER_LEVEL} XP ⚡</div>
+    <button onclick="closeModal()">🎮 Continue Quest</button>
+  `;
+  document.getElementById('rewardModal').classList.add('show');
+}
+
+function closeModal(){
+  document.getElementById('rewardModal').classList.remove('show');
+}
+
+document.getElementById('rewardModal').addEventListener('click', function(e){
+  if(e.target === this) closeModal();
+});
+
+// ===== CONFETTI =====
+function launchConfetti(){
+  const colors = ['#6c5ce7','#00e5ff','#f97316','#fbbf24','#10b981','#ef4444','#a78bfa'];
+  for(let i=0;i<60;i++){
+    const c = document.createElement('div');
+    c.className='confetti-piece';
+    c.style.left = Math.random()*100+'vw';
+    c.style.background = colors[Math.floor(Math.random()*colors.length)];
+    c.style.animationDelay = Math.random()*0.5+'s';
+    c.style.animationDuration = (2+Math.random()*2)+'s';
+    c.style.width = (6+Math.random()*8)+'px';
+    c.style.height = (6+Math.random()*8)+'px';
+    c.style.borderRadius = Math.random()>.5?'50%':'2px';
+    c.style.transform='rotate('+Math.random()*360+'deg)';
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),4000);
+  }
+}
+
+// ===== HERO PARTICLES =====
+function initParticles(){
+  const cont = document.getElementById('particles');
+  for(let i=0;i<20;i++){
+    const s = document.createElement('span');
+    s.style.left=Math.random()*100+'%';
+    s.style.top=Math.random()*100+'%';
+    s.style.animationDelay=Math.random()*6+'s';
+    s.style.opacity=Math.random()*.5;
+    cont.appendChild(s);
+  }
+}
+
+// ===== COPY CODE =====
+function copyCode(btn){
+  const pre = btn.closest('.code-block').querySelector('pre');
+  const text = pre.textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent='✅ Copied!';
+    setTimeout(()=>btn.textContent='📋 Copy',2000);
+  });
+}
+
+// ===== SCROLL TO LEVEL =====
+function scrollToLevel(n){
+  document.getElementById('level'+n).scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ===== RESTORE STATE ON LOAD =====
+function restoreQuizState(){
+  gameState.completed.forEach(id=>{
+    const container = document.getElementById('quiz'+id);
+    if(!container) return;
+    const opts = container.querySelectorAll('.quiz-option');
+    opts.forEach((o,i)=>{
+      o.style.pointerEvents='none';
+      if(i===1) o.classList.add('correct');
+    });
+    const btn = document.getElementById('quizBtn'+id);
+    btn.disabled=true;
+    const fb = document.getElementById('feedback'+id);
+    fb.className='quiz-feedback show correct';
+    fb.innerHTML='✅ Already completed! +'+XP_PER_LEVEL+' XP';
+  });
+}
+
+// ===== INIT =====
+initParticles();
+updateXPBar();
+restoreQuizState();
+</script>
+</body>
+</html>
