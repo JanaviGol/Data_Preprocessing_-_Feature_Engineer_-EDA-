@@ -4,7 +4,7 @@
 
 ## 📺 Project Walkthrough Video
 > 💡 **Instructor Note:** I have recorded a detailed 10-minute presentation covering every technical step, code block execution, and logical analysis of this engineering project.
-* 🔗 **[\[Click Here to Watch the Full Project Presentation Video](https://drive.google.com/drive/home)** 👈 
+* 🔗 **[\[Click Here to Watch the Full Project Presentation Video](https://drive.google.com/file/d/1KOSnp8JXkSuUiqtd2K0WIHl3KFecdiEO/view?usp=sharing)** 👈 
 
 ---
 
