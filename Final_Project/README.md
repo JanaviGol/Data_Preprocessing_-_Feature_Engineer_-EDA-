@@ -26,7 +26,7 @@ In credit risk evaluation, raw financial datasets often contain missing values, 
 
 Watch the complete project breakdown and step-by-step code demonstration:
 
-[![Watch Project Explanation](https://img.youtube.com/vi/YOUR_VIDEO_ID/maxresdefault.jpg)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)
+(https://drive.google.com/file/d/1SfeqRnX2UGpw-XnXBATmCj1fHxndFYUx/view?usp=sharing)]
 
 ## 🛠️ Tech Stack & Dependencies
 
